@@ -1,0 +1,126 @@
+{
+  "name": "system",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.26.0",
+    "@balkangraph/orgchart.js": "^8.14.47",
+    "@emotion/react": "^11.13.3",
+    "@fortawesome/fontawesome": "^1.1.8",
+    "@fortawesome/fontawesome-free-regular": "^5.0.13",
+    "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@headlessui/react": "^2.1.2",
+    "@heroicons/react": "^2.1.5",
+    "@mdi/js": "^7.4.47",
+    "@reduxjs/toolkit": "^1.9.0",
+    "@table-library/react-table-library": "^4.1.7",
+    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@vitejs/plugin-react": "^4.3.1",
+    "axios": "^1.7.4",
+    "capitalize-the-first-letter": "^1.0.8",
+    "chart.js": "^4.4.4",
+    "date-fns": "^3.6.0",
+    "dayjs": "^1.11.13",
+    "dom-to-image": "^2.6.0",
+    "easyinvoice": "^3.0.47",
+    "formik": "^2.4.6",
+    "formik-stepper": "^2.2.1",
+    "html-to-image": "^1.11.11",
+    "html2canvas": "^1.4.1",
+    "jwt-decode": "^4.0.0",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.462.0",
+    "luxon": "^3.5.0",
+    "moment": "^2.30.1",
+    "mysql2": "^3.11.5",
+    "qrcode.react": "^3.1.0",
+    "rc-dialog": "^9.6.0",
+    "rc-tree-select": "^5.22.1",
+    "react": "^18.3.1",
+    "react-big-calendar": "^1.17.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-csv": "^2.2.2",
+    "react-d3-tree": "^3.6.2",
+    "react-date-range": "^2.0.1",
+    "react-dom": "^18.3.1",
+    "react-dropdown-tree-select": "^2.8.0",
+    "react-dropzone": "^14.3.5",
+    "react-form-wizard-component": "^0.2.7",
+    "react-google-autocomplete": "^2.7.3",
+    "react-icons": "^5.3.0",
+    "react-notifications": "^1.7.4",
+    "react-qr-code": "^2.0.15",
+    "react-redux": "^8.0.2",
+    "react-router-dom": "^6.26.1",
+    "react-select": "^5.8.0",
+    "react-table": "^7.8.0",
+    "react-tailwindcss-datepicker": "^1.7.2",
+    "react-to-print": "^2.15.1",
+    "react-toastify": "^10.0.5",
+    "react-tooltip": "^5.28.0",
+    "recharts": "^2.13.0",
+    "select-philippines-address": "^1.0.6",
+    "theme-change": "^2.5.0",
+    "tw-elements": "^2.0.0",
+    "tw-elements-react": "^1.0.0-alpha2",
+    "vite": "^5.4.2",
+    "web-vitals": "^4.2.3",
+    "xlsx": "^0.18.5",
+    "yup": "^1.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "reactjs",
+    "tailwind-css",
+    "starter-kit",
+    "saas-starter-kit",
+    "reduxt-toolkit-dashboard-template",
+    "daisyui-template",
+    "dashboard-template",
+    "react-router",
+    "react-charts"
+  ],
+  "author": "srobbin01",
+  "license": "ISC",
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^6.6.0",
+    "@tailwindcss/typography": "^0.5.14",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.10",
+    "postcss": "^8.4.41",
+    "shadcn-ui": "^0.9.4",
+    "tailwindcss": "^3.4.10"
+  }
+}

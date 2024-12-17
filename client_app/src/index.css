@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+  .hidden-print {
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  /* .overflow-x-auto {
+    display: none !important;
+  } */
+}
+
+.loading-indicator:before {
+  content: '';
+  background: #00000080;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.loading-indicator:after {
+  content: ' ';
+  position: fixed;
+  top: 40%;
+  left: 45%;
+  z-index: 10010;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #0f172a; /* Blue */
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 2s linear infinite;
+}
+/* Add this to your CSS file */
+.triangle-up {
+  width: 0;
+  height: 0;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-bottom: 70px solid;
+}
+
+.triangle-down {
+  width: 0;
+  height: 0;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-top: 70px solid;
+}
+.clip-hexagon {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+/* Diamond Shape */
+.clip-diamond {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Parallelogram */
+.clip-parallelogram {
+  clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+}
+
+/* Pentagon */
+.clip-pentagon {
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+/* Star */
+.clip-star {
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
+
+/* Hexagon */
+.clip-hexagon {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}

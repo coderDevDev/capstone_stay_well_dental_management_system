@@ -1,0 +1,536 @@
+{
+  "dateList": [
+    {
+      "dateTimeAdded": 1713110704486,
+      "dateIdentifier": "2024-04-15",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1713174878325
+    },
+    {
+      "dateTimeAdded": 1713024304986,
+      "dateIdentifier": "2024-04-14",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1713174867981
+    },
+    {
+      "dateTimeAdded": 1712937904282,
+      "dateIdentifier": "2024-04-13",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1713162829435
+    },
+    {
+      "dateTimeAdded": 1712851504408,
+      "dateIdentifier": "2024-04-12",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1713162785331
+    },
+    {
+      "dateTimeAdded": 1712765105100,
+      "dateIdentifier": "2024-04-11",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712908435361
+    },
+    {
+      "dateTimeAdded": 1712678703915,
+      "dateIdentifier": "2024-04-10",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712908417934
+    },
+    {
+      "dateTimeAdded": 1712592303410,
+      "dateIdentifier": "2024-04-09",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712903415869
+    },
+    {
+      "dateTimeAdded": 1712505902488,
+      "dateIdentifier": "2024-04-08",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712903397550
+    },
+    {
+      "dateTimeAdded": 1712419504302,
+      "dateIdentifier": "2024-04-07",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712812072423
+    },
+    {
+      "dateTimeAdded": 1712333105799,
+      "dateIdentifier": "2024-04-06",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712812059075
+    },
+    {
+      "dateTimeAdded": 1712246702459,
+      "dateIdentifier": "2024-04-05",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712811699667
+    },
+    {
+      "dateTimeAdded": 1712160305302,
+      "dateIdentifier": "2024-04-04",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712811687005
+    },
+    {
+      "dateTimeAdded": 1712073902081,
+      "dateIdentifier": "2024-04-03",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712217479542
+    },
+    {
+      "dateTimeAdded": 1711987504281,
+      "dateIdentifier": "2024-04-02",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712203715209
+    },
+    {
+      "dateTimeAdded": 1711901104581,
+      "dateIdentifier": "2024-04-01",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712203700515
+    },
+    {
+      "dateTimeAdded": 1711814705099,
+      "dateIdentifier": "2024-03-31",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712114197920
+    },
+    {
+      "dateTimeAdded": 1711728303785,
+      "dateIdentifier": "2024-03-30",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712114185353
+    },
+    {
+      "dateTimeAdded": 1711641903202,
+      "dateIdentifier": "2024-03-29",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712108742660
+    },
+    {
+      "dateTimeAdded": 1711555502135,
+      "dateIdentifier": "2024-03-28",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1712108709656
+    },
+    {
+      "dateTimeAdded": 1711469103219,
+      "dateIdentifier": "2024-03-27",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1711708961630
+    },
+    {
+      "dateTimeAdded": 1711382704024,
+      "dateIdentifier": "2024-03-26",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1711708955979
+    },
+    {
+      "dateTimeAdded": 1711296302517,
+      "dateIdentifier": "2024-03-25",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1711708950097
+    },
+    {
+      "dateTimeAdded": 1711209904335,
+      "dateIdentifier": "2024-03-24",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1711708939339
+    },
+    {
+      "dateTimeAdded": 1711123504142,
+      "dateIdentifier": "2024-03-23",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1711708921362
+    },
+    {
+      "dateTimeAdded": 1711058702227,
+      "dateIdentifier": "2024-03-22",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1711093745500
+    },
+    {
+      "dateTimeAdded": 1710979803137,
+      "dateIdentifier": "2024-03-21",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1711093735683
+    },
+    {
+      "dateTimeAdded": 1710912002887,
+      "dateIdentifier": "2024-03-20",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710926967154
+    },
+    {
+      "dateTimeAdded": 1710777781993,
+      "dateIdentifier": "2024-03-19",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710926954009
+    },
+    {
+      "dateTimeAdded": 1710691382650,
+      "dateIdentifier": "2024-03-18",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710761616734
+    },
+    {
+      "dateTimeAdded": 1710604982641,
+      "dateIdentifier": "2024-03-17",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710761565798
+    },
+    {
+      "dateTimeAdded": 1710518582043,
+      "dateIdentifier": "2024-03-16",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710629527521
+    },
+    {
+      "dateTimeAdded": 1710432182165,
+      "dateIdentifier": "2024-03-15",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710629525269
+    },
+    {
+      "dateTimeAdded": 1710345782291,
+      "dateIdentifier": "2024-03-14",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710629522230
+    },
+    {
+      "dateTimeAdded": 1710259381457,
+      "dateIdentifier": "2024-03-13",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710629519368
+    },
+    {
+      "dateTimeAdded": 1710172982475,
+      "dateIdentifier": "2024-03-12",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710629514764
+    },
+    {
+      "dateTimeAdded": 1710086581196,
+      "dateIdentifier": "2024-03-11",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710290641936
+    },
+    {
+      "dateTimeAdded": 1710000182802,
+      "dateIdentifier": "2024-03-10",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710290638795
+    },
+    {
+      "dateTimeAdded": 1709913783488,
+      "dateIdentifier": "2024-03-09",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710290636400
+    },
+    {
+      "dateTimeAdded": 1709827381787,
+      "dateIdentifier": "2024-03-08",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710290633489
+    },
+    {
+      "dateTimeAdded": 1709740982733,
+      "dateIdentifier": "2024-03-07",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710290630927
+    },
+    {
+      "dateTimeAdded": 1709654582337,
+      "dateIdentifier": "2024-03-06",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1710290618555
+    },
+    {
+      "dateTimeAdded": 1709568181302,
+      "dateIdentifier": "2024-03-05",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709647784818
+    },
+    {
+      "dateTimeAdded": 1709481782892,
+      "dateIdentifier": "2024-03-04",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709647782957
+    },
+    {
+      "dateTimeAdded": 1709395381903,
+      "dateIdentifier": "2024-03-03",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709647781382
+    },
+    {
+      "dateTimeAdded": 1709308981196,
+      "dateIdentifier": "2024-03-02",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709647779232
+    },
+    {
+      "dateTimeAdded": 1709222581218,
+      "dateIdentifier": "2024-03-01",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709250471414
+    },
+    {
+      "dateTimeAdded": 1709136180883,
+      "dateIdentifier": "2024-02-29",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709250469007
+    },
+    {
+      "dateTimeAdded": 1709049781398,
+      "dateIdentifier": "2024-02-28",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709216909210
+    },
+    {
+      "dateTimeAdded": 1708963380789,
+      "dateIdentifier": "2024-02-27",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709216903839
+    },
+    {
+      "dateTimeAdded": 1708876981297,
+      "dateIdentifier": "2024-02-26",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709216889006
+    },
+    {
+      "dateTimeAdded": 1708790581079,
+      "dateIdentifier": "2024-02-25",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1709216881983
+    },
+    {
+      "dateTimeAdded": 1708704181053,
+      "dateIdentifier": "2024-02-24",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708909866264
+    },
+    {
+      "dateTimeAdded": 1708617781468,
+      "dateIdentifier": "2024-02-23",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708820781399
+    },
+    {
+      "dateTimeAdded": 1708531380835,
+      "dateIdentifier": "2024-02-22",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708820778132
+    },
+    {
+      "dateTimeAdded": 1708444981357,
+      "dateIdentifier": "2024-02-21",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708820773377
+    },
+    {
+      "dateTimeAdded": 1708358581167,
+      "dateIdentifier": "2024-02-20",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708498067054
+    },
+    {
+      "dateTimeAdded": 1708272180443,
+      "dateIdentifier": "2024-02-19",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708407359178
+    },
+    {
+      "dateTimeAdded": 1708185780440,
+      "dateIdentifier": "2024-02-18",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708407339179
+    },
+    {
+      "dateTimeAdded": 1708099381033,
+      "dateIdentifier": "2024-02-17",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708349721220
+    },
+    {
+      "dateTimeAdded": 1708012981355,
+      "dateIdentifier": "2024-02-16",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708349714418
+    },
+    {
+      "dateTimeAdded": 1707926581887,
+      "dateIdentifier": "2024-02-15",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708327861963
+    },
+    {
+      "dateTimeAdded": 1707840181653,
+      "dateIdentifier": "2024-02-14",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708327853136
+    },
+    {
+      "dateTimeAdded": 1707753781143,
+      "dateIdentifier": "2024-02-13",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708325123318
+    },
+    {
+      "dateTimeAdded": 1707667381244,
+      "dateIdentifier": "2024-02-12",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1708325114610
+    },
+    {
+      "dateTimeAdded": 1707580980639,
+      "dateIdentifier": "2024-02-11",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707657584912
+    },
+    {
+      "dateTimeAdded": 1707494581648,
+      "dateIdentifier": "2024-02-10",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707657573855
+    },
+    {
+      "dateTimeAdded": 1707408180342,
+      "dateIdentifier": "2024-02-09",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707540323320
+    },
+    {
+      "dateTimeAdded": 1707406560850,
+      "dateIdentifier": "2024-02-08",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707471301419
+    },
+    {
+      "dateTimeAdded": 1707235381296,
+      "dateIdentifier": "2024-02-07",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707471279937
+    },
+    {
+      "dateTimeAdded": 1707148980298,
+      "dateIdentifier": "2024-02-06",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707471264227
+    },
+    {
+      "dateTimeAdded": 1707062580385,
+      "dateIdentifier": "2024-02-05",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707125910222
+    },
+    {
+      "dateTimeAdded": 1707039000316,
+      "dateIdentifier": "2024-02-04",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707125896598
+    },
+    {
+      "dateTimeAdded": 1706889780890,
+      "dateIdentifier": "2024-02-03",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1707036492602
+    },
+    {
+      "dateTimeAdded": 1706803381383,
+      "dateIdentifier": "2024-02-02",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1706967371528
+    },
+    {
+      "dateTimeAdded": 1706716980505,
+      "dateIdentifier": "2024-02-01",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1706967362256
+    },
+    {
+      "dateTimeAdded": 1706631360405,
+      "dateIdentifier": "2024-01-31",
+      "amountInPhp": 600,
+      "isRecieved": true,
+      "dateTimeRecieved": 1706740449456
+    }
+  ]
+}

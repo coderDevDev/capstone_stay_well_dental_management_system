@@ -1,0 +1,8 @@
+steps:
+  # Install node packages
+  - name: node:18.16.1
+    entrypoint: npm
+    args: ['install']
+
+options:
+  logging: CLOUD_LOGGING_ONLY

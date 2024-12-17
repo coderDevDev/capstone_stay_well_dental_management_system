@@ -1,0 +1,678 @@
+{
+  "success": true,
+  "data": {
+    "INDEX_PLACEMENT": 1,
+    "name": "Lowelyn Digamon",
+    "_id": 12,
+    "attributes": {
+      "lastName": "Digamon",
+      "_type": "User",
+      "INDEX_PLACEMENT": 1,
+      "_id": 12,
+      "email": "admin@amuletinternationalopc.com",
+      "name": "Lowelyn Digamon",
+      "ID": "4087a53b-4f1b-4d7b-a540-9c8419db1791",
+      "has_invite": [],
+      "firstName": "Lowelyn",
+      "displayID": "AM_OPC-2024-VZzeM",
+      "has_invite.date_created": ""
+    },
+    "children": [
+      {
+        "INDEX_PLACEMENT": {
+          "low": 1,
+          "high": 0
+        },
+        "name": "Esrail  Navales",
+        "_id": 12,
+        "attributes": {
+          "lastName": "Navales",
+          "_type": "User",
+          "INDEX_PLACEMENT": {
+            "low": 1,
+            "high": 0
+          },
+          "_id": {
+            "low": 536,
+            "high": 0
+          },
+          "email": "navalesesrail@gmail.com",
+          "name": "Esrail  Navales",
+          "ID": "ede23a19-312b-4f56-879b-0680013658e3",
+          "has_invite": [],
+          "has_invite.date_created": "",
+          "has_invite.date_updated": {
+            "low": 1951067599,
+            "high": 397
+          },
+          "firstName": "Esrail ",
+          "displayID": "AM_OPC-2024-jnzpE"
+        },
+        "children": [
+          {
+            "INDEX_PLACEMENT": {
+              "low": 1,
+              "high": 0
+            },
+            "name": "Esrail Navales",
+            "_id": {
+              "low": 536,
+              "high": 0
+            },
+            "attributes": {
+              "lastName": "Navales",
+              "_type": "User",
+              "INDEX_PLACEMENT": {
+                "low": 1,
+                "high": 0
+              },
+              "_id": {
+                "low": 422,
+                "high": 0
+              },
+              "email": "navalesesrail-1@gmail.com",
+              "name": "Esrail Navales",
+              "ID": "7b98151b-f26b-4323-92b6-c025bbdf7a33",
+              "has_invite": [],
+              "has_invite.date_created": "",
+              "has_invite.date_updated": {
+                "low": 1951164229,
+                "high": 397
+              },
+              "firstName": "Esrail",
+              "displayID": "AM_OPC-2024-nq6Cj"
+            },
+            "children": [
+              {
+                "INDEX_PLACEMENT": {
+                  "low": 1,
+                  "high": 0
+                },
+                "name": "Esrail Navales",
+                "_id": {
+                  "low": 422,
+                  "high": 0
+                },
+                "attributes": {
+                  "lastName": "Navales",
+                  "_type": "User",
+                  "INDEX_PLACEMENT": {
+                    "low": 1,
+                    "high": 0
+                  },
+                  "_id": {
+                    "low": 544,
+                    "high": 0
+                  },
+                  "email": "navalesesrail-2@gmail.com",
+                  "name": "Esrail Navales",
+                  "ID": "3e004b1a-e541-4b71-ac9f-82b3a7642bd5",
+                  "has_invite": [],
+                  "has_invite.date_created": "",
+                  "has_invite.date_updated": {
+                    "low": 1951187808,
+                    "high": 397
+                  },
+                  "firstName": "Esrail",
+                  "displayID": "AM_OPC-2024-azmkf"
+                },
+                "children": [
+                  {
+                    "INDEX_PLACEMENT": {
+                      "low": 1,
+                      "high": 0
+                    },
+                    "name": "M'jay  Baliar ",
+                    "_id": {
+                      "low": 544,
+                      "high": 0
+                    },
+                    "attributes": {
+                      "lastName": "Baliar ",
+                      "_type": "User",
+                      "INDEX_PLACEMENT": {
+                        "low": 1,
+                        "high": 0
+                      },
+                      "_id": {
+                        "low": 655,
+                        "high": 0
+                      },
+                      "email": "baliarmarv@gmail.com",
+                      "name": "M'jay  Baliar ",
+                      "ID": "d241dbd1-c384-4289-bd73-94a5025f9ba8",
+                      "has_invite": [],
+                      "has_invite.date_created": "",
+                      "has_invite.date_updated": {
+                        "low": 1952717123,
+                        "high": 397
+                      },
+                      "firstName": "M'jay ",
+                      "displayID": "AM_OPC-2024-NfhfC"
+                    },
+                    "children": [
+                      {
+                        "INDEX_PLACEMENT": {
+                          "low": 1,
+                          "high": 0
+                        },
+                        "name": "M'jay  Baliar ",
+                        "_id": {
+                          "low": 655,
+                          "high": 0
+                        },
+                        "attributes": {
+                          "lastName": "Baliar ",
+                          "_type": "User",
+                          "INDEX_PLACEMENT": {
+                            "low": 1,
+                            "high": 0
+                          },
+                          "_id": {
+                            "low": 667,
+                            "high": 0
+                          },
+                          "email": "baliarmarmar@gmail.com",
+                          "name": "M'jay  Baliar ",
+                          "ID": "ada30354-4dad-4949-9cb3-1c543d19f1ed",
+                          "has_invite.date_created": "",
+                          "has_invite.date_updated": {
+                            "low": 1952798484,
+                            "high": 397
+                          },
+                          "firstName": "M'jay ",
+                          "displayID": "AM_OPC-2024-Zdw1B",
+                          "has_invite": []
+                        },
+                        "children": [],
+                        "has_invite": [],
+                        "matchingPairs": [],
+                        "has_invite.date_created": ""
+                      },
+                      {
+                        "INDEX_PLACEMENT": {
+                          "low": 2,
+                          "high": 0
+                        },
+                        "name": "M'jay  Baliar ",
+                        "_id": {
+                          "low": 655,
+                          "high": 0
+                        },
+                        "attributes": {
+                          "lastName": "Baliar ",
+                          "_type": "User",
+                          "INDEX_PLACEMENT": {
+                            "low": 2,
+                            "high": 0
+                          },
+                          "_id": {
+                            "low": 651,
+                            "high": 0
+                          },
+                          "email": "",
+                          "name": "M'jay  Baliar ",
+                          "ID": "995006a7-9fab-48f3-8299-3d3b827f0d55",
+                          "has_invite": [],
+                          "has_invite.date_created": "",
+                          "has_invite.date_updated": {
+                            "low": 1952880853,
+                            "high": 397
+                          },
+                          "firstName": "M'jay ",
+                          "displayID": "AM_OPC-2024-P58Jn"
+                        },
+                        "children": [
+                          {
+                            "INDEX_PLACEMENT": {
+                              "low": 2,
+                              "high": 0
+                            },
+                            "name": "Marvin jay  Baliar ",
+                            "_id": {
+                              "low": 651,
+                              "high": 0
+                            },
+                            "attributes": {
+                              "lastName": "Baliar ",
+                              "_type": "User",
+                              "INDEX_PLACEMENT": {
+                                "low": 2,
+                                "high": 0
+                              },
+                              "_id": {
+                                "low": 730,
+                                "high": 0
+                              },
+                              "email": "",
+                              "name": "Marvin jay  Baliar ",
+                              "ID": "d1114747-dd4f-484d-baec-16d14b4c9ba4",
+                              "has_invite": [],
+                              "has_invite.date_created": "",
+                              "has_invite.date_updated": {
+                                "low": 1953208205,
+                                "high": 397
+                              },
+                              "firstName": "Marvin jay ",
+                              "displayID": "AM_OPC-2024-ATLYU"
+                            },
+                            "children": [
+                              {
+                                "INDEX_PLACEMENT": {
+                                  "low": 1,
+                                  "high": 0
+                                },
+                                "name": "Romeo  Rapal",
+                                "_id": {
+                                  "low": 730,
+                                  "high": 0
+                                },
+                                "attributes": {
+                                  "lastName": "Rapal",
+                                  "_type": "User",
+                                  "INDEX_PLACEMENT": {
+                                    "low": 1,
+                                    "high": 0
+                                  },
+                                  "_id": {
+                                    "low": 547,
+                                    "high": 0
+                                  },
+                                  "email": "ferapal1956@gmail.com",
+                                  "name": "Romeo  Rapal",
+                                  "ID": "3a36660e-faed-4636-9793-2d9a6efea5ab",
+                                  "has_invite": [],
+                                  "has_invite.date_created": "",
+                                  "has_invite.date_updated": {
+                                    "low": 1953295027,
+                                    "high": 397
+                                  },
+                                  "firstName": "Romeo ",
+                                  "displayID": "AM_OPC-2024-piz3j"
+                                },
+                                "children": [
+                                  {
+                                    "INDEX_PLACEMENT": {
+                                      "low": 1,
+                                      "high": 0
+                                    },
+                                    "name": "Earl Manligas",
+                                    "_id": {
+                                      "low": 547,
+                                      "high": 0
+                                    },
+                                    "attributes": {
+                                      "lastName": "Manligas",
+                                      "_type": "User",
+                                      "INDEX_PLACEMENT": {
+                                        "low": 1,
+                                        "high": 0
+                                      },
+                                      "_id": {
+                                        "low": 670,
+                                        "high": 0
+                                      },
+                                      "email": "manligasearl@gmail.com",
+                                      "name": "Earl Manligas",
+                                      "ID": "16f222c6-dd2a-4978-af53-07d581b1d69f",
+                                      "has_invite": [],
+                                      "has_invite.date_created": "",
+                                      "has_invite.date_updated": {
+                                        "low": 1953339512,
+                                        "high": 397
+                                      },
+                                      "firstName": "Earl",
+                                      "displayID": "AM_OPC-2024-JoRWN"
+                                    },
+                                    "children": [
+                                      {
+                                        "INDEX_PLACEMENT": {
+                                          "low": 1,
+                                          "high": 0
+                                        },
+                                        "name": "Earl Manligas",
+                                        "_id": {
+                                          "low": 670,
+                                          "high": 0
+                                        },
+                                        "attributes": {
+                                          "lastName": "Manligas",
+                                          "_type": "User",
+                                          "INDEX_PLACEMENT": {
+                                            "low": 1,
+                                            "high": 0
+                                          },
+                                          "_id": {
+                                            "low": 672,
+                                            "high": 0
+                                          },
+                                          "email": "manligasearl-1@gmail.com",
+                                          "name": "Earl Manligas",
+                                          "ID": "57d020de-9a48-4e33-8499-56a2de73c03f",
+                                          "has_invite": [],
+                                          "has_invite.date_created": "",
+                                          "has_invite.date_updated": {
+                                            "low": 1953576431,
+                                            "high": 397
+                                          },
+                                          "firstName": "Earl",
+                                          "displayID": "AM_OPC-2024-RhZwn"
+                                        },
+                                        "children": [
+                                          {
+                                            "INDEX_PLACEMENT": {
+                                              "low": 1,
+                                              "high": 0
+                                            },
+                                            "name": "Earl Manligas",
+                                            "_id": {
+                                              "low": 672,
+                                              "high": 0
+                                            },
+                                            "attributes": {
+                                              "lastName": "Manligas",
+                                              "_type": "User",
+                                              "INDEX_PLACEMENT": {
+                                                "low": 1,
+                                                "high": 0
+                                              },
+                                              "_id": {
+                                                "low": 674,
+                                                "high": 0
+                                              },
+                                              "email": "manligasearl-2@gmail.com",
+                                              "name": "Earl Manligas",
+                                              "ID": "233c4090-25a6-477c-8951-770686feb378",
+                                              "has_invite": [],
+                                              "has_invite.date_created": "",
+                                              "has_invite.date_updated": {
+                                                "low": 1953598100,
+                                                "high": 397
+                                              },
+                                              "firstName": "Earl",
+                                              "displayID": "AM_OPC-2024-3iPqb"
+                                            },
+                                            "children": [
+                                              {
+                                                "INDEX_PLACEMENT": {
+                                                  "low": 1,
+                                                  "high": 0
+                                                },
+                                                "name": "Jherson Longino",
+                                                "_id": {
+                                                  "low": 674,
+                                                  "high": 0
+                                                },
+                                                "attributes": {
+                                                  "lastName": "Longino",
+                                                  "_type": "User",
+                                                  "INDEX_PLACEMENT": {
+                                                    "low": 1,
+                                                    "high": 0
+                                                  },
+                                                  "_id": {
+                                                    "low": 676,
+                                                    "high": 0
+                                                  },
+                                                  "email": "Jhersonglongino103018@gmail.com",
+                                                  "name": "Jherson Longino",
+                                                  "ID": "2c630795-c7db-48e7-90e7-f79b0922ce51",
+                                                  "has_invite": [],
+                                                  "has_invite.date_created": "",
+                                                  "has_invite.date_updated": {
+                                                    "low": 1953650389,
+                                                    "high": 397
+                                                  },
+                                                  "firstName": "Jherson",
+                                                  "displayID": "AM_OPC-2024-bk32e"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "INDEX_PLACEMENT": {
+                                                      "low": 2,
+                                                      "high": 0
+                                                    },
+                                                    "name": "Jherson Longino",
+                                                    "_id": {
+                                                      "low": 676,
+                                                      "high": 0
+                                                    },
+                                                    "attributes": {
+                                                      "lastName": "Longino",
+                                                      "_type": "User",
+                                                      "INDEX_PLACEMENT": {
+                                                        "low": 2,
+                                                        "high": 0
+                                                      },
+                                                      "_id": {
+                                                        "low": 680,
+                                                        "high": 0
+                                                      },
+                                                      "email": "",
+                                                      "name": "Jherson Longino",
+                                                      "ID": "1535b7a2-f058-4061-9812-56117303c661",
+                                                      "has_invite": [],
+                                                      "has_invite.date_created": "",
+                                                      "has_invite.date_updated": {
+                                                        "low": 1957477632,
+                                                        "high": 397
+                                                      },
+                                                      "firstName": "Jherson",
+                                                      "displayID": "AM_OPC-2024-W2Pbs"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "INDEX_PLACEMENT": {
+                                                          "low": 2,
+                                                          "high": 0
+                                                        },
+                                                        "name": "Jherson Longino",
+                                                        "_id": {
+                                                          "low": 680,
+                                                          "high": 0
+                                                        },
+                                                        "attributes": {
+                                                          "lastName": "Longino",
+                                                          "_type": "User",
+                                                          "INDEX_PLACEMENT": {
+                                                            "low": 2,
+                                                            "high": 0
+                                                          },
+                                                          "_id": {
+                                                            "low": 682,
+                                                            "high": 0
+                                                          },
+                                                          "email": "",
+                                                          "name": "Jherson Longino",
+                                                          "ID": "41f9c257-cee4-46e6-a7ad-7aa7863917c5",
+                                                          "has_invite": [],
+                                                          "has_invite.date_created": "",
+                                                          "has_invite.date_updated": {
+                                                            "low": 2003837503,
+                                                            "high": 397
+                                                          },
+                                                          "firstName": "Jherson",
+                                                          "displayID": "AM_OPC-2024-aVrMM"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "INDEX_PLACEMENT": {
+                                                              "low": 1,
+                                                              "high": 0
+                                                            },
+                                                            "name": "Mark Cleoferd Tutor",
+                                                            "_id": {
+                                                              "low": 682,
+                                                              "high": 0
+                                                            },
+                                                            "attributes": {
+                                                              "lastName": "Tutor",
+                                                              "_type": "User",
+                                                              "INDEX_PLACEMENT": {
+                                                                "low": 1,
+                                                                "high": 0
+                                                              },
+                                                              "_id": {
+                                                                "low": 757,
+                                                                "high": 0
+                                                              },
+                                                              "email": "markcleoferd1995@gmail.com",
+                                                              "name": "Mark Cleoferd Tutor",
+                                                              "ID": "b239a693-a2ac-4a53-9a37-a74a78c59474",
+                                                              "has_invite.date_created": "",
+                                                              "has_invite.date_updated": {
+                                                                "low": 2003864962,
+                                                                "high": 397
+                                                              },
+                                                              "firstName": "Mark Cleoferd",
+                                                              "displayID": "AM_OPC-2024-btvtH",
+                                                              "has_invite": []
+                                                            },
+                                                            "children": [],
+                                                            "has_invite": [],
+                                                            "matchingPairs": [],
+                                                            "has_invite.date_created": ""
+                                                          }
+                                                        ],
+                                                        "has_invite": [],
+                                                        "matchingPairs": [],
+                                                        "has_invite.date_created": ""
+                                                      }
+                                                    ],
+                                                    "has_invite": [],
+                                                    "matchingPairs": [],
+                                                    "has_invite.date_created": ""
+                                                  }
+                                                ],
+                                                "has_invite": [],
+                                                "matchingPairs": [],
+                                                "has_invite.date_created": ""
+                                              }
+                                            ],
+                                            "has_invite": [],
+                                            "matchingPairs": [],
+                                            "has_invite.date_created": ""
+                                          }
+                                        ],
+                                        "has_invite": [],
+                                        "matchingPairs": [],
+                                        "has_invite.date_created": ""
+                                      }
+                                    ],
+                                    "has_invite": [],
+                                    "matchingPairs": [],
+                                    "has_invite.date_created": ""
+                                  }
+                                ],
+                                "has_invite": [],
+                                "matchingPairs": [],
+                                "has_invite.date_created": ""
+                              },
+                              {
+                                "INDEX_PLACEMENT": {
+                                  "low": 2,
+                                  "high": 0
+                                },
+                                "name": "Edrose Atinen",
+                                "_id": {
+                                  "low": 730,
+                                  "high": 0
+                                },
+                                "attributes": {
+                                  "lastName": "Atinen",
+                                  "_type": "User",
+                                  "INDEX_PLACEMENT": {
+                                    "low": 2,
+                                    "high": 0
+                                  },
+                                  "_id": {
+                                    "low": 686,
+                                    "high": 0
+                                  },
+                                  "email": "",
+                                  "name": "Edrose Atinen",
+                                  "ID": "633ccb50-b817-490c-b728-7f7fced6de29",
+                                  "has_invite.date_created": "",
+                                  "has_invite.date_updated": {
+                                    "low": 2004337270,
+                                    "high": 397
+                                  },
+                                  "firstName": "Edrose",
+                                  "displayID": "AM_OPC-2024-aXogM",
+                                  "has_invite": []
+                                },
+                                "children": [],
+                                "has_invite": [],
+                                "matchingPairs": [],
+                                "has_invite.date_created": ""
+                              }
+                            ],
+                            "has_invite": [],
+                            "matchingPairs": [],
+                            "has_invite.date_created": ""
+                          }
+                        ],
+                        "has_invite": [],
+                        "matchingPairs": [],
+                        "has_invite.date_created": ""
+                      }
+                    ],
+                    "has_invite": [],
+                    "matchingPairs": [],
+                    "has_invite.date_created": ""
+                  }
+                ],
+                "has_invite": [],
+                "matchingPairs": [],
+                "has_invite.date_created": ""
+              }
+            ],
+            "has_invite": [],
+            "matchingPairs": [],
+            "has_invite.date_created": ""
+          }
+        ],
+        "has_invite": [],
+        "matchingPairs": [],
+        "has_invite.date_created": ""
+      },
+      {
+        "INDEX_PLACEMENT": {
+          "low": 2,
+          "high": 0
+        },
+        "name": "Esrail Navales",
+        "_id": 12,
+        "attributes": {
+          "lastName": "Navales",
+          "_type": "User",
+          "INDEX_PLACEMENT": {
+            "low": 2,
+            "high": 0
+          },
+          "_id": {
+            "low": 684,
+            "high": 0
+          },
+          "email": "navals_esra@gmail.com",
+          "name": "Esrail Navales",
+          "ID": "c3eaa6a3-6d11-4f5d-93b9-db59fad077f6",
+          "has_invite.date_created": "",
+          "has_invite.date_updated": {
+            "low": 1951082614,
+            "high": 397
+          },
+          "firstName": "Esrail",
+          "displayID": "AM_OPC-2024-Cwuk5",
+          "has_invite": []
+        },
+        "children": [],
+        "has_invite": [],
+        "matchingPairs": [],
+        "has_invite.date_created": ""
+      }
+    ],
+    "has_invite": [],
+    "matchingPairs": []
+  }
+}
