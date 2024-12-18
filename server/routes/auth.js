@@ -261,12 +261,6 @@ router.get(
         []
       );
 
-      // if (appointments.length === 0) {
-      //   return res
-      //     .status(404)
-      //     .json({ message: 'No appointments found for this patient' });
-      // }
-
       // Return the list of appointments
       res.json({ success: true, data: appointments });
     } catch (error) {

@@ -221,20 +221,20 @@ function Register({ isFromUpdateProfile, patientId }) {
 
   let initialValues = {
 
-    "email": "dextermiranda441@gmail.com",
-    "password": "Dexter_20",
-    "firstName": "DEXTER",
+    "email": "",
+    "password": "",
+    "firstName": "",
     "middleName": "",
-    "lastName": "MIRANDA",
+    "lastName": "",
     "address_region": "05",
-    "address_province": "0505",
-    "address_city": "050506",
-    "Address_or_Location": "050506062",
-    "age": 4,
-    "gender": "Male",
-    "birthDate": "2020-01-27",
-    "medical_history": "allergy",
-    "phone_number": "09275478620"
+    "address_province": "",
+    "address_city": "",
+    "Address_or_Location": "",
+    "age": "",
+    "gender": "",
+    "birthDate": "",
+    "medical_history": "",
+    "phone_number": ""
 
   };
 
