@@ -89,9 +89,9 @@ const PackageCart = ({
               onChange={handleChange}
               name={`totalAmountToWithdrawList.${index}.quantity`}
 
-              // value={values.parentUserName}
+            // value={values.parentUserName}
 
-              // onChange={handleEmailChange}
+            // onChange={handleEmailChange}
             />
             {/* <span
               className="py-2 cursor-pointer rounded-r bg-gray-100 py-1 px-3 duration-100 hover:bg-green-500 hover:text-blue-50"
@@ -246,11 +246,11 @@ function InternalPage() {
         //     return value.quantity > 0;
         //   }
         // );
-        // console.log({ checkInputQuantity });
+        // //console.log({ checkInputQuantity });
         // if (!checkInputQuantity) {
-        //   console.log('Dex');
+        //   //console.log('Dex');
         // }
-        // console.log('passed');
+        // //console.log('passed');
         // window.location.href = '/app/checkout';
         setSubmitting(false);
       } catch (error) {

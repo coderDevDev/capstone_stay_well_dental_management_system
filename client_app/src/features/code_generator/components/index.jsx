@@ -154,7 +154,7 @@ const PendingCodeBundleTableComponent = ({
   let { codeTypeList, packageList } = appSettings;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log({ data });
+  //console.log({ data });
   const columns = useMemo(
     () => [
       {
@@ -186,7 +186,7 @@ const PendingCodeBundleTableComponent = ({
         Cell: ({ value, row }) => {
           let bundle = row.original;
 
-          console.log(bundle);
+          //console.log(bundle);
           return (
             <div className="flex">
               {/* <button

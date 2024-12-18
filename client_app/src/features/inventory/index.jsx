@@ -281,7 +281,7 @@ function Transactions() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setUser(list);
   };
 
@@ -308,7 +308,7 @@ function Transactions() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -489,7 +489,7 @@ function Transactions() {
                   onClick={() => {
 
 
-                    console.log(l.OrderID)
+                    //console.log(l.OrderID)
 
                     setactiveChildID(l.OrderID);
                     document.getElementById('deleteModal').showModal();
@@ -629,9 +629,9 @@ function Transactions() {
                 <button className="btn btn-outline btn-sm mr-2" onClick={async () => {
 
 
-                  // console.log("Dex")
+                  // //console.log("Dex")
                   // setisEditModalOpen(true)
-                  // console.log({ l })
+                  // //console.log({ l })
                   setSelectedPayment(l);
 
                   document.getElementById('viewProofPaymentImage').showModal();
@@ -662,7 +662,7 @@ function Transactions() {
   );
 
   const handleOnChange = e => {
-    console.log(e.target.files[0]);
+    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -713,13 +713,13 @@ function Transactions() {
 
   const formikConfig = (selectedSupplier) => {
 
-    console.log({ selectedSupplier })
+    //console.log({ selectedSupplier })
 
-    // console.log({ selectedSupplier })
+    // //console.log({ selectedSupplier })
 
-    // console.log({ isAddPaymentOpen })
+    // //console.log({ isAddPaymentOpen })
 
-    // console.log(selectedSupplier.Admin_Fname)
+    // //console.log(selectedSupplier.Admin_Fname)
 
 
 
@@ -748,7 +748,7 @@ function Transactions() {
 
     // Format it as YYYY-MM-DD
     const formattedDate = defaultDate.toISOString().split('T')[0]; // '2024-10-1
-    console.log({ formattedDate })
+    //console.log({ formattedDate })
     let initialValues = {
       SupplierID: parseInt(selectedSupplier?.SupplierID) || '',
       Category: selectedSupplier?.Category || '',
@@ -833,7 +833,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -849,11 +849,11 @@ function Transactions() {
   };
 
 
-  // console.log({
+  // //console.log({
   //   viewedData
   // })
 
-  console.log({ dexxx: inventoryReportDetails?.TotalGramsSold });
+  //console.log({ dexxx: inventoryReportDetails?.TotalGramsSold });
   const leftColumnData = [
     { key: 'Grams', value: viewedData.Grams },
     { key: 'Total Grams Sold', value: inventoryReportDetails?.TotalGramsSold },
@@ -1055,7 +1055,7 @@ function Transactions() {
                     alert('Please fill in the required fields');
                   };
 
-                  // console.log({ values })
+                  // //console.log({ values })
 
                   return (
                     <Form className="">
@@ -1067,7 +1067,7 @@ function Transactions() {
 
 
                         {
-                          console.log({ suppliers })
+                          //console.log({ suppliers })
                         }
                         <Dropdown
                           // icons={mdiAccount}
@@ -1354,7 +1354,7 @@ function Transactions() {
                   alert('Please fill in the required fields');
                 };
 
-                // console.log({ values })
+                // //console.log({ values })
 
                 return (
                   <Form className="">

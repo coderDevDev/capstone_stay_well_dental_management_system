@@ -45,7 +45,7 @@ function InternalPage() {
     const selectedValue = event.target.value;
     setSelectedFilter(selectedValue);
     // Perform any filtering action here based on selectedValue
-    console.log('Selected Filter:', selectedValue);
+    //console.log('Selected Filter:', selectedValue);
     // Optionally close the dropdown after selection
     // setDropdownVisible(false);
   };

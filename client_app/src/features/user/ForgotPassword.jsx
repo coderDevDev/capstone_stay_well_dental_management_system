@@ -49,13 +49,13 @@ function ForgotPassword() {
                 });
             } catch (error) {
 
-                console.log(error)
+                //console.log(error)
 
 
 
                 let message = error.response.data.message;
 
-                console.log({ message })
+                //console.log({ message })
                 toast.error(`Failed. ${message}`, {
                     position: 'top-right',
                     autoClose: 3000,

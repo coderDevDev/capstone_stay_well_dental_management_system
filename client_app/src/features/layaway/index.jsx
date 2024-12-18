@@ -327,7 +327,7 @@ function Transactions() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setUser(list);
   };
 
@@ -354,7 +354,7 @@ function Transactions() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -504,9 +504,9 @@ function Transactions() {
                 <button className="btn btn-outline btn-sm mr-2" onClick={async () => {
 
 
-                  // console.log("Dex")
+                  // //console.log("Dex")
                   // setisEditModalOpen(true)
-                  // console.log({ l })
+                  // //console.log({ l })
                   setSelectedOrder(l);
 
                   document.getElementById('viewProofPaymentImage').showModal();
@@ -736,8 +736,8 @@ function Transactions() {
       onSubmit: async (values, { setFieldError, setSubmitting, resetForm }) => {
         setSubmitting(true);
 
-        // console.log("here")
-        // console.log({ isEditModalOpen })
+        // //console.log("here")
+        // //console.log({ isEditModalOpen })
 
 
 
@@ -791,7 +791,7 @@ function Transactions() {
           resetForm()
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
 
         }
@@ -803,7 +803,7 @@ function Transactions() {
   const totalAmountPaid = selectedOrder ? payments.filter(s => ['PAYMENT_FOR_APPROVAL', 'PARTIALLY_PAID', 'PAID'].includes(s.status)).reduce((acc, current) => {
     return acc + parseInt(current.amount)
   }, 0) : 0;
-  console.log({ totalAmountPaid })
+  //console.log({ totalAmountPaid })
 
 
   const formikConfigAddPayment = () => {
@@ -843,7 +843,7 @@ function Transactions() {
         try {
 
 
-          console.log({ dex: 1 })
+          //console.log({ dex: 1 })
 
 
           const data = new FormData();
@@ -897,7 +897,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
           resetForm()
         }
@@ -917,7 +917,7 @@ function Transactions() {
       const monthsToAdd = parseInt(plan);
       const start = new Date(startDate);
       const calculatedEndDate = new Date(start.setMonth(start.getMonth() + monthsToAdd));
-      console.log({ calculatedEndDate })
+      //console.log({ calculatedEndDate })
       calculatedEndDate && setEndDate(calculatedEndDate.toISOString().split('T')[0]);
     } else {
       setEndDate('');
@@ -1087,7 +1087,7 @@ function Transactions() {
                     alert('Please fill in the required fields');
                   };
 
-                  // console.log({ values })
+                  // //console.log({ values })
                   let selectString = {
                     'SUBASTA': 'Amount_Per_Gram_Subasta',
                     'BRAND NEW': 'Amount_Per_Gram_Brand_New'
@@ -1128,7 +1128,7 @@ function Transactions() {
 
                     setFieldValue('PriceWithInterest', basicPrice + interestTimeMonthsToPay)
 
-                    // console.log({ interestPrice, price: price })
+                    // //console.log({ interestPrice, price: price })
                     // setFieldValue('PriceWithInterest', 2); //
                   }
 
@@ -1162,14 +1162,14 @@ function Transactions() {
                             // if (inventoryList.length === 0) {
                             //   setFieldValue('orderID', '')
                             // }
-                            // console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
+                            // //console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
 
                             // setInventoryList(inventoryList.filter(i => i.SupplierID === `${value}`))
                           }}
                         // onChange={() => {
                         //   // setFieldValue('SupplierName', values.SupplierID)
 
-                        //   console.log({
+                        //   //console.log({
                         //     inventoryList
                         //   })
                         // }}
@@ -1375,7 +1375,7 @@ function Transactions() {
                               // if (inventoryList.length === 0) {
                               //   setFieldValue('orderID', '')
                               // }
-                              // console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
+                              // //console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
 
                               // setInventoryList(inventoryList.filter(i => i.SupplierID === `${value}`))
                             }}

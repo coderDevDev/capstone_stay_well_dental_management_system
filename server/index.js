@@ -3,7 +3,7 @@ import cors from 'cors';
 
 import config from './config.js';
 import loanAdminRoute from './routes/admin/loan.js';
-import loanRoute from './routes/loan.js';
+import appointmentRoute from './routes/appointment.js';
 import userRoute from './routes/userRoute.js';
 import adminRoute from './routes/admin/admin.js';
 import authRoute from './routes/auth.js';
@@ -46,7 +46,7 @@ app.use(
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/loan', loanRoute);
+app.use('/api/appointment', appointmentRoute);
 app.use('/api/admin/loan', loanAdminRoute);
 
 app.use('/api/user', userRoute);
@@ -59,5 +59,5 @@ app.use(express.static('files'));
 app.use('/static', express.static('public'));
 
 app.listen(config.port, async () => {
-console.log(`Hello Server is live`);
+  console.log(`Hello Server is live`);
 });

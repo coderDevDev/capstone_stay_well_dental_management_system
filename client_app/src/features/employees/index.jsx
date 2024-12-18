@@ -159,7 +159,7 @@ function Transactions() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setUser(list);
   };
 
@@ -186,7 +186,7 @@ function Transactions() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -435,7 +435,7 @@ function Transactions() {
       //   Header: 'Date Measured',
       //   accessor: 'Date_Measured',
       //   Cell: ({ value }) => {
-      //     console.log({ value });
+      //     //console.log({ value });
       //     return (
       //       <span
       //         className=""
@@ -554,7 +554,7 @@ function Transactions() {
   );
 
   const handleOnChange = e => {
-    console.log(e.target.files[0]);
+    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -607,7 +607,7 @@ function Transactions() {
 
 
     const phoneRegExp = /^(\+?[\d\s-]{11})$/
-    // console.log(selectedEmployee.Admin_Fname)
+    // //console.log(selectedEmployee.Admin_Fname)
     return {
       initialValues: {
         role: selectedEmployee.role || '',
@@ -695,7 +695,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -865,7 +865,7 @@ function Transactions() {
                     alert('Please fill in the required fields');
                   };
 
-                  // console.log({ values })
+                  // //console.log({ values })
 
                   return (
                     <Form className="">
@@ -1016,7 +1016,7 @@ function Transactions() {
                   }) => {
 
 
-                    console.log({ values })
+                    //console.log({ values })
 
                     return (
                       <Form className="">

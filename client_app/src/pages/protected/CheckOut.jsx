@@ -51,7 +51,7 @@ function InternalPage() {
     });
     let data = res.data.data;
 
-    console.log(data);
+    //console.log(data);
     if (data.status === 'APPROVED') {
       setStatusOptions([
         {
@@ -96,7 +96,7 @@ function InternalPage() {
 
   let userInfo = payoutData.userInfo;
 
-  console.log({ payoutData });
+  //console.log({ payoutData });
 
   let taskReward = (payoutData.rawData || []).find(
     n => n.name === 'dailyBonus'
@@ -152,7 +152,7 @@ function InternalPage() {
       try {
         setSubmitting(true);
 
-        console.log({ values });
+        //console.log({ values });
         await axios({
           method: 'POST',
           url: 'admin/payout/changePayoutStatus',
@@ -178,7 +178,7 @@ function InternalPage() {
         });
         window.location.reload();
       } catch (error) {
-        console.log(error);
+        //console.log(error);
         toast.error('Something went wrong', {
           onClose: () => {
             setSubmitting(false);
@@ -208,7 +208,7 @@ function InternalPage() {
                 <button
                   className="btn bg-green-500  font-bold btn-md text-white"
                   onClick={() => {
-                    console.log('Dex');
+                    //console.log('Dex');
                     document.getElementById('approveRequestModal').showModal();
                   }}>
                   <i className="fa-solid fa-circle-info fa-2xl"></i>

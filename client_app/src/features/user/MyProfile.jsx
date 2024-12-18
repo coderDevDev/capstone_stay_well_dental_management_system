@@ -45,7 +45,7 @@ function ForgotPassword() {
         });
         let result = res.data.data;
 
-        console.log({ result })
+        //console.log({ result })
         setFaqs(result);
         setIsLoaded(true);
     };
@@ -89,7 +89,7 @@ function ForgotPassword() {
                 let link = `/myprofile/${userId}/order/${TransactionID}`;
 
 
-                console.log({ Dex: row.original.LayawayID })
+                //console.log({ Dex: row.original.LayawayID })
                 if (row.original.LayawayID) {
                     link = `/myprofile/${userId}/layaway/${TransactionID}`;
                 }
@@ -201,7 +201,7 @@ function ForgotPassword() {
 
 
                 } catch (error) {
-                    console.log({ error });
+                    //console.log({ error });
                 } finally {
                 }
             }

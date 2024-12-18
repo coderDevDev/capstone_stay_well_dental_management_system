@@ -84,7 +84,7 @@ function Login() {
         window.location.href = '/app/dashboard';
       } catch (error) {
 
-        // console.log(error.response.data.message)
+        // //console.log(error.response.data.message)
         toast.error(`Login Failed. Unknown User.`, {
           position: 'top-right',
           autoClose: 3000,
@@ -184,14 +184,14 @@ function Login() {
                       Sign in
                     </button>
 
-                    {/* <div className="text-sm font-light text-gray-500 dark:text-gray-400 mt-4">
+                    <div className="text-sm  text-blue-950 dark:text-gray-400 mt-4 text-right">
                       Don't have an account yet?
                       <Link to="/register">
                         <span className="  inline-block  hover:text-primary hover:underline hover:cursor-pointer transition duration-200">
                           Register
                         </span>
                       </Link>
-                    </div> */}
+                    </div>
                   </Form>
                 );
               }}

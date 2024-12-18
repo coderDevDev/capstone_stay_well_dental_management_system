@@ -23,7 +23,7 @@ const validationSchema = Yup.object().shape({
   phone: Yup.string().required('Phone is required')
 });
 
-export const AppointmentForm: React.FC = () => {
+export const AppointmentForm: React.FC = ({ getAppointmentList }) => {
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   const [selectedUser, setSelectedUser] = useState({});
@@ -41,14 +41,16 @@ export const AppointmentForm: React.FC = () => {
 
     setAppoinments(list);
 
-    console.log({ appointmentList });
+    //console.log({ appointmentList });
     const startDate = new Date();
     const endDate = addDays(startDate, 30);
 
     const slots = getAvailableTimeSlots(startDate, endDate, list);
-    setTimeSlots(slots);
-    //console.log({ selectedUser: selectedUser });
 
+    console.log({ slots });
+    setTimeSlots(slots);
+    ////console.log({ selectedUser: selectedUser });
+    getAppointmentList();
     setIsLoaded(true);
   };
 
@@ -99,6 +101,7 @@ export const AppointmentForm: React.FC = () => {
       setSelectedSlot(null);
       setIsModalOpen(false);
       resetForm();
+      document.getElementById('addAppointment').close();
     }
   };
 
@@ -133,10 +136,10 @@ export const AppointmentForm: React.FC = () => {
               </h2>
               <p>
                 {selectedSlot &&
-                  `Selected time: ${format(
+                  `${format(
                     selectedSlot.start,
                     "MMMM d, yyyy 'at' h:mm a"
-                  )}`}
+                  )} ${format(selectedSlot.end, " 'to' h:mm a")}`}
               </p>
 
               <Formik

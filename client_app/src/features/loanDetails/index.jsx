@@ -530,7 +530,7 @@ function LoanApplication() {
   const prepareAddress = async () => {
     await regions().then(region => {
 
-      console.log({ region })
+      //console.log({ region })
       setRegions(
         region.map(r => {
           return {
@@ -540,14 +540,14 @@ function LoanApplication() {
         })
       );
     });
-    // await regionByCode('01').then(region => console.log(region.region_name));
-    await provinces().then(province => console.log(province));
-    // await provincesByCode('01').then(province => console.log(province));
-    // await provinceByName('Rizal').then(province =>
-    //   console.log(province.province_code)
-    // );
-    await cities().then(city => console.log(city));
-    await barangays().then(barangays => console.log(barangays));
+    // await regionByCode('01').then(region => //console.log(region.region_name));
+    await provinces().then(province => //console.log(province));
+      // await provincesByCode('01').then(province => //console.log(province));
+      // await provinceByName('Rizal').then(province =>
+      //   //console.log(province.province_code)
+      // );
+      await cities().then(city => //console.log(city));
+        await barangays().then(barangays => //console.log(barangays));
   };
 
   const getLoanDetails = async () => {
@@ -589,7 +589,7 @@ function LoanApplication() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setList(list);
   };
 
@@ -616,7 +616,7 @@ function LoanApplication() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -797,7 +797,7 @@ function LoanApplication() {
           document.getElementById("confirmationModal").close()
           resetForm()
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
 

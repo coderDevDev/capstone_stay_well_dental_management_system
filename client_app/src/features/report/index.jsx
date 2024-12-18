@@ -123,7 +123,7 @@ function Dashboard() {
     validateOnMount: true,
     validateOnChange: false,
     onSubmit: async (values, { setFieldError, setSubmitting }) => {
-      console.log({ values });
+      //console.log({ values });
 
       try {
         if (values.barangay && values.report_type) {
@@ -139,7 +139,7 @@ function Dashboard() {
               a => a.value === values.report_type
             );
 
-            console.log({ activeFilter });
+            //console.log({ activeFilter });
             setactiveFilterLabel(activeFilter && activeFilter.label);
             setDashboardData(res.data.data);
             setSubmitting(false);
@@ -147,7 +147,7 @@ function Dashboard() {
           });
         }
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     }
   };

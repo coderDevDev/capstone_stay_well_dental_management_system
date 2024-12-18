@@ -52,7 +52,7 @@ function ForgotPassword() {
 
 
     const handleOnChange = e => {
-        console.log(e.target.files[0]);
+        //console.log(e.target.files[0]);
         setFile(e.target.files[0]);
     };
 
@@ -115,7 +115,7 @@ function ForgotPassword() {
         setUserObj({ ...userObj, [updateType]: value })
     }
 
-    console.log({ selectedUser })
+    //console.log({ selectedUser })
 
 
     const columns = useMemo(
@@ -214,7 +214,7 @@ function ForgotPassword() {
         ]);
 
 
-    console.log({ selectedOrder })
+    //console.log({ selectedOrder })
     let colors = {
         'IN_PROGRESS': 'bg-yellow-500',
         'PAID': 'bg-green-500',
@@ -253,7 +253,7 @@ function ForgotPassword() {
 
 
 
-                console.log({ file })
+                //console.log({ file })
 
                 if (!file) {
                     setFieldError('Proof_Payment', 'Required');

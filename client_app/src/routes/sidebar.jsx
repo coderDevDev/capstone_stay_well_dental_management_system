@@ -28,7 +28,7 @@ const AppRoutes = () => {
       const decoded = jwtDecode(token);
       let role = decoded.role;
 
-      // console.log({ decoded })
+      // //console.log({ decoded })
 
 
 
@@ -56,6 +56,47 @@ const AppRoutes = () => {
 
 
 
+
+      if (role === 'Dentist') {
+        newRoutes.push({
+          path: '/app/dashboard',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Dashboard',
+        });
+        // newRoutes.push({
+        //   path: '/app/profile',
+        //   icon: <Squares2X2Icon className={iconClasses} />,
+        //   name: 'Profile',
+        // });
+
+        newRoutes.push({
+          path: '/app/users',
+          icon: <UsersIcon className={iconClasses} />,
+          name: 'Patients',
+        });
+
+        newRoutes.push({
+          path: '/app/appointments',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Appointments',
+        });
+
+
+        newRoutes.push({
+          path: '/app/services',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Dental Services',
+        });
+
+        newRoutes.push({
+          path: '/app/payments',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Payments',
+        });
+
+      }
+
+
       if (role === 'Patient') {
         newRoutes.push({
           path: '/app/dashboard',
@@ -79,60 +120,6 @@ const AppRoutes = () => {
           icon: <Squares2X2Icon className={iconClasses} />,
           name: 'Payments',
         });
-
-        // newRoutes.push({
-        //   path: '/app/docs',
-        //   icon: <Squares2X2Icon className={iconClasses} />,
-        //   name: 'Documents and Resources',
-        // });
-      }
-
-      if (role === 'Loan Officer') {
-
-
-        newRoutes.push({
-          path: '/app/dashboard',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Dashboard',
-        });
-
-        newRoutes.push({
-          path: '/app/loan_management',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Loan Management',
-        });
-
-        newRoutes.push({
-          path: '/app/payments',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Payments',
-        });
-
-        newRoutes.push({
-          path: '/app/borrowers',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Borrowers',
-        });
-
-        newRoutes.push({
-          path: '/app/sms_logs',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'SMS Logs',
-        });
-
-
-        newRoutes.push({
-          path: '/app/online_forms',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Online Forms',
-        });
-
-        // newRoutes.push({
-        //   path: '/app/loan_details/:loanId',
-        //   icon: <Squares2X2Icon className={iconClasses} />,
-        //   name: 'Loan Details',
-        // });
-
 
       }
 

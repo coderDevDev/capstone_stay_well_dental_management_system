@@ -42,7 +42,7 @@ export function getAvailableTimeSlots(
     status: appointment.status || 'Confirmed' // Ensure there's a status
   }));
 
-  console.log({ transformedAppointments });
+  //console.log({ transformedAppointments });
 
   // Generate time slots for each day in the range
   while (currentDate <= endDate) {
@@ -83,6 +83,6 @@ export function getAvailableTimeSlots(
     currentDate = addDays(currentDate, 1);
   }
 
-  console.log({ slots });
+  //console.log({ slots });
   return slots;
 }

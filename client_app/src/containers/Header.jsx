@@ -24,7 +24,7 @@ function Header() {
   const [selectedUser, setSelectedUser] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
 
-  console.log({ loggedInUser })
+  //console.log({ loggedInUser })
 
   const getUser = async () => {
     let res = await axios({
@@ -39,7 +39,7 @@ function Header() {
   };
   useEffect(() => {
     getUser();
-    //console.log({ selectedUser: selectedUser });
+    ////console.log({ selectedUser: selectedUser });
   }, []);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ function Header() {
             className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52 text-slate-900 font-bold">
             <li>
               <Link
-                to={`/app/settings-profile/user?userId=${loggedInUser.userId}`}>
+                to={`/app/profile`}>
                 <a>Profile</a>
               </Link>
             </li>

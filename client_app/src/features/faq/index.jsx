@@ -160,7 +160,7 @@ function Transactions() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setList(list);
   };
 
@@ -187,7 +187,7 @@ function Transactions() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -212,7 +212,7 @@ function Transactions() {
         Cell: ({ row, value }) => {
           let l = row.original;
 
-          console.log({ l })
+          //console.log({ l })
 
           return (
             <div className="flex items-center space-x-3">
@@ -275,7 +275,7 @@ function Transactions() {
   );
 
   const handleOnChange = e => {
-    console.log(e.target.files[0]);
+    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -328,7 +328,7 @@ function Transactions() {
 
 
 
-    // console.log(selectedFaq.Admin_Fname)
+    // //console.log(selectedFaq.Admin_Fname)
     return {
       initialValues: {
         question: selectedFaq.question || '',
@@ -402,7 +402,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -572,7 +572,7 @@ function Transactions() {
                     alert('Please fill in the required fields');
                   };
 
-                  // console.log({ values })
+                  // //console.log({ values })
 
                   return (
                     <Form className="">

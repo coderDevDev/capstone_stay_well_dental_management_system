@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, lazy } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showNotification } from '../common/headerSlice';
 import TitleCard from '../../components/Cards/TitleCard';
@@ -36,6 +36,9 @@ import Dropdown from '../../components/Input/Dropdown';
 import { Formik, useField, useFormik, Form } from 'formik';
 import * as Yup from 'yup';
 import { QRCodeSVG } from 'qrcode.react';
+
+const Register = lazy(() => import('./../../pages/Register'));
+
 const TopSideButtons = ({ removeFilter, applyFilter, applySearch, users }) => {
   const [filterParam, setFilterParam] = useState('');
   const [searchText, setSearchText] = useState('');
@@ -76,12 +79,12 @@ const TopSideButtons = ({ removeFilter, applyFilter, applySearch, users }) => {
           <XMarkIcon className="w-4 ml-2" />
         </button>
       )} */}
-      <div className="badge badge-neutral mr-2 px-2 p-4">Total Customers: {users.length}</div>
-
-      <button className="btn btn-outline btn-sm" onClick={() => document.getElementById('addCustomer').showModal()}>
-        Add Customer
+      <div className="badge badge-neutral mr-2 px-4 p-4 bg-white text-blue-950">Total: {users.length}</div>
+      {/* 
+      <button className="btn btn-outline" onClick={() => document.getElementById('addCustomer').showModal()}>
+        
         <PlusCircleIcon className="h-6 w-6 text-white-500" />
-      </button>
+      </button> */}
 
       {/* 
       <button
@@ -161,8 +164,8 @@ function Transactions() {
   const dispatch = useDispatch();
   const fetchUsers = async () => {
     let res = await axios({
-      method: 'POST',
-      url: 'user/getCustomerList',
+      method: 'get',
+      url: 'user/patients/all',
       data: {
 
       }
@@ -191,7 +194,7 @@ function Transactions() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setUser(list);
   };
 
@@ -218,207 +221,248 @@ function Transactions() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
-
       {
-        Header: 'Customer ID',
-        accessor: '',
-        Cell: ({ row }) => {
-          return <span className="">{row.index + 1}</span>;
-        }
+        Header: 'Patient ID',
+        accessor: 'patient_id',
+        Cell: ({ value }) => <span>{value}</span>,
       },
       {
-        Header: 'QR Code',
-        accessor: '',
-        Cell: ({ row }) => {
-          const url = `${import.meta.env.VITE_REACT_APP_FRONTEND_URL}/myprofile/${row.original.CustomerID}`;
-          console.log({ row: url })
-
-          return <div>
-            <div
-              ref={qrCodeRef}
-              onClick={() => {
-                downloadQRCode()
-              }}
-              className=' flex justify-center items-center mt-4 h-20 w-20'>
-              <QRCodeSVG value={
-                url
-              } />,
-            </div>
-            <button
-              // type="button"
-              className='btn btn-sm mt-2'
-              size="sm"
-              type="submit"
-              onClick={() => {
-                downloadQRCode()
-              }}
-            >
-              Download
-            </button>
+        Header: 'Full Name',
+        accessor: 'full_name',
+        Cell: ({ value }) => <div className="font-bold text-neutral-500">{value}</div>,
+      },
+      {
+        Header: 'Email',
+        accessor: 'email',
+        Cell: ({ value }) => (
+          <div className="text-blue-500 font-bold">
+            <a href={`mailto:${value}`} target="_blank" rel="noopener noreferrer">
+              {value}
+            </a>
           </div>
-        }
+        ),
       },
       {
-        Header: 'Name',
-        accessor: 'CustomerName',
-
-        Cell: ({ row, value }) => {
-          return (
-            <div className="flex items-center space-x-3">
-
-
-              <div>
-                <div className="font-bold text-neutral-500">{value}</div>
-              </div>
-            </div>
-          );
-        }
-      },
-      {
-        Header: 'Facebook Link',
-        accessor: 'Facebook',
-
-        Cell: ({ row, value }) => {
-          return (
-            <div className="flex items-center space-x-3">
-
-
-              <div>
-                <div className="font-bold text-neutral-500">{value}</div>
-              </div>
-            </div>
-          );
-        }
-      },
-      {
-        Header: 'Contact',
-        accessor: 'Contact',
-
-        Cell: ({ row, value }) => {
-          return (
-            <div className="flex items-center space-x-3">
-
-
-              <div>
-                <div className="font-bold text-neutral-500">{value}</div>
-              </div>
-            </div>
-          );
-        }
+        Header: 'Phone Number',
+        accessor: 'phone_number',
+        Cell: ({ value }) => (
+          <div className="font-bold text-neutral-500">{value}</div>
+        ),
       },
       {
         Header: 'Address',
-        accessor: 'Address',
-
-        Cell: ({ row, value }) => {
+        accessor: 'address',
+        Cell: ({ row }) => {
+          const { address, address_region, address_province, address_city, address_or_location } =
+            row.original;
           return (
-            <div className="flex items-center space-x-3">
-
-
-              <div>
-                <div className="font-bold text-neutral-500">{value}</div>
-              </div>
+            <div className="text-neutral-500">
+              <p>{address}</p>
+              <p>
+                {address_city}, {address_province}, {address_region}
+              </p>
+              <p>{address_or_location}</p>
             </div>
           );
-        }
+        },
       },
       {
-        Header: 'Modified By',
-        accessor: 'Admin_Fname',
-
-        Cell: ({ row, value }) => {
-
-
-
-          console.log({ value })
-          return (
-            <div className="flex items-center space-x-3">
-
-              {
-                (!value || value !== 'undefined undefined') && <div>
-                  <div className="font-bold text-neutral-500">{value}</div>
-                </div>
-              }
-
-            </div>
-          );
-        }
+        Header: 'Date of Birth',
+        accessor: 'date_of_birth',
+        Cell: ({ value }) => {
+          const formattedDate = value
+            ? format(new Date(value), 'MMM dd, yyyy')
+            : 'N/A';
+          return <div className="font-bold text-neutral-500">{formattedDate}</div>;
+        },
       },
       {
-        Header: 'Date Modified',
-        accessor: 'Date_Modified',
-
-        Cell: ({ row, value }) => {
-          let date_modified = format(value, 'MMM dd, yyyy');
-          return (
-            <div className="flex items-center space-x-3">
-
-
-              <div>
-                <div className="font-bold text-neutral-500">{date_modified}</div>
-              </div>
-            </div>
-          );
-        }
+        Header: 'Age',
+        accessor: 'age',
+        Cell: ({ value }) => <div className="font-bold text-neutral-500">{value}</div>,
       },
       {
-        Header: 'Action',
+        Header: 'Gender',
+        accessor: 'gender',
+        Cell: ({ value }) => (
+          <div className="font-bold text-neutral-500">{value}</div>
+        ),
+      },
+      {
+        Header: 'Medical History',
+        accessor: 'medical_history',
+        Cell: ({ value }) => (
+          <div className="text-neutral-500">{value || 'None'}</div>
+        ),
+      },
+      {
+        Header: 'Actions',
         accessor: '',
         Cell: ({ row }) => {
-          let l = row.original;
+          const patient = row.original;
+
+
+          const [isModalOpen, setIsModalOpen] = useState(false);
+
+          const handleConfirm = async (updateStatus) => {
+            // Handle confirmation action here
+
+
+            try {
+
+              // let res = await axios({
+              //   method: 'put',
+              //   url: `appointment/update`,
+              //   data: { ...appointment, status: updateStatus }
+              // })
+
+
+              // await getAppointmentList();
+
+              toast.success(`Deleted Successfully`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+              });
+            } catch (error) {
+              console.log(error)
+              toast.error(`Something went wrong`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+              });
+            } finally {
+              console.log('Confirmed!');
+              setIsModalOpen(false);
+
+            }
+
+          };
+
+
+          const [isOpen, setIsOpen] = useState(false);
+
+          const toggleModal = () => {
+
+            console.log("Dex")
+            setIsOpen(!isOpen);
+          };
 
           return (
-            (
-              <div className="flex">
-                {/* <Link to={`/app/settings-profile/user?userId=${l.ID}`}>
-                  <button className="btn btn-outline btn-sm">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                  </button>
-                </Link> */}
-                <button
-                  className="btn btn-outline btn-sm ml-2"
-                  onClick={() => {
-                    setactiveChildID(l.CustomerID);
-                    document.getElementById('deleteModal').showModal();
-                  }}>
-                  <i class="fa-solid fa-archive"></i>
-                </button>
-                <button
-                  className="btn btn-outline btn-sm ml-2"
-                  onClick={() => {
-                    setactiveChildID(l.CustomerID);
-                    setviewedUser(l)
-                    document.getElementById('updateCustomer').showModal();
-                  }}>
-                  <i class="fa-solid fa-edit"></i>
-                </button>
-                <Link to={`/app/userProfile/${l.CustomerID}`}>
-                  <button
-                    className="btn btn-outline btn-sm ml-2"
-                    onClick={() => {
-                      setactiveChildID(l.CustomerID);
-                      // document.getElementById('updateCustomer').showModal();
-                    }}>
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                </Link>
-              </div>
-            )
+            <div className="flex">
+
+              <button
+                className="btn btn-outline btn-sm ml-2"
+                onClick={toggleModal}
+              >
+                <i className="fa-solid fa-edit"></i>
+              </button>
+
+              <button
+                className="btn btn-outline btn-sm ml-2"
+
+                onClick={() => {
+
+                  setIsModalOpen(true)
+                  // setSelectedAppointment(appointment);
+                  // document.getElementById('viewAppointment').showModal();
+                }}
+
+
+              >
+                <i className="fa-solid fa-trash"></i>
+              </button>
+              {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="bg-white w-11/12 lg:w-3/4 xl:w-2/3 p-6 rounded-lg shadow-lg overflow-y-auto max-h-screen">
+                    {/* Modal Header */}
+                    <div className="flex justify-between items-center border-b pb-3">
+                      <h2 className="text-xl font-semibold">Patient Details</h2>
+                      <button
+                        className="text-gray-500 hover:text-gray-700"
+                        onClick={toggleModal}
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {/* Modal Content */}
+                    <div className="mt-4">
+                      <Register
+
+                        isFromUpdateProfile={true}
+                        patientId={patient}
+
+                      />
+                    </div>
+
+                    {/* Modal Footer */}
+                    {/* <div className="flex justify-end mt-6">
+                      <button
+                        className="px-4 py-2 text-white bg-gray-600 rounded hover:bg-gray-700 mr-2"
+                        onClick={toggleModal}
+                      >
+                        Cancel
+                      </button>
+                      <button className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+                        Confirm
+                      </button>
+                    </div> */}
+                  </div>
+                </div>
+              )}
+
+              {
+                isModalOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+                    <div className="modal modal-open">
+                      <div className="modal-box">
+                        <h2 className="text-lg font-bold mb-4">Delete Patient</h2>
+                        <p>Do you want to delete this patient?</p>
+                        <div className="modal-action">
+                          <button className="btn" onClick={() => {
+                            setIsModalOpen(false)
+                          }}>
+                            Cancel
+                          </button>
+                          <button className="btn btn-success bg-red-500 text-white" onClick={() => {
+                            handleConfirm()
+                          }}>
+                            Confirm
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
+
+            </div>
           );
-        }
+        },
       },
-
-
     ],
     []
   );
 
+
   const handleOnChange = e => {
-    console.log(e.target.files[0]);
+    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -516,7 +560,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -572,7 +616,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -582,7 +626,7 @@ function Transactions() {
   return (
     isLoaded && (
       <TitleCard
-        title="Customer List"
+        title="List"
         topMargin="mt-2"
         TopSideButtons={
           <TopSideButtons

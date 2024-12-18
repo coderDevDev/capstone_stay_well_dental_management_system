@@ -131,7 +131,7 @@ function Dashboard() {
     validateOnMount: true,
     validateOnChange: false,
     onSubmit: async (values, { setFieldError, setSubmitting }) => {
-      console.log('dex');
+      //console.log('dex');
       try {
         let res = await axios({
           method: 'POST',
@@ -145,7 +145,7 @@ function Dashboard() {
           return res;
         });
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     }
   };
@@ -212,7 +212,7 @@ function Dashboard() {
               <i className="fa-solid fa-circle-info fa-2xl text-blue-900"></i>
             }
             type=""
-            showModal={(type, isBreakDownActive) => {}}
+            showModal={(type, isBreakDownActive) => { }}
             totalAmount={dashboardData.totalNumOfChildren}
           />
           <AmountStats
@@ -222,7 +222,7 @@ function Dashboard() {
               <i className="fa-solid fa-circle-info fa-2xl text-blue-900"></i>
             }
             type=""
-            showModal={(type, isBreakDownActive) => {}}
+            showModal={(type, isBreakDownActive) => { }}
             totalAmount={dashboardData.childrenAffectedByUnderNutrition}
           />
           <AmountStats
@@ -236,7 +236,7 @@ function Dashboard() {
               <i className="fa-solid fa-circle-info fa-2xl text-blue-900"></i>
             }
             type=""
-            showModal={(type, isBreakDownActive) => {}}
+            showModal={(type, isBreakDownActive) => { }}
           />
         </div>
         <div className="my-4 divider mt-10" />
@@ -248,7 +248,7 @@ function Dashboard() {
               <i className="fa-solid fa-circle-info fa-2xl text-blue-900"></i>
             }
             type="WFA"
-            showModal={(type, isBreakDownActive) => {}}
+            showModal={(type, isBreakDownActive) => { }}
             color="green"
             data={dashboardData?.WFA}
           />
@@ -260,7 +260,7 @@ function Dashboard() {
               <i className="fa-solid fa-circle-info fa-2xl text-blue-900"></i>
             }
             color="green"
-            showModal={(type, isBreakDownActive) => {}}
+            showModal={(type, isBreakDownActive) => { }}
             data={dashboardData?.HFA}
           />
           {/* <SummaryStats

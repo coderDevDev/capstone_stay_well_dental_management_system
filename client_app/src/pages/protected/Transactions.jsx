@@ -7,7 +7,7 @@ function InternalPage() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setPageTitle({ title: 'Customer Record' }));
+    dispatch(setPageTitle({ title: 'Patient Record' }));
   }, []);
 
   return <Transactions />;

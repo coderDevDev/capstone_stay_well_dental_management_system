@@ -209,7 +209,7 @@ function LoanApplication() {
   const prepareAddress = async () => {
     await regions().then(region => {
 
-      console.log({ region })
+      //console.log({ region })
       setRegions(
         region.map(r => {
           return {
@@ -219,14 +219,14 @@ function LoanApplication() {
         })
       );
     });
-    // await regionByCode('01').then(region => console.log(region.region_name));
-    await provinces().then(province => console.log(province));
-    // await provincesByCode('01').then(province => console.log(province));
-    // await provinceByName('Rizal').then(province =>
-    //   console.log(province.province_code)
-    // );
-    await cities().then(city => console.log(city));
-    await barangays().then(barangays => console.log(barangays));
+    // await regionByCode('01').then(region => //console.log(region.region_name));
+    await provinces().then(province => //console.log(province));
+      // await provincesByCode('01').then(province => //console.log(province));
+      // await provinceByName('Rizal').then(province =>
+      //   //console.log(province.province_code)
+      // );
+      await cities().then(city => //console.log(city));
+        await barangays().then(barangays => //console.log(barangays));
   };
 
   const loanList = async () => {
@@ -268,7 +268,7 @@ function LoanApplication() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setList(list);
   };
 
@@ -295,7 +295,7 @@ function LoanApplication() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -413,7 +413,7 @@ function LoanApplication() {
   );
 
   const handleOnChange = e => {
-    console.log(e.target.files[0]);
+    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -467,7 +467,7 @@ function LoanApplication() {
 
 
 
-    console.log({ currentStep })
+    //console.log({ currentStep })
 
     let PersonalInfoTabValidation = {};
 
@@ -535,7 +535,7 @@ function LoanApplication() {
 
     // else if (currentStep === 1) {
 
-    //   console.log("DEx")
+    //   //console.log("DEx")
     //   PersonalInfoTabValidation = {
     //     borrowerValidID: Yup.string().required("Borrower's Valid ID is required"),
     //     bankStatement: Yup.string().required("Bank Statement is required"),
@@ -597,11 +597,11 @@ function LoanApplication() {
       onSubmit: async (values, { setFieldError, setSubmitting, resetForm }) => {
         setSubmitting(true);
 
-        console.log({ values })
+        //console.log({ values })
 
 
 
-        // console.log("dex submit")
+        // //console.log("dex submit")
 
 
 
@@ -708,7 +708,7 @@ function LoanApplication() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -830,7 +830,7 @@ function LoanApplication() {
                             onBlur={handleBlur}
                             onChange={(e) => {
 
-                              console.log(e.target.value)
+                              //console.log(e.target.value)
                               setFieldValue('first_name', e.target.value); // Use the input value
                             }}
                           />
@@ -930,7 +930,7 @@ function LoanApplication() {
                                 await barangays(code).then(cities => {
                                   setBarangay(
                                     cities.map(p => {
-                                      console.log({ p });
+                                      //console.log({ p });
                                       return {
                                         value: p.brgy_code,
                                         label: p.brgy_name
@@ -1294,7 +1294,7 @@ function LoanApplication() {
                           type="button"
                           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                           onClick={() => {
-                            console.log({ files })
+                            //console.log({ files })
 
 
 
@@ -1398,7 +1398,7 @@ function LoanApplication() {
 
 
 
-                    console.log({ currentStep })
+                    //console.log({ currentStep })
 
                     if (currentStep === 2) {
                       const validateFields = (fields, setFieldError) => {
@@ -1568,7 +1568,7 @@ function LoanApplication() {
                   isSubmitting
                 }) => {
 
-                  console.log({ values })
+                  //console.log({ values })
 
 
                   return <LoanCalculator

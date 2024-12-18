@@ -55,7 +55,7 @@ function App() {
           <Route path="/myprofile/:userId/layaway/:transactionId" element={<LayawayPaymentOrder />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          {/* <Route path="/register" element={<Register />} /> */}
+          <Route path="/register" element={<Register />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           {/* Place new routes over this */}
           <Route element={<AuthWrapper />}>

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, lazy } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showNotification } from '../common/headerSlice';
 import TitleCard from '../../components/Cards/TitleCard';
@@ -84,12 +84,23 @@ import { formatAmount } from './../../features/dashboard/helpers/currencyFormat'
 
 import { AppointmentForm } from './../../components/AppointmentForm';
 
-const TopSideButtons = ({ removeFilter, applyFilter, applySearch, myLoanList }) => {
+
+
+// const Register = lazy(() => import('./../../pages/Register'));
+const formatDateForDB = (date, timeOnly = false) => {
+  if (!!timeOnly) {
+    return format(new Date(date), 'hh:mm a'); // 'a' adds AM/PM
+  } else {
+    return format(new Date(date), 'MMMM dd, yyyy hh:mm a'); // e.g., "December 18, 2024 02:30 PM"
+  }
+};
+const TopSideButtons = ({ removeFilter, applyFilter, applySearch, myAppointmentList }) => {
   const [filterParam, setFilterParam] = useState('');
   const [searchText, setSearchText] = useState('');
 
   const locationFilters = [''];
-
+  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  let isEnabled = loggedInUser.role === 'Patient';
   const showFiltersAndApply = params => {
     applyFilter(params);
     setFilterParam(params);
@@ -108,7 +119,7 @@ const TopSideButtons = ({ removeFilter, applyFilter, applySearch, myLoanList }) 
       applySearch(searchText);
     }
   }, [searchText]);
-  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
   return (
     <div className="inline-block float-right">
       {/* <SearchBar
@@ -124,12 +135,13 @@ const TopSideButtons = ({ removeFilter, applyFilter, applySearch, myLoanList }) 
           <XMarkIcon className="w-4 ml-2" />
         </button>
       )} */}
-      <div className="badge badge-neutral mr-2 px-4 p-4 bg-white text-blue-950">Total : {myLoanList.length}</div>
+      <div className="badge badge-neutral mr-2 px-4 p-4 bg-white text-blue-950">Total : {myAppointmentList.length}</div>
 
-      <button className="btn btn-outline bg-cyan-900 text-white" onClick={() => document.getElementById('addLoan').showModal()}>
+      {isEnabled && <button className="btn btn-outline bg-cyan-900 text-white" onClick={() => document.getElementById('addAppointment').showModal()}>
         Add
         <PlusCircleIcon className="h-6 w-6 text-white-500" />
       </button>
+      }
 
       {/* 
       <button
@@ -208,7 +220,7 @@ function LoanApplication() {
   const [addressCity, setCity] = useState([]);
   const [addressBarangay, setBarangay] = useState([]);
 
-  const [myLoanList, setLoanList] = useState([]);
+  const [myAppointmentList, setAppointmentList] = useState([]);
 
   const prepareAddress = async () => {
     await regions().then(region => {
@@ -233,18 +245,18 @@ function LoanApplication() {
     await barangays().then(barangays => console.log(barangays));
   };
 
-  const loanList = async () => {
+  const getAppointmentList = async () => {
 
     let res = await axios({
       method: 'POST',
-      url: 'loan/list',
+      url: 'appointment/list',
       data: {
 
       }
     });
     let list = res.data.data;
 
-    setLoanList(list)
+    setAppointmentList(list)
 
 
   };
@@ -253,7 +265,7 @@ function LoanApplication() {
 
 
     prepareAddress();
-    loanList()
+    getAppointmentList()
     setIsLoaded(true);
   }, []);
 
@@ -303,7 +315,6 @@ function LoanApplication() {
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
-
       {
         Header: '#',
         accessor: '',
@@ -312,106 +323,257 @@ function LoanApplication() {
         }
       },
       {
-        Header: 'Type',
-        accessor: 'loan_type_value',
+        Header: 'Appointment ID',
+        accessor: 'appointment_id',
         Cell: ({ row, value }) => {
           return <span className="">{value}</span>;
         }
       },
       {
-        Header: 'Loan Amount',
-        accessor: 'loan_amount',
+        Header: 'Patient Name',
+        accessor: '',
         Cell: ({ row, value }) => {
-          return <span className="">{formatAmount(value)}</span>;
+          let details = row.original;
+          return <span className="">{details.patient_first_name} {details.patient_last_name}</span>;
         }
       },
       {
-        Header: 'Interest Rate',
-        accessor: 'interest_rate',
+        Header: 'Dentist Name',
+        accessor: 'dentist_full_name',
         Cell: ({ row, value }) => {
           return <span className="">{value}</span>;
         }
       },
       {
-        Header: 'Months To Pay',
-        accessor: 'repayment_schedule_id',
+        Header: 'Appointment Date',
+        accessor: '',
         Cell: ({ row, value }) => {
-          return <span className="">{value} Months</span>;
-        }
-      },
-      {
-        Header: 'Date Created',
-        accessor: 'application_date',
-        Cell: ({ row, value }) => {
+          let details = row.original;
+
+          console.log({ details })
           return <span className="">
-
-            {value &&
-              format(value, 'MMM dd, yyyy hh:mm a')}
-
-          </span>;
-        }
-      },
-      {
-        Header: 'Date Approved',
-        accessor: 'approval_date',
-        Cell: ({ row, value }) => {
-          return <span className="">{value}</span>;
+            {formatDateForDB(details.start)} to {formatDateForDB(details.end, true)}
+          </span>
         }
       },
       {
         Header: 'Status',
-        accessor: 'loan_status',
+        accessor: 'status',
         Cell: ({ row, value }) => {
-          return <StatusPill value={value} />
-
-
-
+          return <StatusPill value={value} />;
         }
       },
-
-
+      {
+        Header: 'Remarks',
+        accessor: 'remarks',
+        Cell: ({ row, value }) => {
+          return <span className="">{value}</span>;
+        }
+      },
       {
         Header: 'Action',
         accessor: '',
         Cell: ({ row }) => {
-          let loan = row.original;
+          let appointment = row.original;
+
+
+
+          let isEnabled = loggedInUser.role !== 'Patient';
+
+          const [isModalOpen, setIsModalOpen] = useState(false);
+
+          const [isModalCancelOpen, seIsModalCancelOpen] = useState(false);
+
+
+          const handleOpenModal = () => {
+            setIsModalOpen(true);
+          };
+
+          const handleCloseModal = () => {
+            setIsModalOpen(false);
+          };
+
+
+          const handleOpenCancelModal = () => {
+            seIsModalCancelOpen(true);
+          };
+
+          const handleCloseCancelModal = () => {
+            seIsModalCancelOpen(false);
+          };
+
+
+
+          const sendMessage = async ({ firstName, lastName, phoneNumber, status, date }) => {
+            const message = `Dear ${firstName} ${lastName}, your appointment on ${date} has been ${status}!`;
+
+
+            // URL encoding the message and phone number
+            const url = `https://sadnsrmvis.com/hwebit_sms/index.php?cp_num=${encodeURIComponent(phoneNumber)}&message=${encodeURIComponent(message)}`;
+
+            try {
+              // Perform the request to the server
+              const response = await fetch(url);
+              const data = await response.json(); // Assuming the server returns JSON
+
+              // Handle the server response
+              if (response.ok) {
+                //console.log('Message sent successfully:', data);
+              } else {
+                console.error('Error sending message:', data);
+              }
+            } catch (error) {
+              console.error('Network error:', error);
+            }
+          };
+
+
+          const handleConfirm = async (updateStatus) => {
+            // Handle confirmation action here
+
+
+            try {
+
+              let res = await axios({
+                method: 'put',
+                url: `appointment/update`,
+                data: { ...appointment, status: updateStatus }
+              })
+
+
+              await sendMessage({
+                firstName: appointment.patient_first_name,
+                lastName: appointment.patient_last_name,
+                phoneNumber: appointment.phone_number,
+                status: updateStatus,
+                date: `${formatDateForDB(appointment.start)} to ${formatDateForDB(appointment.end, true)}`
+              });
+
+
+
+              await getAppointmentList();
+
+              toast.success(`Updated Successfully`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+              });
+            } catch (error) {
+              console.log(error)
+              toast.error(`Something went wrong`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+              });
+            } finally {
+              console.log('Confirmed!');
+              setIsModalOpen(false);
+              seIsModalCancelOpen(false)
+            }
+
+          };
 
 
 
           return (
-            (
-              <div className="flex">
+            <div className="flex">
 
-                <button className="btn btn-outline btn-sm" onClick={() => {
+              {isEnabled && <button
+                className="btn btn-outline btn-sm bg-base-500 mr-4"
+                onClick={() => {
 
-                  // setisEditModalOpen(true)
-                  setselectedLoan(loan);
+                  handleOpenModal()
 
-                  document.getElementById('viewLoan').showModal();
-                  // setFieldValue('Admin_Fname', 'dex');
-                }}>
-                  <i class="fa-solid fa-eye"></i>
-                </button>
-
-                {/* <button
-                  className="btn btn-outline btn-sm ml-2"
-                  onClick={() => {
+                  console.log({ isModalOpen })
+                  // setSelectedAppointment(appointment);
+                  // document.getElementById('viewAppointment').showModal();
+                }}
+              >
+                <i class="fa-solid fa-check text-gray-900"></i>
 
 
-                    setactiveChildID(l.id);
+              </button>
+              }
+              <button
+                className="btn btn-outline btn-sm bg-base-500"
+                onClick={() => {
+                  handleOpenCancelModal()
+                  // setSelectedAppointment(appointment);
+                  // document.getElementById('viewAppointment').showModal();
+                }}
+              >
+                <i class="fa-solid fa-archive text-gray-900"></i>
 
-                  }}>
-                  <i class="fa-solid fa-archive"></i>
-                </button> */}
-              </div>
-            )
+              </button>
+              {/* Optionally add more action buttons here */}
+
+              {
+                isModalOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+                    <div className="modal modal-open">
+                      <div className="modal-box">
+                        <h2 className="text-lg font-bold mb-4">Apppointment Acceptance</h2>
+                        <p>Do you want to confirm this appointment?</p>
+
+                        {/* <Register /> */}
+                        <div className="modal-action">
+                          <button className="btn" onClick={handleCloseModal}>
+                            Cancel
+                          </button>
+                          <button className="btn btn-success text-white" onClick={() => {
+                            handleConfirm('Scheduled')
+                          }}>
+                            Confirm
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
+              {
+                isModalCancelOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+                    <div className="modal modal-open">
+                      <div className="modal-box">
+                        <h2 className="text-lg font-bold mb-4">Apppointment Cancellation</h2>
+                        <p>Do you want to cancel this appointment?</p>
+                        <div className="modal-action">
+                          <button className="btn" onClick={handleCloseCancelModal}>
+                            Cancel
+                          </button>
+                          <button className="btn bg-red-500 text-white" onClick={() => {
+                            handleConfirm('Cancelled')
+                          }}>
+                            Confirm Cancellation
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
+
+            </div>
           );
         }
       },
-
     ],
     []
   );
+
 
   const handleOnChange = e => {
     console.log(e.target.files[0]);
@@ -628,8 +790,8 @@ function LoanApplication() {
         setSubmitting(false);
 
         resetForm();
-        loanList();
-        document.getElementById('addLoan').close();
+        getAppointmentList();
+        document.getElementById('addAppointment').close();
 
         toast.success('Successfully created!', {
           onClose: () => {
@@ -681,7 +843,7 @@ function LoanApplication() {
               url: 'faq/create',
               data: values
             })
-            document.getElementById('addLoan').close();
+            document.getElementById('addAppointment').close();
             await fetchFaqList();
             resetForm();
             toast.success('Successfully added!', {
@@ -765,12 +927,12 @@ function LoanApplication() {
           applySearch={applySearch}
           applyFilter={applyFilter}
           removeFilter={removeFilter}
-          myLoanList={myLoanList}
+          myAppointmentList={myAppointmentList}
         />
       }>
       <div className="">
 
-        <dialog id="addLoan" className="modal">
+        <dialog id="addAppointment" className="modal">
           <div className="modal-box w-11/12 max-w-5xl">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
@@ -779,10 +941,11 @@ function LoanApplication() {
             <h1 className="font-bold text-lg  p-4 
  bg-gradient-to-r from-gray-200 to-gray-300
       z-10 text-blue-950 border bg-white
-             rounded">New Appointment</h1>
+             rounded">New Appointments</h1>
             <p className="text-sm text-gray-500 mt-1 font-bold"></p>
             <div className="">
-              <AppointmentForm />
+              <AppointmentForm
+                getAppointmentList={getAppointmentList} />
 
             </div>
           </div>
@@ -859,7 +1022,7 @@ function LoanApplication() {
           style={{ overflow: 'wrap' }}
           className="table-sm"
           columns={columns}
-          data={(myLoanList || []).map(data => {
+          data={(myAppointmentList || []).map(data => {
             return {
               ...data
 

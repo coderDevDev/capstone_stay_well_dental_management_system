@@ -29,7 +29,7 @@ function Layout() {
 
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
-  // console.log({ loggedInUser });
+  // //console.log({ loggedInUser });
   let isAdmin = loggedInUser && loggedInUser.role === 'super_admin';
 
   return (

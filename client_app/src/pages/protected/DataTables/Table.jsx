@@ -155,23 +155,23 @@ export function dateBetweenFilterFn(rows, id, dateFilterValues) {
     return new Date(a) - new Date(b);
   });
 
-  console.log({ filterValues });
+  //console.log({ filterValues });
   let sd = filterValues[0] ? Date.parse(filterValues[0]) : undefined;
   let ed = filterValues[1] ? Date.parse(filterValues[1]) : undefined;
 
   if (sd === ed) {
     ed = filterValues[0].setDate(filterValues[0].getDate() + 1);
 
-    console.log({ ed });
+    //console.log({ ed });
   }
 
-  console.log({ sd, ed });
+  //console.log({ sd, ed });
 
   if (ed || sd) {
     return rows.filter(r => {
       const cellDate = r.values[id];
 
-      // console.log({ cellDate });
+      // //console.log({ cellDate });
 
       return sd <= cellDate && ed >= cellDate;
     });
@@ -320,22 +320,12 @@ export function StatusPill({ value }) {
     <span
       className={classNames(
         'px-3 py-1 uppercase leading-wide font-bold text-xs rounded-full shadow-sm',
-        status.startsWith('available') ? 'bg-green-100 text-green-800' : null,
-        status.startsWith('inactive') ? 'bg-yellow-100 text-yellow-800' : null,
-        status.startsWith('used') ? 'bg-red-100 text-red-800' : null,
-        status.startsWith('available') ? 'bg-green-100 text-green-800' : null,
-        status.startsWith('pending') ? 'bg-yellow-100 text-yellow-800' : null,
-        status.startsWith('approve') ? 'bg-green-100 text-green-800' : null,
-        status.startsWith('hold') ? 'bg-red-100 text-red-800' : null,
-        status.startsWith('complete') ? 'bg-lime-100 text-lime-800' : null,
-        status.startsWith('unhold') ? 'bg-lime-100 text-lime-800' : null,
-        status.startsWith('free_slot') ? 'bg-yellow-100 text-yellow-800' : null,
-        status.startsWith('partially_paid') ? 'bg-yellow-100 text-yellow-800' : null,
-        status.startsWith('paid') ? 'bg-green-100 text-green-800' : null,
+
+        status.startsWith('scheduled') ? 'bg-green-100 text-green-800' : null,
         status.startsWith('overdue') ? 'bg-red-100 text-red-800' : null,
-        status.startsWith('rejected') ? 'bg-red-100 text-red-800' : null,
+        status.startsWith('cancelled') ? 'bg-red-100 text-red-800' : null,
         status.startsWith('in_progress') ? 'bg-orange-100 text-orange-800' : null,
-        status.startsWith('payment_for_approval') ? 'bg-yellow-100 text-yellow-800' : null,
+        status.startsWith('pending') ? 'bg-yellow-100 text-yellow-800' : null,
       )}>
       {status}
     </span>
@@ -476,7 +466,7 @@ function Table({ columns, data, searchField }) {
     }, []);
   });
 
-  // console.log({ rows });
+  // //console.log({ rows });
 
   let dataSet = [];
 
@@ -527,7 +517,7 @@ function Table({ columns, data, searchField }) {
         }
 
         // if (!isDate(parseISO(mydate)) || !isValid(parseISO(mydate))) {
-        //   console.log({ finalValue });
+        //   //console.log({ finalValue });
         //   // dataRow.push(format(validDate, 'MMM dd, yyyy hh:mm:ss a'));
         // } else {
         //   dataRow.push(finalValue);

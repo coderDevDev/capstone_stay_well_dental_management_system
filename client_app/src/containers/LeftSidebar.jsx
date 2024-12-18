@@ -33,14 +33,14 @@ function LeftSidebar() {
 
   useEffect(() => {
     getUser();
-    //console.log({ selectedUser: selectedUser });
+    ////console.log({ selectedUser: selectedUser });
   }, []);
 
   const close = e => {
     document.getElementById('left-sidebar-drawer').click();
   };
 
-  console.log({ selectedUser })
+  //console.log({ selectedUser })
 
   return isLoaded && (
 
@@ -69,6 +69,9 @@ function LeftSidebar() {
           <li className="flex items-center justify-between mb-3">
             <label className="text-white">
               Hello, <span className="font-bold">{selectedUser.full_name} </span>
+            </label>
+            <label className="text-white">
+              <span className="font-bold">Role: {selectedUser.role} </span>
             </label>
           </li>
         )}

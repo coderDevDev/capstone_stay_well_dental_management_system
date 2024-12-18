@@ -105,9 +105,9 @@ const PackageCart = ({
               onChange={handleChange}
               name={`totalAmountToWithdrawList.${index}.quantity`}
 
-              // value={values.parentUserName}
+            // value={values.parentUserName}
 
-              // onChange={handleEmailChange}
+            // onChange={handleEmailChange}
             />
             {/* <span
               className="py-2 cursor-pointer rounded-r bg-gray-100 py-1 px-3 duration-100 hover:bg-green-500 hover:text-blue-50"
@@ -182,7 +182,7 @@ function InternalPage() {
     result
       // .filter(incomeType => incomeType.name !== 'giftChequeIncome')
       .map(item => {
-        console.log('handleAddToCart');
+        //console.log('handleAddToCart');
         handleAddToCart(item);
       });
     setIsLoaded(true);
@@ -305,7 +305,7 @@ function InternalPage() {
 
         // setIsLoaded(true);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
         toast.error('Something went wrong', {
           position: 'top-right',
           autoClose: 3000,
@@ -385,7 +385,7 @@ function InternalPage() {
       try {
         let formValues = values.cartState;
 
-        // console.log({
+        // //console.log({
         //   ...formValues,
         //   list: formValues.list.map(l => {
         //     return {
@@ -447,7 +447,7 @@ function InternalPage() {
 
         // setIsLoaded(true);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
         toast.error('Something went wrong', {
           position: 'top-right',
           autoClose: 3000,
@@ -508,7 +508,7 @@ function InternalPage() {
   const TopSideButtons = ({ removeFilter, applyFilter, applySearch }) => {
     let checkIfIsWithinPayoutWindow = isWithinPayoutWindow();
 
-    console.log({ checkIfIsWithinPayoutWindow });
+    //console.log({ checkIfIsWithinPayoutWindow });
 
     return (
       <div>
@@ -684,7 +684,7 @@ function InternalPage() {
     type,
     openTab
   }) => {
-    console.log({ openTab });
+    //console.log({ openTab });
     const columns = useMemo(
       () => [
         {
@@ -1183,9 +1183,9 @@ function InternalPage() {
                             <p className="text-gray-700">
                               {!computationError
                                 ? formatAmount(
-                                    values.totalAmountToWithdrawList['0']
-                                      .quantity
-                                  )
+                                  values.totalAmountToWithdrawList['0']
+                                    .quantity
+                                )
                                 : 0}
                             </p>
                           </div>
@@ -1197,9 +1197,9 @@ function InternalPage() {
                               <p className="text-gray-700">
                                 {!computationError
                                   ? formatAmount(
-                                      values.totalAmountToWithdrawList['0']
-                                        .quantity
-                                    )
+                                    values.totalAmountToWithdrawList['0']
+                                      .quantity
+                                  )
                                   : 0}
                               </p>
                             </div>

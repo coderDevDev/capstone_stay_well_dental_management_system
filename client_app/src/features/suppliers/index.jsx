@@ -197,7 +197,7 @@ function Transactions() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setUser(list);
   };
 
@@ -224,7 +224,7 @@ function Transactions() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -508,7 +508,7 @@ function Transactions() {
       //   Header: 'Date Measured',
       //   accessor: 'Date_Measured',
       //   Cell: ({ value }) => {
-      //     console.log({ value });
+      //     //console.log({ value });
       //     return (
       //       <span
       //         className=""
@@ -742,9 +742,9 @@ function Transactions() {
                 <button className="btn btn-outline btn-sm mr-2" onClick={async () => {
 
 
-                  console.log("Dex")
+                  //console.log("Dex")
                   // setisEditModalOpen(true)
-                  console.log({ l })
+                  //console.log({ l })
                   setSelectedPayment(l);
 
                   document.getElementById('viewProofPaymentImage').showModal();
@@ -775,7 +775,7 @@ function Transactions() {
   );
 
   const handleOnChange = e => {
-    console.log(e.target.files[0]);
+    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -828,11 +828,11 @@ function Transactions() {
 
 
 
-    // console.log({ selectedSupplier })
+    // //console.log({ selectedSupplier })
 
-    // console.log({ isAddPaymentOpen })
+    // //console.log({ isAddPaymentOpen })
 
-    // console.log(selectedSupplier.Admin_Fname)
+    // //console.log(selectedSupplier.Admin_Fname)
 
 
 
@@ -890,7 +890,7 @@ function Transactions() {
         setSubmitting(true);
 
 
-        // console.log({ isEditModalOpen })
+        // //console.log({ isEditModalOpen })
         try {
 
           if (isFromEdit) {
@@ -973,7 +973,7 @@ function Transactions() {
               theme: 'light'
             });
 
-            // console.log("dex")
+            // //console.log("dex")
 
             // let res = await axios({
             //   method: 'POST',
@@ -1000,7 +1000,7 @@ function Transactions() {
 
           } else {
 
-            // console.log({ values })
+            // //console.log({ values })
 
 
             let res = await axios({
@@ -1029,7 +1029,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -1153,7 +1153,7 @@ function Transactions() {
                     alert('Please fill in the required fields');
                   };
 
-                  // console.log({ values })
+                  // //console.log({ values })
 
                   return (
                     <Form className="">
@@ -1252,7 +1252,7 @@ function Transactions() {
                   }) => {
 
 
-                    // console.log({ values })
+                    // //console.log({ values })
 
                     return (
                       <Form className="">
@@ -1373,7 +1373,7 @@ function Transactions() {
                             let file = e.target.files[0];
                             setFile(file);
                             //setFieldValue('Proof_Payment', 'dex')
-                            // console.log(file.name)
+                            // //console.log(file.name)
                             if (file) {
                               blah.src = URL.createObjectURL(file)
                             }
@@ -1465,7 +1465,7 @@ function Transactions() {
                 onClick={async () => {
                   try {
 
-                    console.log("Dex")
+                    //console.log("Dex")
                     let res = await axios({
                       method: 'put',
                       url: `/archive/supplier/${activeChildID}/SupplierID`,
@@ -1532,7 +1532,7 @@ function Transactions() {
                   }) => {
 
 
-                    console.log({ values })
+                    //console.log({ values })
 
                     return (
                       <Form className="">

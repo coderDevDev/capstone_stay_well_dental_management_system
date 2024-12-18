@@ -284,7 +284,7 @@ function Transactions() {
     // });
     // let list = res.data.data;
 
-    // console.log({ list });
+    // //console.log({ list });
     // setUser(list);
   };
 
@@ -311,7 +311,7 @@ function Transactions() {
     return classes.filter(Boolean).join(' ');
   }
 
-  // console.log(users);
+  // //console.log(users);
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const columns = useMemo(
     () => [
@@ -521,7 +521,7 @@ function Transactions() {
             'CANCELLED': 'bg-red-500'
           }
 
-          console.log(value)
+          //console.log(value)
           return (
             <div className="flex items-center space-x-3">
 
@@ -544,7 +544,7 @@ function Transactions() {
 
 
   const handleOnChange = e => {
-    console.log(e.target.files[0]);
+    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -749,8 +749,8 @@ function Transactions() {
       onSubmit: async (values, { setFieldError, setSubmitting, resetForm }) => {
         setSubmitting(true);
 
-        // console.log("here")
-        // console.log({ isEditModalOpen })
+        // //console.log("here")
+        // //console.log({ isEditModalOpen })
 
 
 
@@ -795,7 +795,7 @@ function Transactions() {
           resetForm()
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
 
         }
@@ -872,7 +872,7 @@ function Transactions() {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -1098,7 +1098,7 @@ function Transactions() {
 
                 }) => {
 
-                  // console.log(errors)
+                  // //console.log(errors)
                   const checkValidateTab = () => {
                     // submitForm();
                   };
@@ -1107,7 +1107,7 @@ function Transactions() {
                     alert('Please fill in the required fields');
                   };
 
-                  // console.log({ values })
+                  // //console.log({ values })
 
 
                   // // Calculate the total of item quantities
@@ -1146,14 +1146,14 @@ function Transactions() {
                             // if (inventoryList.length === 0) {
                             //   setFieldValue('orderID', '')
                             // }
-                            // console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
+                            // //console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
 
                             // setInventoryList(inventoryList.filter(i => i.SupplierID === `${value}`))
                           }}
                         // onChange={() => {
                         //   // setFieldValue('SupplierName', values.SupplierID)
 
-                        //   console.log({
+                        //   //console.log({
                         //     inventoryList
                         //   })
                         // }}
@@ -1296,7 +1296,7 @@ function Transactions() {
                               // if (inventoryList.length === 0) {
                               //   setFieldValue('orderID', '')
                               // }
-                              // console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
+                              // //console.log(inventoryList.filter(i => i.SupplierID === `${value}`))
 
                               // setInventoryList(inventoryList.filter(i => i.SupplierID === `${value}`))
                             }}
@@ -1323,7 +1323,7 @@ function Transactions() {
                             let maxOrder = findTotal_Grams_Sold.maxGramsOffer;
 
 
-                            console.log({ maxOrder })
+                            //console.log({ maxOrder })
                             if (maxOrder < 1) {
                               setFieldError(
                                 'Grams', `Stock is already 0`
@@ -1433,9 +1433,9 @@ function Transactions() {
                     alert('Please fill in the required fields');
                   };
 
-                  // console.log({ values })
+                  // //console.log({ values })
 
-                  // console.log({ selectedOrder })
+                  // //console.log({ selectedOrder })
 
                   return (
                     <Form className="">
@@ -1604,7 +1604,7 @@ function Transactions() {
                           <button
                             type="submits"
                             // onClick={(e) => {
-                            //   console.log("dex")
+                            //   //console.log("dex")
 
 
                             // }}

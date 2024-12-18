@@ -188,11 +188,11 @@ function InternalPage() {
   useEffect(() => {
     dispatch(setPageTitle({ title: 'Network Tree' }));
 
-    // console.log({ shouldRecenterTreeRef })
+    // //console.log({ shouldRecenterTreeRef })
     // if (treeContainerRef.current && shouldRecenterTreeRef.current) {
     //   shouldRecenterTreeRef.current = false;
     //   const dimensions = treeContainerRef.current.getBoundingClientRect();
-    //   console.log({ dimensions });
+    //   //console.log({ dimensions });
     //   setTreeTranslate({
     //     x: dimensions.width / 2,
     //     y: dimensions.height / 8
@@ -310,7 +310,7 @@ function InternalPage() {
     if (isLoaded && observed.current && shouldRecenterTreeRef.current) {
       shouldRecenterTreeRef.current = false;
       const dimensions = observed.current.getBoundingClientRect();
-      console.log({ dimensions });
+      //console.log({ dimensions });
       setTreeTranslate({
         x: dimensions.width / 2,
         y: dimensions.height / 8
@@ -540,7 +540,7 @@ function InternalPage() {
               <div
                 // ref={refTree}
                 ref={el => {
-                  console.log(el);
+                  //console.log(el);
                   observed.current = el;
                 }} // or setState(el)
                 style={{ height: '100vh' }}
@@ -626,7 +626,7 @@ function InternalPage() {
                           placeholder=""
                           value={values.parentUserName}
 
-                          // onChange={handleEmailChange}
+                        // onChange={handleEmailChange}
                         />
                         <div className="grid grid-cols-2 gap-3 md:grid-cols-2 ">
                           <InputText
@@ -638,7 +638,7 @@ function InternalPage() {
                             placeholder=""
                             value={values.parentNodeName}
 
-                            // onChange={handleEmailChange}
+                          // onChange={handleEmailChange}
                           />
                           <InputText
                             // icons={mdiEmailCheckOutline}
@@ -649,7 +649,7 @@ function InternalPage() {
                             placeholder=""
                             value={values.parentNodeEmail}
 
-                            // onChange={handleEmailChange}
+                          // onChange={handleEmailChange}
                           />
                         </div>
                         <div className="divider font-bold">
@@ -701,7 +701,7 @@ function InternalPage() {
                           placeholder=""
                           value={values.childUserName}
 
-                          // onChange={handleEmailChange}
+                        // onChange={handleEmailChange}
                         />
                         {/* <div className="grid grid-cols-2 gap-3 md:grid-cols-2 ">
                         <InputText
@@ -791,7 +791,7 @@ function InternalPage() {
                                   {networkNode.map((node, index) => {
                                     let fullName = `${node.childDetails.firstName} ${node.childDetails.lastName}`;
 
-                                    console.log({ node });
+                                    //console.log({ node });
                                     let data = node.list_ParentsOfParents;
 
                                     let foundData = {};

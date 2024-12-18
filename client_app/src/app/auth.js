@@ -11,7 +11,8 @@ const checkAuth = () => {
     'register',
     'documentation',
     'myprofile',
-    'reset-password'
+    'reset-password',
+    'register'
   ];
 
   const isPublicPage = PUBLIC_ROUTES.some(r =>

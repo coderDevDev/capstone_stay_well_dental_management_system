@@ -19,7 +19,7 @@ function ForgotPassword() {
     const params = useParams();
     let userId = params.userId;
 
-    console.log({ userId })
+    //console.log({ userId })
     const [selectedUser, setSelectedUser] = useState({});
     const [orders, setOrders] = useState([]);
 
@@ -54,7 +54,7 @@ function ForgotPassword() {
                 let link = `/myprofile/${userId}/order/${TransactionID}`;
 
 
-                console.log({ Dex: row.original.LayawayID })
+                //console.log({ Dex: row.original.LayawayID })
                 if (row.original.LayawayID) {
                     link = `/myprofile/${userId}/layaway/${TransactionID}`;
                 }

@@ -7,6 +7,9 @@ import ErrorText from '../../components/Typography/ErrorText';
 import InputText from '../../components/Input/InputText';
 import RadioText from '../../components/Input/Radio';
 import Dropdown from '../../components/Input/Dropdown';
+import TextAreaInput from '../../components/Input/TextAreaInput';
+
+
 import { Formik, useField, useFormik, Form } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -53,60 +56,11 @@ import {
   regionByCode
 } from 'select-philippines-address';
 
-function SolarUserLinear(props) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="w-6 h-6">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-      />
-    </svg>
-  );
-}
-function placementInfoIcon(props) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="1.5"
-      stroke="currentColor"
-      className="w-6 h-6">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-      />
-    </svg>
-  );
-}
 
-function paymentInfoIcon(props) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="1.5"
-      stroke="currentColor"
-      className="w-6 h-6">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-      />
-    </svg>
-  );
-}
 
-function Register(funcProps) {
+function Register({ isFromUpdateProfile, patientId }) {
+
+  console.log({ isFromUpdateProfile, patientId })
   const [emailError, setEmailError] = useState('');
   const [currentWizardIndex, setCurrentWizardIndex] = useState(false);
   const navigate = useNavigate();
@@ -127,14 +81,45 @@ function Register(funcProps) {
         })
       );
     });
-    // await regionByCode('01').then(region => console.log(region.region_name));
+    // await regionByCode('01').then(region => //console.log(region.region_name));
     await provinces().then(province => console.log(province));
-    // await provincesByCode('01').then(province => console.log(province));
+    await provincesByCode('05').then(
+      province => {
+        setProvince(
+          province.map(p => {
+            return {
+              value: p.province_code,
+              label: p.province_name
+            };
+          })
+        );
+      }
+    );
     // await provinceByName('Rizal').then(province =>
-    //   console.log(province.province_code)
+    //   //console.log(province.province_code)
     // );
-    await cities().then(city => console.log(city));
-    await barangays().then(barangays => console.log(barangays));
+    await cities(patientId?.address_province).then(cities => {
+      setCity(
+        cities.map(p => {
+          return {
+            value: p.city_code,
+            label: p.city_name
+          };
+        })
+      );
+    });
+
+    await barangays(patientId?.address_city).then(cities => {
+      setBarangay(
+        cities.map(p => {
+
+          return {
+            value: p.brgy_code,
+            label: p.brgy_name
+          };
+        })
+      );
+    });
   };
   useEffect(() => {
     prepareAddress();
@@ -193,7 +178,7 @@ function Register(funcProps) {
 
         const isExist = res.data.isEmailExist;
 
-        console.log({ isExist });
+        //console.log({ isExist });
         if (isExist) {
           // setEmailError('Email already exists');
           setFieldError('email', 'Email already exists');
@@ -232,45 +217,69 @@ function Register(funcProps) {
     }
   );
 
+
+
+  let initialValues = {
+
+    "email": "dextermiranda441@gmail.com",
+    "password": "Dexter_20",
+    "firstName": "DEXTER",
+    "middleName": "",
+    "lastName": "MIRANDA",
+    "address_region": "05",
+    "address_province": "0505",
+    "address_city": "050506",
+    "Address_or_Location": "050506062",
+    "age": 4,
+    "gender": "Male",
+    "birthDate": "2020-01-27",
+    "medical_history": "allergy",
+    "phone_number": "09275478620"
+
+  };
+
+  if (!!patientId?.patient_id) {
+    initialValues = {
+
+      "email": patientId.email,
+      "password": patientId.password,
+      "firstName": patientId.patient_first_name,
+      "middleName": patientId.middle_name,
+      "lastName": patientId.patient_last_name,
+      "address_region": patientId.address_region,
+      "address_province": patientId.address_province,
+      "address_city": patientId.address_city,
+      "Address_or_Location": patientId.address_or_location,
+      "age": patientId.age,
+      "gender": patientId.gender,
+      "birthDate": patientId.date_of_birth,
+      "medical_history": patientId.medical_history,
+      "phone_number": patientId.phone_number
+
+    };
+
+  }
+
   const formikConfig = {
-    initialValues: {
-      Full_Name_of_Child: '',
-      Name_of_Mother_or_Caregiver: '',
-      Address_or_Location: '',
-      address_region: '',
-      address_province: '',
-      address_city: '',
-      Date_of_Birth: '',
-      Sex: '',
-      Weight: '',
-      Height: '',
-      Age_in_Months: '',
-      Weight_for_Age_Status: '',
-      Height_for_Age_Status: '',
-      Weight_for_Lt_or_Ht_Status: '',
-      address_barangay: ''
-    },
+    initialValues,
     validationSchema: Yup.object({
-      Full_Name_of_Child: Yup.string().required('Required'),
-      Name_of_Mother_or_Caregiver: Yup.string().required('Required'),
+      email: Yup.string().email().required("Required"),
+      password: Yup.string().required("Required"),
+      firstName: Yup.string().required("First Name is required"),
+      middleName: Yup.string().nullable(),
+      lastName: Yup.string().required("Last Name is required"),
+      address_region: Yup.string().required("Region is required"),
+      address_province: Yup.string().required("Province is required"),
+      address_city: Yup.string().required("City is required"),
+      Address_or_Location: Yup.string().required("Barangay is required"),
+      age: Yup.number()
+        .min(1, "Age must be greater than 0.")
+        .required("Age is required"),
+      gender: Yup.string().required("Required"),
+      birthDate: Yup.string().required("Required"),
+      medical_history: Yup.string().required("Required"),
+      phone_number: Yup.number().required("Required"),
 
-      Sex: Yup.string().required('Required'),
-      Date_of_Birth: Yup.date().required('Required'),
-
-      Address_or_Location: Yup.string().required('Required'),
-      address_region: Yup.string().required('Required'),
-      address_province: Yup.string().required('Required'),
-      address_city: Yup.string().required('Required'),
-      address_barangay: Yup.string(),
-
-      Weight: Yup.number().required('Required'),
-      Height: Yup.number().required('Required'),
-
-      Age_in_Months: Yup.number().required('Required'),
-
-      Weight_for_Age_Status: Yup.string().required('Required'),
-      Height_for_Age_Status: Yup.string().required('Required'),
-      Weight_for_Lt_or_Ht_Status: Yup.string().required('Required')
     }),
     validateOnMount: true,
     validateOnChange: false,
@@ -280,37 +289,67 @@ function Register(funcProps) {
       try {
         let memberData = {
           ...values,
-          address_region: await regionByCode(values.address_region).then(
-            region => region.region_name
-          ),
-          address_province: await provincesByCode(values.address_region).then(
-            province => {
-              let data = province.find(
-                p => p.province_code === values.address_province
-              );
-              return data.province_name;
-            }
-          ),
-          address_city: await cities(values.address_province).then(city => {
-            let data = city.find(p => p.city_code === values.address_city);
+          // address_region: await regionByCode(values.address_region).then(
+          //   region => region.region_name
+          // ),
+          // address_province: await provincesByCode(values.address_region).then(
+          //   province => {
+          //     let data = province.find(
+          //       p => p.province_code === values.address_province
+          //     );
+          //     return data.province_name;
+          //   }
+          // ),
+          // address_city: await cities(values.address_province).then(city => {
+          //   let data = city.find(p => p.city_code === values.address_city);
 
-            return data.city_name;
-          }),
-          Address_or_Location: addressBarangay.find(
-            p => p.value === values.Address_or_Location
-          ).label
+          //   return data.city_name;
+          // }),
+          // Address_or_Location: addressBarangay.find(
+          //   p => p.value === values.Address_or_Location
+          // ).label
         };
 
-        console.log({ memberData });
+        //console.log({ memberData });
         let res = await axios({
           method: 'POST',
           url: 'user/create',
           data: memberData
-        }).then(() => {
+        }).then(async () => {
+
+
+          const sendMessage = async ({ firstName, lastName, phoneNumber, }) => {
+            const message = `Dear ${firstName} ${lastName}. Congratulations! Your registration was successful. We’re thrilled to have you with us. Stay well and enjoy all the benefits ahead!`;
+
+
+            // URL encoding the message and phone number
+            const url = `https://sadnsrmvis.com/hwebit_sms/index.php?cp_num=${encodeURIComponent(phoneNumber)}&message=${encodeURIComponent(message)}`;
+
+            try {
+              // Perform the request to the server
+              const response = await fetch(url);
+              const data = await response.json(); // Assuming the server returns JSON
+
+              // Handle the server response
+              if (response.ok) {
+                //console.log('Message sent successfully:', data);
+              } else {
+                console.error('Error sending message:', data);
+              }
+            } catch (error) {
+              console.error('Network error:', error);
+            }
+          };
+          await sendMessage({
+            firstName: values.firstName,
+            lastName: values.lastName,
+            phoneNumber: values.phone_number
+          });
+
           toast.success('Created Successfully', {
             onClose: () => {
-              setSubmitting(false);
-              navigate('/app/users');
+              // setSubmitting(false);
+              // navigate('/app/users');
             },
             position: 'top-right',
             autoClose: 500,
@@ -323,406 +362,333 @@ function Register(funcProps) {
           });
         });
 
-        let data = res.data;
+        // let data = res.data;
 
-        return data;
+
       } catch (error) {
-        console.log({ error });
+
+        const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
+
+        toast.error(errorMessage, {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light'
+        });
       } finally {
       }
     }
   };
+
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   return (
     isLoaded && (
-      <div className="">
-        <div className="mt-0">
-          <div
-            className="grid  md:grid-cols-1 grid-cols-1  bg-base-100 rounded-xl 
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+        <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
+          {!isFromUpdateProfile && <div className="text-center">
 
-         ">
-            <div className="p-2 space-y-4 md:space-y-6 sm:p-4">
-              {/* <h1 className="text-md font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Register
-            </h1> */}
-              <Formik {...formikConfig}>
-                {({
-                  handleSubmit,
-                  handleChange,
-                  handleBlur, // handler for onBlur event of form elements
-                  values,
-                  touched,
-                  errors,
-                  submitForm,
-                  setFieldTouched,
-                  setFieldValue,
-                  setFieldError,
-                  setErrors,
-                  isSubmitting
-                }) => {
-                  const checkValidateTab = () => {
-                    // submitForm();
-                  };
-                  const errorMessages = () => {
-                    // you can add alert or console.log or any thing you want
-                    alert('Please fill in the required fields');
-                  };
 
-                  return (
-                    <FormWizard
-                      onComplete={() => {
-                        if (!isSubmitting) {
-                          console.log('Dex');
-                          handleSubmit();
-                        }
-                      }}
-                      stepSize="xs"
-                      color="#334155"
-                      finishButtonText="Submit"
-                      finishButtonTemplate={handleComplete => (
-                        <div>
-                          <button
-                            type="button"
-                            disabled={isSubmitting}
-                            className="btn mt-2 justify-end  btn-neutral float-right"
-                            onClick={() => {
-                              handleComplete();
-                            }}>
-                            {isSubmitting ? (
-                              <>
-                                <span className="loading loading-spinner text-white"></span>
-                                Processing...
-                              </>
-                            ) : (
-                              <>
-                                <PlayCircleIcon className="h-6 w-6" />
-                                Submit
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      )}
-                      backButtonTemplate={handlePrevious => (
-                        <div>
-                          <button
-                            className="btn mt-2 justify-end  float-left"
-                            onClick={() => {
-                              handlePrevious();
-                            }}>
-                            <BackwardIcon className="h-6 w-6" />
-                            Previous
-                          </button>
-                        </div>
-                      )}
-                      nextButtonTemplate={(handleNext, currentIndex, ee) => (
-                        <div>
-                          <button
-                            className="btn mt-2 justify-end  btn-neutral float-right"
-                            onClick={async () => {
-                              console.log({ currentWizardIndex });
-                              // check tab name
-                              // if (currentWizardIndex === 0) {
-                              //   if (values.email) {
-                              //     let res = await axios({
-                              //       method: 'POST',
-                              //       url: 'user/isEmailExist',
-                              //       data: {
-                              //         email: values.email
-                              //       }
-                              //     }).then(res => {
-                              //       return res;
-                              //     });
-                              //     const isExist = res.data.isEmailExist;
+            <h1 className="text-2xl font-bold leading-tight text-gray-900 dark:text-white ">
+              Member Registration
+            </h1>
 
-                              //     if (isExist) {
-                              //       setFieldValue('email', '');
-                              //       setFieldError('email', 'dex');
-                              //     }
-                              //   }
-                              // }
+            <div className='mt-5 border-b border-gray-30'></div>
+            {/* <p className="text-gray-600 dark:text-gray-300 mt-2">
+              Please fill in the required details to register.
+            </p> */}
+          </div>}
 
-                              validation.map(key => {
-                                setFieldTouched(key);
-                              });
-                              let errorKeys = Object.keys(errors);
+          <Formik {...formikConfig}>
+            {({
+              handleSubmit,
+              handleBlur,
+              values,
+              touched,
+              errors,
+              setFieldTouched,
+              setFieldValue,
+              isSubmitting
+            }) => (
+              <Form className="space-y-4">
 
-                              const findCommonErrors = (arr1, arr2) => {
-                                // if firstValidation exists on errorKeys
-                                return arr1.some(item => arr2.includes(item));
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <InputText
+                    icons={mdiAccount}
+                    label="Email"
+                    name="email"
+                    type="text"
+                    placeholder="Enter your email"
+                    value={values.email}
+                    onBlur={handleBlur}
+                  />
+                  {
+                    !patientId?.patient_id && <InputText
+                      icons={mdiAccount}
+                      label="Password"
+                      name="password"
+                      type="text"
+                      placeholder="Enter your password"
+                      value={values.password}
+                      onBlur={handleBlur}
+                    />
+                  }
+
+
+                </div>
+
+
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  <InputText
+                    icons={mdiAccount}
+                    label="First Name"
+                    name="firstName"
+                    type="text"
+                    placeholder="Enter given name"
+                    value={values.firstName}
+                    onBlur={handleBlur}
+                  />
+                  <InputText
+                    icons={mdiAccount}
+                    label="Middle Name"
+                    name="middleName"
+                    type="text"
+                    placeholder="Enter your Middle Name"
+                    value={values.middleName}
+                    onBlur={handleBlur}
+                  />
+                  <InputText
+                    icons={mdiAccount}
+                    label="Last Name"
+                    name="lastName"
+                    type="text"
+                    placeholder="Enter your Last Name"
+                    value={values.lastName}
+                    onBlur={handleBlur}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  <div className='mt-2'>
+                    <Dropdown
+                      className="z-50 mt-5"
+
+                      label="Gender"
+                      name="gender"
+                      value={values.gender}
+                      setFieldValue={setFieldValue}
+                      onBlur={handleBlur}
+                      options={[{
+                        label: 'Male',
+                        value: 'Male'
+                      }, {
+                        label: 'Female',
+                        value: 'Female'
+                      }
+                      ]}
+                      affectedInput=""
+                      functionToCalled={async code => { }}
+                    />
+                  </div>
+
+
+
+                  <InputText
+                    icons={mdiAccount}
+                    label="Birth Date"
+                    name="birthDate"
+                    type="date"
+                    placeholder="Enter your birth date"
+                    value={values.birthDate}
+                    onBlur={handleBlur}
+                    onChange={(e) => {
+
+                      let value = e.target.value
+
+                      const birthDate = new Date(value);
+                      const today = new Date();
+                      const age = today.getFullYear() - birthDate.getFullYear();
+                      const month = today.getMonth() - birthDate.getMonth();
+
+                      // Adjust age if the birthday hasn't happened yet this year
+                      if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+
+                      } else {
+
+
+                        setFieldValue('age', age)
+
+
+                      }
+                      setFieldValue('birthDate', value)
+                      // if (values) {
+
+                      // }
+                    }}
+                    max={getTodayDate()} // Disable future date
+                  />
+                  <InputText
+                    icons={mdiAccount}
+                    label="Age"
+                    name="age"
+                    disabled
+                    type="text"
+                    placeholder="Enter your age"
+                    value={values.age}
+                    onBlur={handleBlur}
+                  />
+
+                </div>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <Dropdown
+                    icons={mdiMapMarker}
+                    label="Region"
+                    name="address_region"
+                    value={values.address_region}
+                    setFieldValue={setFieldValue}
+                    onBlur={handleBlur}
+                    options={addressRegions}
+
+                    functionToCalled={async regionCode => {
+
+
+                      if (regionCode) {
+                        setFieldValue('address_province', '');
+                        await provincesByCode(regionCode).then(
+                          province => {
+                            setProvince(
+                              province.map(p => {
+                                return {
+                                  value: p.province_code,
+                                  label: p.province_name
+                                };
+                              })
+                            );
+                          }
+                        );
+                      }
+                    }}
+                  />
+                  <Dropdown
+                    icons={mdiMapMarker}
+                    label="Province"
+                    name="address_province"
+                    value={values.address_province}
+                    setFieldValue={setFieldValue}
+                    onBlur={handleBlur}
+                    options={addressProvince}
+                    functionToCalled={async code => {
+                      if (code) {
+                        await cities(code).then(cities => {
+                          setCity(
+                            cities.map(p => {
+                              return {
+                                value: p.city_code,
+                                label: p.city_name
                               };
+                            })
+                          );
+                        });
+                      }
+                    }}
+                  />
+                  <Dropdown
+                    icons={mdiMapMarker}
+                    label="City"
+                    name="address_city"
+                    value={values.address_city}
+                    setFieldValue={setFieldValue}
+                    onBlur={handleBlur}
+                    options={addressCity}
+                    functionToCalled={async code => {
+                      if (code) {
+                        await barangays(code).then(cities => {
+                          setBarangay(
+                            cities.map(p => {
+                              //console.log({ p });
+                              return {
+                                value: p.brgy_code,
+                                label: p.brgy_name
+                              };
+                            })
+                          );
+                        });
+                      }
+                    }}
+                  />
+                  <Dropdown
+                    icons={mdiMapMarker}
+                    label="Barangay"
+                    name="Address_or_Location"
+                    value={values.Address_or_Location}
+                    setFieldValue={setFieldValue}
+                    onBlur={handleBlur}
+                    options={addressBarangay}
+                  />
+                </div>
 
-                              const hasFirstValidationError = findCommonErrors(
-                                errorKeys,
-                                validation
-                              );
 
-                              if (hasFirstValidationError === false) {
-                                handleNext();
-                              }
-                            }}>
-                            Next
-                            <ForwardIcon className="h-6 w-6" />
-                          </button>
-                        </div>
-                      )}>
-                      <FormWizard.TabContent
-                        title="Child Information"
-                        icon={SolarUserLinear()}
-                        isValid={checkValidateTab()}
-                        errorMessages={errorMessages}>
-                        <Form className="">
-                          {/* <label
-                            className={`block mb-2 text-green-400 text-left font-bold`}>
-                            Child
-                          </label> */}
-                          <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
-                            <InputText
-                              icons={mdiAccount}
-                              label="Full Name of Child"
-                              name="Full_Name_of_Child"
-                              type="text"
-                              placeholder=""
-                              value={values.Full_Name_of_Child}
-                              onBlur={handleBlur} // This apparently updates `touched`?
-                            />
-                          </div>
+                <InputText
+                  icons={mdiAccount}
+                  label="Mobile Number"
+                  name="phone_number"
 
-                          {/* <label
-                            className={`block mb-2 text-green-400 text-left font-bold`}>
-                            Mother / Care Giver
-                          </label> */}
-                          <div className="grid grid-cols-1 gap-3 md:grid-cols-1 mt-3">
-                            <InputText
-                              icons={mdiAccount}
-                              label="Name of Mother/Caregiver"
-                              name="Name_of_Mother_or_Caregiver"
-                              type="text"
-                              placeholder=""
-                              value={values.Name_of_Mother_or_Caregiver}
-                              onBlur={handleBlur} // This apparently updates `touched`?
-                            />
-                          </div>
-                          <label
-                            className={`block mb-2 text-green-400 text-left font-bold mt-3`}>
-                            Child Address
-                          </label>
-                          <div className="z-50 grid grid-cols-1 gap-3 md:grid-cols-4 ">
-                            <Dropdown
-                              className="z-50"
-                              icons={mdiMapMarker}
-                              label="Region"
-                              name="address_region"
-                              value={values.address_region}
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={addressRegions}
-                              affectedInput="address_province"
-                              allValues={values}
-                              functionToCalled={async regionCode => {
-                                if (regionCode) {
-                                  setFieldValue('address_province', '');
-                                  await provincesByCode(regionCode).then(
-                                    province => {
-                                      setProvince(
-                                        province.map(p => {
-                                          return {
-                                            value: p.province_code,
-                                            label: p.province_name
-                                          };
-                                        })
-                                      );
-                                    }
-                                  );
-                                }
-                              }}
-                            />
+                  type="text"
+                  placeholder="Enter your mobile number"
+                  value={values.phone_number}
+                  onBlur={handleBlur}
+                />
+                <TextAreaInput
 
-                            <Dropdown
-                              className="z-50"
-                              icons={mdiMapMarker}
-                              label="Province"
-                              name="address_province"
-                              value={values.address_province}
-                              d
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={addressProvince}
-                              affectedInput="address_city"
-                              functionToCalled={async code => {
-                                if (code) {
-                                  await cities(code).then(cities => {
-                                    setCity(
-                                      cities.map(p => {
-                                        return {
-                                          value: p.city_code,
-                                          label: p.city_name
-                                        };
-                                      })
-                                    );
-                                  });
-                                }
-                              }}
-                            />
-                            <Dropdown
-                              className="z-50"
-                              icons={mdiMapMarker}
-                              label="City"
-                              name="address_city"
-                              // value={values.civilStatus}
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={addressCity}
-                              affectedInput="address_barangay"
-                              functionToCalled={async code => {
-                                if (code) {
-                                  await barangays(code).then(cities => {
-                                    setBarangay(
-                                      cities.map(p => {
-                                        console.log({ p });
-                                        return {
-                                          value: p.brgy_code,
-                                          label: p.brgy_name
-                                        };
-                                      })
-                                    );
-                                  });
-                                }
-                              }}
-                            />
-                            <Dropdown
-                              className="z-50"
-                              icons={mdiMapMarker}
-                              label="Barangay"
-                              name="Address_or_Location"
-                              value={values.Address_or_Location}
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={addressBarangay}
-                              affectedInput=""
-                              functionToCalled={async code => { }}
-                            />
-                          </div>
+                  label="Medical History"
+                  name="medical_history"
 
-                          <label
-                            className={`block mb-2 text-green-400 text-left font-bold`}>
-                            Other Information
-                          </label>
-                          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 ">
-                            <InputText
-                              icons={mdiCalendarRange}
-                              label="Birth Date"
-                              name="Date_of_Birth"
-                              type="date"
-                              placeholder=""
-                              value={values.Date_of_Birth}
-                              onBlur={handleBlur} // This apparently updates `touched`?
-                            />
+                  type="text"
+                  placeholder="Enter medical history details"
+                  value={values.medical_history}
+                  onBlur={handleBlur}
+                />
 
-                            <Dropdown
-                              icons={mdiAccount}
-                              label="Gender"
-                              name="Sex"
-                              placeholder=""
-                              value={values.Sex}
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={[
-                                { value: 'Male', label: 'Male' },
-                                { value: 'Female', label: 'Female' }
-                              ]}
-                            />
-                          </div>
-                          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 ">
-                            <InputText
-                              icons={mdiAccount}
-                              label="Weight (kg)"
-                              name="Weight"
-                              type="number"
-                              placeholder=""
-                              value={values.birthday}
-                              onBlur={handleBlur} // This apparently updates `touched`?
-                            />
-                            <InputText
-                              icons={mdiAccount}
-                              label="Height (cm)"
-                              name="Height"
-                              type="number"
-                              placeholder=""
-                              value={values.age}
-                              onBlur={handleBlur} // This apparently updates `touched`?
-                            />
-                          </div>
+                <div className="flex justify-end">
+                  {!isFromUpdateProfile && <button
+                    type='submit'
+                    onClick={handleSubmit}
+                    className="px-6 py-2 bg-cyan-900 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    Create Account
+                  </button>
+                  }
 
-                          <label
-                            className={`block mb-2 text-green-400 text-left font-bold`}>
-                            Health Information
-                          </label>
-                          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-                            <InputText
-                              icons={mdiAccount}
-                              label="Age In Months"
-                              name="Age_in_Months"
-                              type="number"
-                              placeholder=""
-                              value={values.age}
-                              onBlur={handleBlur} // This apparently updates `touched`?
-                            />
+                  {/* {isFromUpdateProfile && <button
+                    type='submit'
+                    onClick={handleSubmit}
+                    className="px-6 py-2 bg-cyan-900 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    Update
+                  </button>
+                  } */}
 
-                            <Dropdown
-                              icons={mdiAccount}
-                              label="Weight for Age Status"
-                              name="Weight_for_Age_Status"
-                              placeholder=""
-                              value={values.Weight_for_Age_Status}
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={[
-                                { value: 'N', label: 'Normal' },
-                                { value: 'OW', label: 'Overweight' },
-                                { value: 'UW', label: 'Underweight' },
-                                { value: 'SUW', label: 'Severely Underweight' },
-                                { value: 'Ob', label: 'Obese' }
-                              ]}
-                            />
-                            <Dropdown
-                              icons={mdiAccount}
-                              label="Height for Age Status"
-                              name="Height_for_Age_Status"
-                              placeholder=""
-                              value={values.Height_for_Age_Status}
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={[
-                                { value: 'N', label: 'Normal' },
-                                { value: 'St', label: 'Stunted' },
-                                { value: 'SSt', label: 'Severely Stunted' }
-                              ]}
-                            />
-                            <Dropdown
-                              icons={mdiAccount}
-                              label="Weight for Lt/Ht Status"
-                              name="Weight_for_Lt_or_Ht_Status"
-                              placeholder=""
-                              value={values.Weight_for_Lt_or_Ht_Status}
-                              setFieldValue={setFieldValue}
-                              onBlur={handleBlur}
-                              options={[
-                                { value: 'N', label: 'Normal' },
-                                { value: 'MW', label: 'Moderately Wasted' },
-                                { value: 'SW', label: 'Severely Wasted' }
-                              ]}
-                            />
-                          </div>
-                        </Form>
-                      </FormWizard.TabContent>
-                    </FormWizard>
-                  );
-                }}
-              </Formik>
-            </div>
-          </div>
+                </div>
+              </Form>
+            )}
+          </Formik>
         </div>
+
         <ToastContainer />
-      </div>
+
+
+
+      </div >
+
     )
   );
 }

@@ -125,7 +125,7 @@ function Register(funcProps) {
   const id = new URLSearchParams(search).get('userId');
   const userId = id || '';
 
-  console.log({ userId });
+  //console.log({ userId });
   const [selectedUser, setSelectedUser] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const getUser = async () => {
@@ -143,7 +143,7 @@ function Register(funcProps) {
   useEffect(() => {
     dispatch(getFeatureList()).then(result => {
       getUser().then(() => {
-        console.log('loaded__user');
+        //console.log('loaded__user');
         setIsLoaded(true);
       });
     });
@@ -160,9 +160,9 @@ function Register(funcProps) {
         })
       );
     });
-    // await regionByCode('01').then(region => console.log(region.region_name));
+    // await regionByCode('01').then(region => //console.log(region.region_name));
     // await provinces().then(province => {
-    //   console.log({ province });
+    //   //console.log({ province });
     //   setProvince(
     //     province.map(r => {
     //       return {
@@ -183,7 +183,7 @@ function Register(funcProps) {
       );
     });
     // await provinceByName('Rizal').then(province =>
-    //   console.log(province.province_code)
+    //   //console.log(province.province_code)
     // );
     await cities(selectedUser.address_province).then(cities => {
       setCity(
@@ -226,7 +226,7 @@ function Register(funcProps) {
 
         const isExist = res.data.isEmailExist;
 
-        console.log({ isExist });
+        //console.log({ isExist });
         if (isExist) {
           // setEmailError('Email already exists');
           setFieldError('email', 'Email already exists');
@@ -265,8 +265,8 @@ function Register(funcProps) {
     }
   );
 
-  // console.log({ selectedUser: selectedUser.address_region });
-  // console.log({
+  // //console.log({ selectedUser: selectedUser.address_region });
+  // //console.log({
   //   dex: regionByCode(selectedUser.address_region).then(region => region)
   // });
   const formikConfig = () => {
@@ -342,7 +342,7 @@ function Register(funcProps) {
             ).label
           };
 
-          console.log({ memberData });
+          //console.log({ memberData });
           let res = await axios({
             method: 'POST',
             url: `user/${userId}/updateChildInfo`,
@@ -369,7 +369,7 @@ function Register(funcProps) {
 
           // return data;
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }

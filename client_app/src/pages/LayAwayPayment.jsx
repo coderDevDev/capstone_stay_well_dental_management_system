@@ -138,7 +138,7 @@ function LayAwayPayment({ layAwayID }) {
 
 
 
-    console.log({ transactionId, list })
+    //console.log({ transactionId, list })
 
 
     setOrders(list);
@@ -231,7 +231,7 @@ function LayAwayPayment({ layAwayID }) {
   const totalAmountPaid = selectedOrder ? payments.filter(s => ['PAYMENT_FOR_APPROVAL', 'PARTIALLY_PAID', 'PAID'].includes(s.status)).reduce((acc, current) => {
     return acc + parseInt(current.amount)
   }, 0) : 0;
-  console.log({ totalAmountPaid })
+  //console.log({ totalAmountPaid })
 
 
 
@@ -324,7 +324,7 @@ function LayAwayPayment({ layAwayID }) {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -334,7 +334,7 @@ function LayAwayPayment({ layAwayID }) {
 
 
 
-  console.log({ isLoaded })
+  //console.log({ isLoaded })
   return (
     isLoaded && selectedOrder && (
 

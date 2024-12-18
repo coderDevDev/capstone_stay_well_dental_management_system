@@ -70,7 +70,7 @@ const Tab1Content = () => {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
 
-    console.log({ file })
+    //console.log({ file })
     setProfilePhoto(file)
     if (file) {
       const reader = new FileReader();
@@ -86,7 +86,7 @@ const Tab1Content = () => {
   const formikConfig = (selectedEmployee) => {
 
 
-    console.log({ selectedEmployee })
+    //console.log({ selectedEmployee })
     return {
       initialValues: {
         type: selectedEmployee.role,
@@ -123,7 +123,7 @@ const Tab1Content = () => {
             if (profilePhoto) {
               const data = new FormData();
 
-              // console.log({ profilePhoto })
+              // //console.log({ profilePhoto })
               data.append('profilePic', profilePhoto);
               await axios({
                 // headers: {
@@ -186,7 +186,7 @@ const Tab1Content = () => {
 
 
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -222,7 +222,7 @@ const Tab1Content = () => {
               alert('Please fill in the required fields');
             };
 
-            // console.log({ values })
+            // //console.log({ values })
 
             return (
               <Form className="">
@@ -430,7 +430,7 @@ const PricingTab = () => {
             theme: 'light'
           });
         } catch (error) {
-          console.log({ error });
+          //console.log({ error });
         } finally {
         }
       }
@@ -457,7 +457,7 @@ const PricingTab = () => {
             setErrors,
             isSubmitting
           }) => {
-            console.log({ Dex: values })
+            //console.log({ Dex: values })
             const checkValidateTab = () => {
               // submitForm();
             };
@@ -466,7 +466,7 @@ const PricingTab = () => {
               alert('Please fill in the required fields');
             };
 
-            // console.log({ values })
+            // //console.log({ values })
 
             return (
               <Form className="">
@@ -735,7 +735,7 @@ const AccountSettingsTab = () => {
     });
     let result = res.data.data;
 
-    console.log({ result })
+    //console.log({ result })
 
     setActions(result.filter(item => item.name === 'Edit Details' || item.name === 'Password Reset'))
 
@@ -788,7 +788,7 @@ const AccountSettingsTab = () => {
         theme: 'light'
       });
     } catch (error) {
-      console.log({ error });
+      //console.log({ error });
     } finally {
     }
 
@@ -797,7 +797,7 @@ const AccountSettingsTab = () => {
   };
 
 
-  console.log({ actions })
+  //console.log({ actions })
   return (
     <div className="overflow-x-auto shadow-lg">
       <header className="text-center mb-6">
@@ -868,12 +868,12 @@ const RecordManagementTab = () => {
     });
     let result = res.data.data;
 
-    console.log({ result })
+    //console.log({ result })
     const token = checkAuth();
     const decoded = jwtDecode(token);
     let details = result.filter(item => (item.name !== 'Edit Details' && item.name !== 'Password Reset'));
 
-    console.log({ details })
+    //console.log({ details })
     setActions(details)
 
 
@@ -923,7 +923,7 @@ const RecordManagementTab = () => {
         theme: 'light'
       });
     } catch (error) {
-      console.log({ error });
+      //console.log({ error });
     } finally {
     }
 
