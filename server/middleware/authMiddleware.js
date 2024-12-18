@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import config from '../config.js';
 
-console.log(config.JWT_TOKEN_SECRET);
+//console.log(config.JWT_TOKEN_SECRET);
 export const authenticateUserMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];

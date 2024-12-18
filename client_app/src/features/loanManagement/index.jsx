@@ -220,13 +220,11 @@ function LoanApplication() {
       );
     });
     // await regionByCode('01').then(region => //console.log(region.region_name));
-    await provinces().then(province => //console.log(province));
-      // await provincesByCode('01').then(province => //console.log(province));
-      // await provinceByName('Rizal').then(province =>
-      //   //console.log(province.province_code)
-      // );
-      await cities().then(city => //console.log(city));
-        await barangays().then(barangays => //console.log(barangays));
+    await provinces();
+    await provincesByCode('01');
+    await provinceByName('Rizal');
+    await cities().then(city => console.log(city));
+    await barangays().then(barangays => console.log(barangays));
   };
 
   const loanList = async () => {
