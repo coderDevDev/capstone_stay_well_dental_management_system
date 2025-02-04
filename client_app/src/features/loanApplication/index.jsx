@@ -137,7 +137,7 @@ const TopSideButtons = ({ removeFilter, applyFilter, applySearch, myAppointmentL
       )} */}
       <div className="badge badge-neutral mr-2 px-4 p-4 bg-white text-blue-950">Total : {myAppointmentList.length}</div>
 
-      {isEnabled && <button className="btn btn-outline bg-cyan-900 text-white" onClick={() => document.getElementById('addAppointment').showModal()}>
+      {isEnabled && <button className="btn btn-outline bg-blue-700 text-white" onClick={() => document.getElementById('addAppointment').showModal()}>
         Add
         <PlusCircleIcon className="h-6 w-6 text-white-500" />
       </button>

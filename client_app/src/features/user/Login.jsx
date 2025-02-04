@@ -108,120 +108,68 @@ function Login() {
     // <div
 
     <div className="flex flex-col md:flex-row min-h-screen">
-      {/* Left Column for Background Image */}
-      <div className="w-1/2 flex items-center justify-center relative ">
 
-        {/* <TriangleGridBackground /> */}
-        <div className="w-full max-w-md p-8 space-y-6 shadow-lg
-         bg-gradient-to-r from-gray-200 to-gray-300
-          shadow-lg 
-         
-         rounded-lg shadow-lg p-6">
 
-          <h1
-            className="text-xl font-bold leading-tight tracking-tight
-             text-gray-900 md:text-2xl dark:text-white text-center text-blue-950">
-            Login
-          </h1>
-          <div>
+      {/* Login Form - Full Width on Small Screens */}
+      <div className="w-full  flex items-center justify-center bg-gray-100 px-6 md:px-0">
+        <div className="w-full max-w-lg">
+          <div className="flex justify-center -mt-12 mb-6">
+            <img src="/logo.jpg" alt="Logo" className="w-50 h-20 border-4 border-blue-950 shadow-lg p-1" />
+          </div>
+          <div className="p-6 shadow-lg bg-white rounded-lg">
+            <h1 className="text-xl font-bold text-center text-blue-950">Login</h1>
             <Formik {...formikConfig}>
-              {({
-                handleSubmit,
-                handleChange,
-                handleBlur, // handler for onBlur event of form elements
-                values,
-                touched,
-                errors
-              }) => {
-                return (
-                  <Form className="space-y-4 md:space-y-6">
+              {({ handleSubmit, handleBlur, values }) => (
+                <Form className="space-y-4">
+                  <InputText
+                    icons={mdiAccount}
+                    label="Username"
+                    labelColor="text-blue-950"
+                    name="email"
+                    type="text"
+                    value={values.email}
+                    onBlur={handleBlur}
+                  />
+                  <div className="relative">
                     <InputText
-                      icons={mdiAccount}
-                      label="Username"
+                      icons={mdiLockOutline}
                       labelColor="text-blue-950"
-                      name="email"
-                      type="text"
-                      placeholder=""
-                      value={values.email}
-                      onBlur={handleBlur} // This apparently updates `touched`?
+                      label="Password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={values.password}
+                      onBlur={handleBlur}
                     />
-
-                    <div className="relative">
-                      <InputText
-                        icons={mdiLockOutline}
-                        labelColor="text-blue-950"
-                        label="Password"
-                        name="password"
-                        type={showPassword ? "text" : "password"} // Change type based on visibility
-                        value={values.password}
-                        onBlur={handleBlur}
-                      />
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 z-10" // Added z-10
-                      >
-                        {showPassword ? (
-                          <svg className="w-10 h-5 mt-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d={mdiEyeOff} />
-                          </svg>
-                        ) : (
-                          <svg className="w-10 h-5 mt-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d={mdiEye} />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                    <div class="text-right text-blue-950">
-                      <a href="/forgot-password"><span class="text-sm  text-blue-950 inline-block  hover:text-buttonPrimary  hover:underline hover:cursor-pointer transition duration-200">Forgot Password?</span></a></div>
-
                     <button
-                      type="submit"
-                      className={
-                        'btn mt-2 w-full bg-cyan-700 font-bold text-white' +
-                        (loading ? ' loading' : '')
-                      }>
-                      Sign in
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    >
+                      {showPassword ? (
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                          <path d={mdiEyeOff} />
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                          <path d={mdiEye} />
+                        </svg>
+                      )}
                     </button>
-
-                    <div className="text-sm  text-blue-950 dark:text-gray-400 mt-4 text-right">
-                      Don't have an account yet?
-                      <Link to="/register">
-                        <span className="  inline-block  hover:text-primary hover:underline hover:cursor-pointer transition duration-200">
-                          Register
-                        </span>
-                      </Link>
-                    </div>
-                  </Form>
-                );
-              }}
+                  </div>
+                  <button type="submit" className="w-full bg-blue-700 text-white font-bold py-2 rounded">
+                    Sign in
+                  </button>
+                  <div className="text-right text-blue-950 text-sm">
+                    <a href="/forgot-password" className="hover:underline">Forgot Password?</a>
+                  </div>
+                  <div className="text-center text-blue-950 text-sm">
+                    <a href="/register" className="hover:underline">Don't have an account? Register</a>
+                  </div>
+                </Form>
+              )}
             </Formik>
           </div>
         </div>
-      </div>
-      <div className="hidden md:block w-1/2  bg-gradient-to-r from-gray-100 to-teal-400
-      z-10 text-blue-950 border bg-white  relative flex items-center justify-center">
-        {/* Triangle Decorations */}
-
-        {/* Centered Circle with Text */}
-        <div className="relative w-full h-screen ">
-          <div className="absolute top-10 left-10 w-0 h-0 border-l-[50px] border-l-transparent border-b-[100px] border-b-red-500 border-r-[50px] border-r-transparent"></div>
-          <div className="absolute top-1/4 right-20 w-0 h-0 border-l-[60px] border-l-transparent border-b-[120px] border-b-blue-500 border-r-[60px] border-r-transparent"></div>
-          <div className="absolute bottom-16 left-1/3 w-0 h-0 border-l-[70px] border-l-transparent border-b-[140px] border-b-green-500 border-r-[70px] border-r-transparent"></div>
-          <div className="absolute bottom-10 right-10 w-0 h-0 border-l-[40px] border-l-transparent border-b-[80px] border-b-yellow-500 border-r-[40px] border-r-transparent"></div>
-
-          {/* Centered Circle */}
-          <div className="absolute top-1/2 left-1/2 transform 
-          -translate-x-1/2 -translate-y-1/2 bg-cyan-600 text-white w-72 h-72 flex flex-col
-           items-center justify-center text-center clip-hexagon p-10">
-            <h2 className="text-xl font-bold">BOOK YOUR APPOINTMEN NOW</h2>
-            <p className="text-sm mt-2">Get started with your dental care in just a few minutes.</p>
-            <button className="mt-4 bg-white text-cyan-950 py-2 px-6 rounded-full font-bold">
-              Apply Now
-            </button>
-          </div>
-        </div>
-
       </div>
       <ToastContainer />
     </div>

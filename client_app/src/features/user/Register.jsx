@@ -395,11 +395,16 @@ function Register({ isFromUpdateProfile, patientId }) {
   return (
     isLoaded && (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+
         <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
+
+          <div className="flex justify-center mt-4 mb-2">
+            <img src="/logo.jpg" alt="Logo" className="w-50 h-20 border-4 border-blue-950 shadow-lg p-1" />
+          </div>
           {!isFromUpdateProfile && <div className="text-center">
 
 
-            <h1 className="text-2xl font-bold leading-tight text-gray-900 dark:text-white ">
+            <h1 className="text-2xl font-bold leading-tight text-blue-950 dark:text-white ">
               Member Registration
             </h1>
 
@@ -664,7 +669,10 @@ function Register({ isFromUpdateProfile, patientId }) {
                   {!isFromUpdateProfile && <button
                     type='submit'
                     onClick={handleSubmit}
-                    className="px-6 py-2 bg-cyan-900 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    className="w-full bg-blue-700 text-white font-bold py-2 rounded"
+                  >
+
+
                     Create Account
                   </button>
                   }

@@ -233,13 +233,18 @@ function Transactions() {
       {
         Header: 'Full Name',
         accessor: 'full_name',
-        Cell: ({ value }) => <div className="font-bold text-neutral-500">{value}</div>,
+        Cell: ({ value, row }) => {
+
+          let item = row.original;
+          let fullName = `${item.patient_first_name} ${item.patient_last_name}`
+          return <div className="font-bold text-neutral-500">{value || fullName}</div>;
+        }
       },
       {
         Header: 'Email',
         accessor: 'email',
         Cell: ({ value }) => (
-          <div className="text-blue-500 font-bold">
+          <div className="text-blue-900 font-bold">
             <a href={`mailto:${value}`} target="_blank" rel="noopener noreferrer">
               {value}
             </a>

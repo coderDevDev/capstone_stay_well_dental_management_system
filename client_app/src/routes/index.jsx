@@ -12,7 +12,7 @@ const Blank = lazy(() => import('../pages/protected/Blank'));
 
 const Users = lazy(() => import('../pages/protected/Transactions'));
 const Employees = lazy(() => import('../pages/protected/Employees'));
-const Suppliers = lazy(() => import('../pages/protected/Suppliers'));
+// const Suppliers = lazy(() => import('../pages/protected/Suppliers'));
 const Transactions = lazy(() => import('../pages/protected/Transactions_Sales'));
 const Layaway = lazy(() => import('../pages/protected/Layaway'));
 const Settings = lazy(() => import('../pages/protected/Settings'));
@@ -36,6 +36,10 @@ const AddMember = lazy(() => import('../pages/protected/Leads'));
 
 
 const Inventory = lazy(() => import('../pages/protected/Inventory'));
+
+
+const Suppliers = lazy(() => import('../pages/protected/Suppliers'));
+
 
 
 const FAQ = lazy(() => import('../pages/protected/Faq'));
@@ -111,6 +115,11 @@ routes = [
     path: '/inventory',
     component: Inventory
   },
+  {
+    path: '/suppliers-orders',
+    component: Suppliers
+  },
+
   {
     path: '/layaway',
     component: Layaway

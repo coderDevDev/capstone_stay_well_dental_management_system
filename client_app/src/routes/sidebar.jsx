@@ -10,8 +10,16 @@ import {
   DocumentChartBarIcon,
   CogIcon,
   IdentificationIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  ArchiveBoxIcon
 } from '@heroicons/react/24/outline';
+import {
+  Home, Package, Truck, ShoppingCart, UserCheck,
+
+  Banknote
+
+
+} from "lucide-react"
 
 const iconClasses = 'h-6 w-6';
 import { NavLink, Routes, Link, useLocation } from 'react-router-dom';
@@ -60,7 +68,7 @@ const AppRoutes = () => {
       if (role === 'Dentist') {
         newRoutes.push({
           path: '/app/dashboard',
-          icon: <Squares2X2Icon className={iconClasses} />,
+          icon: <Home className={iconClasses} />,
           name: 'Dashboard',
         });
         // newRoutes.push({
@@ -71,7 +79,7 @@ const AppRoutes = () => {
 
         newRoutes.push({
           path: '/app/users',
-          icon: <UsersIcon className={iconClasses} />,
+          icon: <UserCheck className={iconClasses} />,
           name: 'Patients',
         });
 
@@ -83,14 +91,21 @@ const AppRoutes = () => {
 
 
         newRoutes.push({
-          path: '/app/services',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Dental Services',
+          path: '/app/inventory',
+          icon: <Package className={iconClasses} />,
+          name: 'Inventory',
+        });
+
+
+        newRoutes.push({
+          path: '/app/suppliers-orders',
+          icon: <Truck className={iconClasses} />,
+          name: 'Suppliers & Orders',
         });
 
         newRoutes.push({
           path: '/app/payments',
-          icon: <Squares2X2Icon className={iconClasses} />,
+          icon: <Banknote className={iconClasses} />,
           name: 'Payments',
         });
 
@@ -98,11 +113,11 @@ const AppRoutes = () => {
 
 
       if (role === 'Patient') {
-        newRoutes.push({
-          path: '/app/dashboard',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Dashboard',
-        });
+        // newRoutes.push({
+        //   path: '/app/dashboard',
+        //   icon: <Squares2X2Icon className={iconClasses} />,
+        //   name: 'Dashboard',
+        // });
         newRoutes.push({
           path: '/app/profile',
           icon: <Squares2X2Icon className={iconClasses} />,
@@ -113,7 +128,7 @@ const AppRoutes = () => {
         newRoutes.push({
           path: '/app/appointments',
           icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'My Appointments',
+          name: 'Appointments',
         });
         newRoutes.push({
           path: '/app/payments',
@@ -213,7 +228,7 @@ const AppRoutes = () => {
                 end
                 to={route.path}
                 className={({ isActive }) =>
-                  `${isActive ? 'font-bold text-white bg-cyan-700 shadow-2xl' : ''}`
+                  `${isActive ? 'font-bold text-white bg-blue-700 shadow-2xl' : 'font-bold text-gray-700 shadow-1xl'}`
                 }>
                 {route.icon} {route.name}
                 {location.pathname === route.path ? (
