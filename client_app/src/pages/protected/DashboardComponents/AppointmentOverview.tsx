@@ -1,7 +1,60 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { appointmentData } from './mockData';
+// import { appointmentData } from './mockData';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export function AppointmentOverview() {
+  const [appointments, setAppointments] = useState([]);
+
+  const fetchAppointments = async () => {
+    let res = await axios.get('appointment/list', {
+      // customerId: userId,
+      // type: orderType
+    });
+    let list = res.data.data.map(other => {
+      // const phDateStart = addHours(parseISO(other.start), 8);
+      // const phDateEnd = addHours(parseISO(other.end), 8);
+
+      // let options = { timeZone: 'Asia/Manila', timeZoneName: 'long' };
+
+      return {
+        ...other,
+        serviceId: other.service_id,
+        patientId: other.patient_id,
+        start: new Date(other.start),
+        end: new Date(other.end)
+      };
+    });
+    console.log({ list });
+    setAppointments(list);
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+  const appointmentData = [
+    {
+      status: 'Scheduled',
+      count: appointments.filter(a => a.status === 'Confirmed').length,
+      color: 'bg-blue-500'
+    },
+    {
+      status: 'Pending',
+      count: appointments.filter(a => a.status === 'Pending').length,
+      color: 'bg-yellow-500'
+    },
+    {
+      status: 'Completed',
+      count: appointments.filter(a => a.status === 'Completed').length,
+      color: 'bg-green-500'
+    },
+    {
+      status: 'Cancelled',
+      count: appointments.filter(a => a.status === 'Cancelled').length,
+      color: 'bg-red-500'
+    }
+  ];
+
   return (
     <Card>
       <CardHeader>

@@ -1,18 +1,29 @@
 import express from 'express';
 import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 import config from './config.js';
 import loanAdminRoute from './routes/admin/loan.js';
 import appointmentRoute from './routes/appointment.js';
+import servicesRoute from './routes/services.js';
 import userRoute from './routes/userRoute.js';
 import adminRoute from './routes/admin/admin.js';
 import authRoute from './routes/auth.js';
 import bodyParser from 'body-parser';
-
+import inventoryRoutes from './routes/inventory.js';
+import orderRoutes from './routes/orders.js';
+import supplierRoutes from './routes/suppliers.js';
+import employeeRoutes from './routes/employee.js';
+import attendanceRoutes from './routes/attendance.js';
+import roleRoutes from './routes/roles.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import cron from 'node-cron';
+import payrollRoutes from './routes/payroll.js';
+import treatmentRoutes from './routes/treatments.js';
+
 // const { cypherQuerySession } = config;
 // import { mergeUserQuery } from './cypher/child.js';
 // import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +31,40 @@ import cron from 'node-cron';
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 const app = express();
+const httpServer = createServer(app);
+
+// Configure CORS for both Express and Socket.IO
+const corsOptions = {
+  origin: 'http://localhost:5173', // Your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  }
+});
+
+// Make io available globally
+global.io = io;
+
+io.on('connection', socket => {
+  console.log('Client connected:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+
+  socket.on('error', error => {
+    console.error('Socket error:', error);
+  });
+});
+
 // for parsing application/json
 app.use(
   bodyParser.json({
@@ -43,21 +88,50 @@ app.use(
   })
 );
 
-app.use(cors());
 app.use(express.json());
 
 app.use('/api/appointment', appointmentRoute);
+app.use('/api/services', servicesRoute);
 app.use('/api/admin/loan', loanAdminRoute);
-
+app.use('/api/users', userRoute);
 app.use('/api/user', userRoute);
 app.use('/api/admin', adminRoute);
 app.use('/api/auth', authRoute);
 
+app.use('/api', inventoryRoutes);
+app.use('/api', orderRoutes);
+app.use('/api', supplierRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api', attendanceRoutes);
+app.use('/api', roleRoutes);
+app.use('/api/payroll', payrollRoutes);
+app.use('/api/treatments', treatmentRoutes);
 app.use(express.static('public'));
 app.use(express.static('files'));
 
 app.use('/static', express.static('public'));
 
-app.listen(config.port, async () => {
-  console.log(`Hello Server is live`);
+// Schedule daily inventory check at 9 AM
+cron.schedule('0 9 * * *', async () => {
+  try {
+    const [inventory] = await db.query(queries.getAllInventory);
+
+    inventory.forEach(item => {
+      if (item.quantity <= item.min_quantity) {
+        // Emit low stock event
+        global.io.emit('lowStockAlert', {
+          itemId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          minQuantity: item.min_quantity
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error checking inventory levels:', error);
+  }
+});
+
+httpServer.listen(config.port, async () => {
+  console.log(`Server is live`);
 });

@@ -12,7 +12,9 @@ const checkAuth = () => {
     'documentation',
     'myprofile',
     'reset-password',
-    'register'
+    'register',
+    'verify-email',
+    'verify-email-notice'
   ];
 
   const isPublicPage = PUBLIC_ROUTES.some(r =>

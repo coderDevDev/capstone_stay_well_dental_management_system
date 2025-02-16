@@ -11,12 +11,14 @@ import {
   CogIcon,
   IdentificationIcon,
   QuestionMarkCircleIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import {
   Home, Package, Truck, ShoppingCart, UserCheck,
-
-  Banknote
+  PhilippinePeso,
+  Banknote,
+  Calendar
 
 
 } from "lucide-react"
@@ -34,6 +36,8 @@ const AppRoutes = () => {
 
       const token = checkAuth();
       const decoded = jwtDecode(token);
+
+      console.log({ decoded })
       let role = decoded.role;
 
       // //console.log({ decoded })
@@ -65,7 +69,7 @@ const AppRoutes = () => {
 
 
 
-      if (role === 'Dentist') {
+      if (role === 'dentist') {
         newRoutes.push({
           path: '/app/dashboard',
           icon: <Home className={iconClasses} />,
@@ -90,17 +94,42 @@ const AppRoutes = () => {
         });
 
 
+        // newRoutes.push({
+        //   path: '/app/inventory',
+        //   icon: <Package className={iconClasses} />,
+        //   name: 'Inventory',
+        // });
+
+
         newRoutes.push({
-          path: '/app/inventory',
-          icon: <Package className={iconClasses} />,
-          name: 'Inventory',
+          path: '/app/employees',
+          icon: <UserGroupIcon className={iconClasses} />,
+          name: 'Employees',
         });
+
+
+
+        newRoutes.push({
+          path: '/app/attendance',
+          icon: <Calendar className={iconClasses} />,
+          name: 'Attendance',
+        });
+
+
+        newRoutes.push({
+          path: '/app/payroll',
+          icon: <PhilippinePeso className={iconClasses} />,
+          name: 'Payroll',
+        });
+
+
+
 
 
         newRoutes.push({
           path: '/app/suppliers-orders',
           icon: <Truck className={iconClasses} />,
-          name: 'Suppliers & Orders',
+          name: 'Inventory & Suppliers',
         });
 
         newRoutes.push({
@@ -112,12 +141,17 @@ const AppRoutes = () => {
       }
 
 
-      if (role === 'Patient') {
-        // newRoutes.push({
-        //   path: '/app/dashboard',
-        //   icon: <Squares2X2Icon className={iconClasses} />,
-        //   name: 'Dashboard',
-        // });
+      if (role === 'patient') {
+        newRoutes.push({
+          path: '/app/dashboard',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Dashboard',
+        });
+        newRoutes.push({
+          path: '/app/appointments',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Appointments',
+        });
         newRoutes.push({
           path: '/app/profile',
           icon: <Squares2X2Icon className={iconClasses} />,
@@ -125,11 +159,7 @@ const AppRoutes = () => {
         });
 
 
-        newRoutes.push({
-          path: '/app/appointments',
-          icon: <Squares2X2Icon className={iconClasses} />,
-          name: 'Appointments',
-        });
+
         newRoutes.push({
           path: '/app/payments',
           icon: <Squares2X2Icon className={iconClasses} />,
@@ -140,65 +170,6 @@ const AppRoutes = () => {
 
 
 
-
-      if (result.includes('Employees Page')) {
-        newRoutes.push({
-          path: '/app/employees',
-          icon: <IdentificationIcon className={iconClasses} />,
-          name: 'Employees',
-        });
-      }
-      if (result.includes('Inventory')) {
-        newRoutes.push({
-          path: '/app/inventory',
-          icon: <DocumentChartBarIcon className={iconClasses} />,
-          name: 'Inventory',
-        });
-      }
-      if (result.includes("Customer's Record")) {
-        newRoutes.push({
-          path: '/app/users',
-          icon: <UsersIcon className={iconClasses} />,
-          name: 'Customer Record',
-        });
-      }
-      if (result.includes('Transaction History')) {
-        newRoutes.push({
-          path: '/app/transactions',
-          icon: <PresentationChartLineIcon className={iconClasses} />,
-          name: 'Transactions',
-        });
-      }
-      if (result.includes('Layaway')) {
-        newRoutes.push({
-          path: '/app/layaway',
-          icon: <BanknotesIcon className={iconClasses} />,
-          name: 'Lay-away',
-        });
-      }
-      if (result.includes('Supplier Details')) {
-        newRoutes.push({
-          path: '/app/suppliers',
-          icon: <UsersIcon className={iconClasses} />,
-          name: 'Suppliers',
-        });
-      }
-
-
-      // newRoutes.push({
-      //   path: '/app/faq',
-      //   icon: <QuestionMarkCircleIcon className={iconClasses} />,
-      //   name: 'FAQ',
-      // });
-
-      if (result.includes('Settings') && role === 'super_admin') {
-        newRoutes.push({
-          path: '/app/settings',
-          icon: <CogIcon className={iconClasses} />,
-          name: 'Settings',
-        });
-
-      }
 
 
       setRoutes(newRoutes);

@@ -11,7 +11,10 @@ const Page404 = lazy(() => import('../pages/protected/404'));
 const Blank = lazy(() => import('../pages/protected/Blank'));
 
 const Users = lazy(() => import('../pages/protected/Transactions'));
-const Employees = lazy(() => import('../pages/protected/Employees'));
+const Employees = lazy(() => import('../app/employees/page'));
+const Attendance = lazy(() => import('../app/attendance/page'));
+const Payroll = lazy(() => import('../app/payroll/page'));
+const DentalTreatment = lazy(() => import('../app/dental-treatment/page'));
 // const Suppliers = lazy(() => import('../pages/protected/Suppliers'));
 const Transactions = lazy(() => import('../pages/protected/Transactions_Sales'));
 const Layaway = lazy(() => import('../pages/protected/Layaway'));
@@ -35,7 +38,7 @@ const AddMember = lazy(() => import('../pages/protected/Leads'));
 
 
 
-const Inventory = lazy(() => import('../pages/protected/Inventory'));
+const Inventory = lazy(() => import('@/app/inventory-supplier/page'));
 
 
 const Suppliers = lazy(() => import('../pages/protected/Suppliers'));
@@ -43,13 +46,15 @@ const Suppliers = lazy(() => import('../pages/protected/Suppliers'));
 
 
 const FAQ = lazy(() => import('../pages/protected/Faq'));
-const LoanApplication = lazy(() => import('../pages/protected/LoanApplication'));
+const Appointments = lazy(() => import('../pages/protected/Appointments'));
 const LoanManagement = lazy(() => import('../pages/protected/LoanManagement'));
 
 const LoanDetails = lazy(() => import('../pages/protected/LoanDetails'));
 const token = checkAuth();
 
 const decoded = jwtDecode(token);
+
+const VerifyEmailNotice = lazy(() => import('../app/verify-email-notice/page'));
 
 let routes = [];
 
@@ -117,7 +122,7 @@ routes = [
   },
   {
     path: '/suppliers-orders',
-    component: Suppliers
+    component: Inventory
   },
 
   {
@@ -139,7 +144,7 @@ routes = [
 
   {
     path: '/appointments',
-    component: LoanApplication
+    component: Appointments
   },
 
   {
@@ -151,7 +156,29 @@ routes = [
     component: LoanDetails
   },
 
+  {
+    path: '/profile',
+    component: ProfileSettings
+  },
 
+  {
+    path: '/attendance',
+    component: Attendance
+  },
+  {
+    path: '/payroll',
+    component: Payroll
+  },
+
+  {
+    path: '/verify-email-notice',
+    component: VerifyEmailNotice
+  },
+
+  {
+    path: '/payments',
+    component: DentalTreatment
+  },
 ];
 
 

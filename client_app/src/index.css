@@ -9,3 +9,6 @@
 .radix-dialog-overlay {
   background-color: rgba(0, 0, 0, 0.5); /* Adjust the opacity */
 }
+.radix-popover-content {
+  background-color: white;
+}

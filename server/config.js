@@ -48,11 +48,11 @@ try {
     // });
 
     const pool = await mysql.createPool({
-      host: 'jcqlf1.stackhero-network.com',
+      host: '127.0.0.1',
       user: 'root',
-      password: 'OwhHbxDtBwsDB9VlClLwfkzw9MTBr70m',
-      database: 'dental_management_system',
-      port: 4300,
+      password: 'password',
+      database: 'dental_clinic',
+      port: 3306,
       waitForConnections: true,
       connectionLimit: 0, // Max number of connections in the pool
       queueLimit: 0,
@@ -110,5 +110,5 @@ export default {
   defaultDBName: 'neo4j',
   mySqlDriver: mySqlDriver,
   firebaseStorage,
-  REACT_FRONT_END_URL: 'https://www.avdeasisjewelry.com'
+  REACT_FRONT_END_URL: 'http://localhost:5173'
 };

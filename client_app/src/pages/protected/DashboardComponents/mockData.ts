@@ -2,7 +2,7 @@ export const dentalStats = [
   { title: 'Total Patients', value: 1234, icon: 'Users' },
   { title: 'Appointments Today', value: 28, icon: 'Calendar' },
   { title: 'New Patients (This Month)', value: 56, icon: 'UserPlus' },
-  { title: 'Revenue (This Month)', value: '₱45,678', icon: 'DollarSign' }
+  { title: 'Revenue (This Month)', value: '$45,678', icon: 'PesoSign' }
 ];
 
 export const appointmentData = [
@@ -56,4 +56,25 @@ export const recentActivities = [
     time: '4 hours ago',
     icon: 'Bell'
   }
+];
+
+export const dentalServices = [
+  'Dental Cleaning',
+  'Cavity Filling',
+  'Root Canal',
+  'Tooth Extraction',
+  'Dental Crown',
+  'Dental Implant',
+  'Teeth Whitening',
+  'Orthodontic Treatment',
+  'Dental Bridge',
+  'Gum Surgery'
+];
+
+export const dentists = [
+  'Dr. Emma Smith',
+  'Dr. Liam Johnson',
+  'Dr. Olivia Williams',
+  'Dr. Noah Brown',
+  'Dr. Ava Jones'
 ];

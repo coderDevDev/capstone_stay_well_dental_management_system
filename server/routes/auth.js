@@ -15,56 +15,105 @@ import {
   authenticateUserMiddleware,
   auditTrailMiddleware
 } from '../middleware/authMiddleware.js';
-router.post('/login', async (req, res, next) => {
-  const email = req.body.email;
-  const password = req.body.password;
 
+router.post('/login', async (req, res) => {
   try {
-    // Connect to the database
-
-    // Query the user by email
-    const [rows] = await mySqlDriver.execute(
+    const { email, password } = req.body;
+    // Query the user by email and join with roles table
+    const [user] = await mySqlDriver.execute(
       `
-      SELECT u.*, u.role AS role_name
+      SELECT u.*, r.role_name 
       FROM users u
-      WHERE u.email = ?;
-
-  `,
+      JOIN roles r ON u.role_id = r.role_id
+      WHERE u.email = ?
+      `,
       [email]
     );
 
-    console.log({ rows });
-
-    // Check if user exists
-    if (rows.length === 0) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+    if (!user[0]) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
     }
 
-    const user = rows[0];
+    // Check if email is verified
+    if (!user[0].is_verified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email before logging in',
+        needsVerification: true
+      });
+    }
 
-    // Compare the password with the hash
-    const isPasswordValid = password === user.password;
+    // Compare hashed password
+    const isPasswordValid = password === user[0].password;
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
     }
 
-    // Generate JWT token
-    const accessToken = generateAccessToken(user);
+    // Fetch role-specific details
+    let roleDetails = {};
 
-    console.log({ accessToken });
+    switch (user[0].role_name) {
+      case 'admin':
+        [roleDetails] = await mySqlDriver.execute(
+          `SELECT * FROM admins WHERE user_id = ?`,
+          [user[0].user_id]
+        );
+        break;
+      case 'dentist':
+        [roleDetails] = await mySqlDriver.execute(
+          `SELECT * FROM dentists WHERE user_id = ?`,
+          [user[0].user_id]
+        );
+        break;
+      case 'secretary':
+        [roleDetails] = await mySqlDriver.execute(
+          `SELECT * FROM secretaries WHERE user_id = ?`,
+          [user[0].user_id]
+        );
+        break;
+      case 'patient':
+        [roleDetails] = await mySqlDriver.execute(
+          `SELECT * FROM patients WHERE user_id = ?`,
+          [user[0].user_id]
+        );
+        break;
+    }
 
-    // Send response with token
+    // Generate JWT token with role information
+    const tokenPayload = {
+      user_id: user[0].user_id,
+      email: user[0].email,
+      role: user[0].role_name,
+      role_id: user[0].role_id,
+      ...roleDetails[0]
+    };
 
+    const accessToken = generateAccessToken(tokenPayload);
+
+    // Send response
     res.json({
       success: true,
       token: accessToken,
       data: {
-        ...user
+        user_id: user[0].user_id,
+        email: user[0].email,
+        role: user[0].role_name,
+        role_id: user[0].role_id,
+        ...roleDetails[0]
       }
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'An error occurred during login'
+    });
   }
 });
 

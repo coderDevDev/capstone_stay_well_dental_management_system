@@ -7,7 +7,7 @@ function InternalPage() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setPageTitle({ title: 'Profile' }));
+    dispatch(setPageTitle({ title: 'User Profile' }));
   }, []);
 
   return <ProfileSettings />;

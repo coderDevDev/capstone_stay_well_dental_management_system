@@ -58,8 +58,8 @@ function LeftSidebar() {
         />
       </div> */}
       <div className=" mx-auto flex items-center justify-center mb-8 mt-4">
-        <div className="flex justify-center mb-6">
-          <img src="/logo.jpg" alt="Logo" className="w-50 h-20 border-4 border-blue-950 shadow-lg p-1" />
+        <div className="flex justify-center mb-4">
+          <img src="/logo.jpg" alt="Logo" className="w-50 h-20 border-4 border-blue-950 shadow-lg p-0 rounded-lg" />
         </div>
       </div>
       <ul className="menu  text-white items-center justify-between mx-auto ">

@@ -158,6 +158,7 @@ export default function SupplierOrderManagement() {
         <CardContent>
           <Tabs defaultValue="suppliers" className="mb-6">
             <TabsList className="mb-4">
+              <TabsTrigger value="inventory">Inventory</TabsTrigger>
               <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
               <TabsTrigger value="orders">Orders</TabsTrigger>
             </TabsList>

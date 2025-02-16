@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useEffect, useState, useMemo, useRef, lazy } from 'react';
+import React, { useEffect, useState, useMemo, useRef, lazy, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showNotification } from '../common/headerSlice';
 import TitleCard from '../../components/Cards/TitleCard';
@@ -13,18 +13,26 @@ import ViewColumnsIcon from '@heroicons/react/24/outline/EyeIcon';
 import PlusCircleIcon from '@heroicons/react/24/outline/PlusCircleIcon';
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
 import { format, formatDistance, formatRelative, subDays } from 'date-fns';
-
+import { PencilIcon } from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from '@/components/ui/card';
 import {
   setAppSettings,
   getFeatureList
 } from '../settings/appSettings/appSettingsSlice';
-
-import Table, {
-  AvatarCell,
-  SelectColumnFilter,
-  StatusPill,
-  DateCell
-} from '../../pages/protected/DataTables/Table'; // new
+import { cn } from '@/lib/utils';
+// import Table, {
+//   AvatarCell,
+//   SelectColumnFilter,
+//   StatusPill,
+//   DateCell
+// } from '../../pages/protected/DataTables/Table'; // new
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -36,438 +44,355 @@ import Dropdown from '../../components/Input/Dropdown';
 import { Formik, useField, useFormik, Form } from 'formik';
 import * as Yup from 'yup';
 import { QRCodeSVG } from 'qrcode.react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import RegisterPage from '@/app/register/page';
+import {
+  regions,
+  provinces,
+  cities,
+  barangays
+} from 'select-philippines-address';
+
+import {
+  Filter,
+  SortAsc,
+  SortDesc,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Plus,
+  RefreshCw, UserSearch, User, Clock, FilterX, Edit2, Trash2, Eye
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
 const Register = lazy(() => import('./../../pages/Register'));
 
-const TopSideButtons = ({ removeFilter, applyFilter, applySearch, users }) => {
-  const [filterParam, setFilterParam] = useState('');
-  const [searchText, setSearchText] = useState('');
 
-  const locationFilters = [''];
-
-  const showFiltersAndApply = params => {
-    applyFilter(params);
-    setFilterParam(params);
-  };
-
-  const removeAppliedFilter = () => {
-    removeFilter();
-    setFilterParam('');
-    setSearchText('');
-  };
-
-  useEffect(() => {
-    if (searchText === '') {
-      removeAppliedFilter();
-    } else {
-      applySearch(searchText);
-    }
-  }, [searchText]);
-  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-  return (
-    <div className="inline-block float-right">
-      {/* <SearchBar
-        searchText={searchText}
-        styleClass="mr-4"
-        setSearchText={setSearchText}
-      />
-      {filterParam != '' && (
-        <button
-          onClick={() => removeAppliedFilter()}
-          className="btn btn-xs mr-2 btn-active btn-ghost normal-case">
-          {filterParam}
-          <XMarkIcon className="w-4 ml-2" />
-        </button>
-      )} */}
-      <div className="badge badge-neutral mr-2 px-4 p-4 bg-white text-blue-950">Total: {users.length}</div>
-      {/* 
-      <button className="btn btn-outline" onClick={() => document.getElementById('addCustomer').showModal()}>
-        
-        <PlusCircleIcon className="h-6 w-6 text-white-500" />
-      </button> */}
-
-      {/* 
-      <button
-        className="btn ml-2 font-bold bg-yellow-500 text-white"
-        onClick={() => document.getElementById('my_modal_1').showModal()}>
-        Import from file
-        <PlusCircleIcon className="h-6 w-6 text-white-500" />
-      </button> */}
-
-      {/* <div className="dropdown dropdown-bottom dropdown-end">
-        <label tabIndex={0} className="btn btn-sm btn-outline">
-          <FunnelIcon className="w-5 mr-2" />
-          Filter
-        </label>
-        <ul
-          tabIndex={0}
-          className="z-40 dropdown-content menu p-2 text-sm shadow bg-base-100 rounded-box w-52">
-          {locationFilters.map((l, k) => {
-            return (
-              <li key={k}>
-                <a onClick={() => showFiltersAndApply(l)}>{l}</a>
-              </li>
-            );
-          })}
-          <div className="divider mt-0 mb-0"></div>
-          <li>
-            <a onClick={() => removeAppliedFilter()}>Remove Filter</a>
-          </li>
-        </ul>
-      </div> */}
-    </div>
-  );
-};
 
 function Transactions() {
   const qrCodeRef = useRef();
-  const downloadQRCode = () => {
-    // Create a canvas element to convert SVG to image  
-    const canvas = document.createElement('canvas');
-    const size = 200; // size of the QR code  
-    canvas.width = size;
-    canvas.height = size;
 
-    // Get the SVG data  
-    const svg = qrCodeRef.current.querySelector('svg'); // Adjust to get the SVG element  
-    const svgData = new XMLSerializer().serializeToString(svg);
-
-    // Convert SVG to data URL  
-    const img = new Image();
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-
-    img.onload = () => {
-      // Draw the image on the canvas  
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, size, size);
-      URL.revokeObjectURL(url); // Clean up the URL object  
-
-      // Trigger the download of the image  
-      const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png'); // Convert to png  
-      link.download = 'qrcode.png'; // Set the file name  
-      link.click(); // Simulate a click to trigger download  
-    };
-
-    // Set the src of the image to the URL created from SVG blob  
-    img.src = url;
-  };
   const [file, setFile] = useState(null);
-  const [users, setUser] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [patients, setPatients] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [activeChildID, setactiveChildID] = useState('');
   const [viewedUser, setviewedUser] = useState({});
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const fetchUsers = async () => {
-    let res = await axios({
-      method: 'get',
-      url: 'user/patients/all',
-      data: {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(8);
+  const [sortConfig, setSortConfig] = useState({
+    key: 'patient_id',
+    direction: 'desc'
+  });
+  const [filters, setFilters] = useState({
+    search: '',
+    gender: 'all',
+    ageRange: 'all',
+    dateRange: 'all',
+    region: 'all'
+  });
 
-      }
-    });
-
-    let list = res.data.data;
-    setUser(list);
+  const fetchPatients = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axios.get('user/patients/all');
+      setPatients(res.data.data);
+    } catch (error) {
+      toast.error('Failed to fetch patients');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   useEffect(() => {
-    dispatch(getFeatureList()).then(result => {
-      fetchUsers();
-      setIsLoaded(true);
-    });
+    fetchPatients();
   }, []);
 
-  const appSettings = useSelector(state => state.appSettings);
-  let { codeTypeList, packageList } = appSettings;
+  const filterPatients = (data) => {
+    return data.filter(patient => {
+      const searchFields = [
+        patient.full_name,
+        patient.email,
+        patient.phone_number,
+        patient.medical_history
+      ].join(' ').toLowerCase();
 
-  const removeFilter = async () => {
-    // let res = await axios({
-    //   method: 'POST',
-    //   url: 'user/getChildrenList',
-    //   data: {
-    //     sponsorIdNumber: ''
-    //   }
-    // });
-    // let list = res.data.data;
+      const matchesSearch = !filters.search ||
+        searchFields.includes(filters.search.toLowerCase());
 
-    // //console.log({ list });
-    // setUser(list);
-  };
+      const matchesGender = !filters.gender ||
+        filters.gender === 'all' ||
+        patient.gender === filters.gender;
 
-  const applyFilter = params => {
-    let filteredUsers = users.filter(t => {
-      return t.address === params;
+      const matchesAgeRange = !filters.ageRange ||
+        filters.ageRange === 'all' ||
+        (() => {
+          const age = parseInt(patient.age);
+          switch (filters.ageRange) {
+            case '0-18': return age >= 0 && age <= 18;
+            case '19-30': return age >= 19 && age <= 30;
+            case '31-50': return age >= 31 && age <= 50;
+            case '51+': return age >= 51;
+            default: return true;
+          }
+        })();
+
+      const matchesRegion = !filters.region ||
+        filters.region === 'all' ||
+        patient.address_region === filters.region;
+
+      return matchesSearch && matchesGender &&
+        matchesAgeRange && matchesRegion;
     });
-    setUser(filteredUsers);
   };
 
-  // Search according to name
-  const applySearch = value => {
-    let filteredUsers = users.filter(t => {
-      return (
-        t.email.toLowerCase().includes(value.toLowerCase()) ||
-        t.firstName.toLowerCase().includes(value.toLowerCase()) ||
-        t.lastName.toLowerCase().includes(value.toLowerCase())
-      );
+  const sortPatients = (data) => {
+    if (!sortConfig.key) return data;
+
+    return [...data].sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      if (sortConfig.key === 'full_name') {
+        aValue = `${a.patient_first_name} ${a.patient_last_name}`;
+        bValue = `${b.patient_first_name} ${b.patient_last_name}`;
+      }
+
+      if (sortConfig.key === 'date_of_birth') {
+        aValue = new Date(a.date_of_birth);
+        bValue = new Date(b.date_of_birth);
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
     });
-    setUser(filteredUsers);
   };
 
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(' ');
-  }
+  const getPaginatedData = () => {
+    const filteredData = filterPatients(patients);
+    const sortedData = sortPatients(filteredData);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return {
+      currentItems: sortedData.slice(startIndex, startIndex + itemsPerPage),
+      totalItems: filteredData.length,
+      totalPages: Math.ceil(filteredData.length / itemsPerPage)
+    };
+  };
 
-  // //console.log(users);
-  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  const { currentItems, totalItems, totalPages } = getPaginatedData();
+
+  const handleResetFilters = () => {
+    setFilters({
+      search: '',
+      gender: 'all',
+      ageRange: 'all',
+      dateRange: 'all',
+      region: 'all'
+    });
+    setCurrentPage(1);
+  };
+
+  const AddressDisplay = (row) => {
+    const [addressNames, setAddressNames] = useState({
+      region: '',
+      province: '',
+      city: '',
+      barangay: ''
+    });
+    const [isLoading, setIsLoading] = useState(true);
+    console.log({ row })
+    if (!row.original) return null;
+    console.log(row);
+    const {
+      address_region,
+      address_province,
+      address_city,
+      address_or_location
+    } = row.original;
+
+    const loadAddressNames = useCallback(async () => {
+      try {
+        setIsLoading(true);
+        const [regionsList, provincesList, citiesList, barangaysList] = await Promise.all([
+          regions(),
+          address_region ? provinces(address_region) : [],
+          address_province ? cities(address_province) : [],
+          address_city ? barangays(address_city) : []
+        ]);
+
+        const names = {
+          region: regionsList.find(r => r.region_code === address_region)?.region_name || '',
+          province: provincesList.find(p => p.province_code === address_province)?.province_name || '',
+          city: citiesList.find(c => c.city_code === address_city)?.city_name || '',
+          barangay: barangaysList.find(b => b.brgy_code === address_or_location)?.brgy_name || ''
+        };
+
+        setAddressNames(names);
+      } catch (error) {
+        console.error('Error loading address names:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }, [address_region, address_province, address_city, address_or_location]);
+
+    useEffect(() => {
+      loadAddressNames();
+    }, [loadAddressNames]);
+
+    if (isLoading) {
+      return <div className="text-neutral-500">Loading address...</div>;
+    }
+
+    return (
+      <div className="text-neutral-500">
+        {addressNames.barangay && <p>{addressNames.barangay}</p>}
+        <p>
+          {[addressNames.city, addressNames.province, addressNames.region]
+            .filter(Boolean)
+            .join(', ')}
+        </p>
+      </div>
+    );
+  };
+
   const columns = useMemo(
     () => [
       {
-        Header: 'Patient ID',
-        accessor: 'patient_id',
-        Cell: ({ value }) => <span>{value}</span>,
+        key: 'full_name',
+        label: 'Full Name',
+        sortable: true
       },
       {
-        Header: 'Full Name',
-        accessor: 'full_name',
-        Cell: ({ value, row }) => {
-
-          let item = row.original;
-          let fullName = `${item.patient_first_name} ${item.patient_last_name}`
-          return <div className="font-bold text-neutral-500">{value || fullName}</div>;
-        }
+        key: 'email',
+        label: 'Email',
+        sortable: true
       },
       {
-        Header: 'Email',
-        accessor: 'email',
-        Cell: ({ value }) => (
-          <div className="text-blue-900 font-bold">
-            <a href={`mailto:${value}`} target="_blank" rel="noopener noreferrer">
-              {value}
-            </a>
-          </div>
-        ),
+        key: 'phone_number',
+        label: 'Phone Number',
+        sortable: true
+      },
+      // {
+      //   key: 'address',
+      //   label: 'Address',
+      //   sortable: false
+      // },
+      {
+        key: 'date_of_birth',
+        label: 'Date of Birth',
+        sortable: true
       },
       {
-        Header: 'Phone Number',
-        accessor: 'phone_number',
-        Cell: ({ value }) => (
-          <div className="font-bold text-neutral-500">{value}</div>
-        ),
+        key: 'age',
+        label: 'Age',
+        sortable: true
       },
       {
-        Header: 'Address',
-        accessor: 'address',
-        Cell: ({ row }) => {
-          const { address, address_region, address_province, address_city, address_or_location } =
-            row.original;
-          return (
-            <div className="text-neutral-500">
-              <p>{address}</p>
-              <p>
-                {address_city}, {address_province}, {address_region}
-              </p>
-              <p>{address_or_location}</p>
-            </div>
-          );
-        },
+        key: 'gender',
+        label: 'Gender',
+        sortable: true
       },
       {
-        Header: 'Date of Birth',
-        accessor: 'date_of_birth',
-        Cell: ({ value }) => {
-          const formattedDate = value
-            ? format(new Date(value), 'MMM dd, yyyy')
-            : 'N/A';
-          return <div className="font-bold text-neutral-500">{formattedDate}</div>;
-        },
+        key: 'medical_history',
+        label: 'Medical History',
+        sortable: false
       },
       {
-        Header: 'Age',
-        accessor: 'age',
-        Cell: ({ value }) => <div className="font-bold text-neutral-500">{value}</div>,
-      },
-      {
-        Header: 'Gender',
-        accessor: 'gender',
-        Cell: ({ value }) => (
-          <div className="font-bold text-neutral-500">{value}</div>
-        ),
-      },
-      {
-        Header: 'Medical History',
-        accessor: 'medical_history',
-        Cell: ({ value }) => (
-          <div className="text-neutral-500">{value || 'None'}</div>
-        ),
-      },
-      {
-        Header: 'Actions',
-        accessor: '',
-        Cell: ({ row }) => {
-          const patient = row.original;
-
-
-          const [isModalOpen, setIsModalOpen] = useState(false);
-
-          const handleConfirm = async (updateStatus) => {
-            // Handle confirmation action here
-
-
-            try {
-
-              // let res = await axios({
-              //   method: 'put',
-              //   url: `appointment/update`,
-              //   data: { ...appointment, status: updateStatus }
-              // })
-
-
-              // await getAppointmentList();
-
-              toast.success(`Deleted Successfully`, {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'light'
-              });
-            } catch (error) {
-              console.log(error)
-              toast.error(`Something went wrong`, {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'light'
-              });
-            } finally {
-              console.log('Confirmed!');
-              setIsModalOpen(false);
-
-            }
-
-          };
-
-
-          const [isOpen, setIsOpen] = useState(false);
-
-          const toggleModal = () => {
-
-            console.log("Dex")
-            setIsOpen(!isOpen);
-          };
-
-          return (
-            <div className="flex">
-
-              <button
-                className="btn btn-outline btn-sm ml-2"
-                onClick={toggleModal}
-              >
-                <i className="fa-solid fa-edit"></i>
-              </button>
-
-              <button
-                className="btn btn-outline btn-sm ml-2"
-
-                onClick={() => {
-
-                  setIsModalOpen(true)
-                  // setSelectedAppointment(appointment);
-                  // document.getElementById('viewAppointment').showModal();
-                }}
-
-
-              >
-                <i className="fa-solid fa-trash"></i>
-              </button>
-              {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                  <div className="bg-white w-11/12 lg:w-3/4 xl:w-2/3 p-6 rounded-lg shadow-lg overflow-y-auto max-h-screen">
-                    {/* Modal Header */}
-                    <div className="flex justify-between items-center border-b pb-3">
-                      <h2 className="text-xl font-semibold">Patient Details</h2>
-                      <button
-                        className="text-gray-500 hover:text-gray-700"
-                        onClick={toggleModal}
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    {/* Modal Content */}
-                    <div className="mt-4">
-                      <Register
-
-                        isFromUpdateProfile={true}
-                        patientId={patient}
-
-                      />
-                    </div>
-
-                    {/* Modal Footer */}
-                    {/* <div className="flex justify-end mt-6">
-                      <button
-                        className="px-4 py-2 text-white bg-gray-600 rounded hover:bg-gray-700 mr-2"
-                        onClick={toggleModal}
-                      >
-                        Cancel
-                      </button>
-                      <button className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-                        Confirm
-                      </button>
-                    </div> */}
-                  </div>
-                </div>
-              )}
-
-              {
-                isModalOpen && (
-                  <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
-                    <div className="modal modal-open">
-                      <div className="modal-box">
-                        <h2 className="text-lg font-bold mb-4">Delete Patient</h2>
-                        <p>Do you want to delete this patient?</p>
-                        <div className="modal-action">
-                          <button className="btn" onClick={() => {
-                            setIsModalOpen(false)
-                          }}>
-                            Cancel
-                          </button>
-                          <button className="btn btn-success bg-red-500 text-white" onClick={() => {
-                            handleConfirm()
-                          }}>
-                            Confirm
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              }
-
-
-            </div>
-          );
-        },
-      },
+        key: 'actions',
+        label: 'Actions',
+        sortable: false
+      }
     ],
     []
   );
 
+  const handleEdit = (user) => {
+    const formData = {
+      firstName: user.patient_first_name,
+      middleName: user.middle_name || '',
+      lastName: user.patient_last_name,
+      email: user.email,
+      phoneNumber: user.phone_number,
+      dateOfBirth: user.date_of_birth ? new Date(user.date_of_birth).toISOString().split('T')[0] : '',
+      gender: user.gender,
+      region: user.address_region || '',
+      province: user.address_province || '',
+      city: user.address_city || '',
+      barangay: user.address_or_location || '',
+      medicalHistory: user.medical_history || '',
+      password: '',
+      confirmPassword: ''
+    };
+
+    setviewedUser({
+      ...user,
+      formData,
+      address_region: user.address_region,
+      address_province: user.address_province,
+      address_city: user.address_city,
+      address_or_location: user.address_or_location
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDelete = async (patientId) => {
+    if (window.confirm('Are you sure you want to delete this patient?')) {
+      try {
+        await axios.delete(`user/patients/${patientId}`);
+        toast.success('Patient deleted successfully');
+        fetchPatients();
+      } catch (error) {
+        console.error('Delete error:', error);
+        toast.error(error.response?.data?.message || 'Failed to delete patient');
+      }
+    }
+  };
+
+  const handleUpdate = async (values) => {
+    try {
+      const response = await axios.put(`user/patients/${viewedUser.patient_id}`, values);
+      if (response.data.success) {
+        toast.success('Patient updated successfully');
+        setIsEditDialogOpen(false);
+        fetchPatients();
+      } else {
+        throw new Error(response.data.message || 'Update failed');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update patient');
+    }
+  };
 
   const handleOnChange = e => {
-    //console.log(e.target.files[0]);
     setFile(e.target.files[0]);
   };
 
@@ -479,16 +404,13 @@ function Transactions() {
       const data = new FormData();
       data.append('file', file);
       let res = await axios({
-        // headers: {
-        //   'content-type': 'multipart/form-data'
-        // },
         method: 'POST',
         url: 'user/uploadFile',
         data
       });
 
       setIsSubmitting(false);
-      fetchUsers();
+      fetchPatients();
       toast.success(`Uploaded Successfully`, {
         position: 'top-right',
         autoClose: 3000,
@@ -515,7 +437,6 @@ function Transactions() {
     }
   };
 
-
   const formikConfig = () => {
     return {
       initialValues: {
@@ -523,7 +444,6 @@ function Transactions() {
         Facebook: '',
         Contact: '',
         Address: ''
-
       },
       validationSchema: Yup.object({
         CustomerName: Yup.string().required('Required'),
@@ -537,16 +457,13 @@ function Transactions() {
         setSubmitting(true);
 
         try {
-
-
-
           let res = await axios({
             method: 'POST',
             url: 'user/create',
             data: values
           })
           document.getElementById('addCustomer').close();
-          await fetchUsers();
+          await fetchPatients();
           resetForm();
           toast.success('Customer successfully added!', {
             onClose: () => {
@@ -562,10 +479,7 @@ function Transactions() {
             progress: undefined,
             theme: 'light'
           });
-
-
         } catch (error) {
-          //console.log({ error });
         } finally {
         }
       }
@@ -578,7 +492,6 @@ function Transactions() {
         Facebook: viewedUser.Facebook || '',
         Contact: viewedUser.Contact || '',
         Address: viewedUser.Address || ''
-
       },
       validationSchema: Yup.object({
         CustomerName: Yup.string().required('Required'),
@@ -592,9 +505,6 @@ function Transactions() {
         setSubmitting(true);
 
         try {
-
-
-
           let res = await axios({
             method: 'put',
             url: `user/${activeChildID}`,
@@ -602,7 +512,7 @@ function Transactions() {
           })
           document.getElementById('updateCustomer').close();
           setviewedUser({})
-          await fetchUsers();
+          await fetchPatients();
           resetForm();
           toast.success('Customer successfully updated!', {
             onClose: () => {
@@ -618,356 +528,535 @@ function Transactions() {
             progress: undefined,
             theme: 'light'
           });
-
-
         } catch (error) {
-          //console.log({ error });
         } finally {
         }
       }
     };
   };
 
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  const handleViewTreatment = (patient) => {
+    navigate(`/patients/${patient.patient_id}/treatments`);
+  };
+
+  const handleAdd = async (formData) => {
+    try {
+      const response = await userService.register(formData);
+      if (response.success) {
+        toast.success('Patient added successfully');
+        fetchPatients();
+        setIsAddDialogOpen(false);
+      } else {
+        throw new Error(response.message || 'Failed to add patient');
+      }
+    } catch (error) {
+      toast.error(error.message || 'An error occurred');
+    }
+  };
+
   return (
-    isLoaded && (
-      <TitleCard
-        title="List"
-        topMargin="mt-2"
-        TopSideButtons={
-          <TopSideButtons
-            applySearch={applySearch}
-            applyFilter={applyFilter}
-            removeFilter={removeFilter}
-            users={users}
-          />
-        }>
-        <div className="">
-          <Table
-            style={{ overflow: 'wrap' }}
-            className="table-sm"
-            columns={columns}
-            data={(users || []).map(data => {
-              return {
-                ...data
-                // fullName,
-                // address: fullAddress,
-                // packageDisplayName: aP && aP.displayName,
-                // date_created:
-                //   data.date_created &&
-                //   format(data.date_created, 'MMM dd, yyyy hh:mm:ss a')
-              };
-            })}
-            searchField="lastName"
-          />
-        </div>
-        <form onSubmit={handleSubmit}>
-          <dialog id="my_modal_1" className="modal">
-            <div className="modal-box">
-              <h3 className="font-bold text-lg">Upload Excel File</h3>
-              {/* <p className="py-4">Pick a file</p> */}
+    <div className="container mx-auto py-6 space-y-6">
+      <Card className="bg-white">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Patient Management</CardTitle>
+              <CardDescription>Manage your patient records</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between mb-4">
 
-              {isSubmitting && (
-                <div
-                  class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mt-2"
-                  role="alert">
-                  <p class="font-bold">Please wait</p>
-                  <p>Uploading ...</p>
-                </div>
-              )}
+          </div>
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="bg-blue-50 text-blue-700 rounded-md px-3 py-1.5 text-sm font-medium">
+                Total Patients: {totalItems}
+              </div>
 
-              <label className="form-control w-full">
-                <div className="label">
-                  {/* <span className="label-text">Pick a file</span> */}
-                </div>
-                <input
-                  type="file"
-                  className="file-input file-input-bordered w-full max-w-xs w-full"
-                  onChange={handleOnChange}
+              <div className="relative flex-1 min-w-[200px]">
+                <UserSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search patients..."
+                  value={filters.search}
+                  onChange={e => {
+                    setFilters(prev => ({ ...prev, search: e.target.value }));
+                    setCurrentPage(1);
+                  }}
+                  className="pl-8"
                 />
-              </label>
+              </div>
 
-              <div className="modal-action">
-                {/* if there is a button in form, it will close the modal */}
-                <button
-                  className="btn mr-2 btn-primary"
-                  disabled={isSubmitting || !file}
-                  onClick={async e => {
-                    if (!isSubmitting && file) {
-                      await handleSubmit(e);
-                    }
-                  }}>
-                  Upload
-                </button>
-                <button className="btn" disabled={isSubmitting || !file}>
-                  Close
-                </button>
+              <Select
+                value={filters.gender}
+                onValueChange={value => {
+                  setFilters(prev => ({ ...prev, gender: value }));
+                  setCurrentPage(1);
+                }}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Genders</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={filters.ageRange}
+                onValueChange={value => {
+                  setFilters(prev => ({ ...prev, ageRange: value }));
+                  setCurrentPage(1);
+                }}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Age Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Ages</SelectItem>
+                  <SelectItem value="0-18">0-18</SelectItem>
+                  <SelectItem value="19-30">19-30</SelectItem>
+                  <SelectItem value="31-50">31-50</SelectItem>
+                  <SelectItem value="51+">51+</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                onClick={handleResetFilters}
+                className="flex items-center gap-2">
+                <FilterX className="h-4 w-4" />
+                Reset Filters
+              </Button>
+
+              <Button
+                onClick={() => setIsAddDialogOpen(true)}
+                className="ml-auto bg-blue-600 hover:bg-blue-700 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Patient
+              </Button>
+            </div>
+
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableHead
+                        key={column.key}
+                        className={cn(
+                          "font-semibold",
+                          column.sortable && "cursor-pointer"
+                        )}
+                        onClick={() => column.sortable && requestSort(column.key)}
+                      >
+                        {column.label}
+                        {sortConfig.key === column.key && (
+                          <span className="ml-2">
+                            {sortConfig.direction === 'asc' ?
+                              <SortAsc className="h-4 w-4 inline" /> :
+                              <SortDesc className="h-4 w-4 inline" />
+                            }
+                          </span>
+                        )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8">
+                        Loading patients...
+                      </TableCell>
+                    </TableRow>
+                  ) : currentItems.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8">
+                        No patients found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    currentItems.map((item, idx) => (
+                      <TableRow
+                        key={item.patient_id}
+                        className={`transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-muted/30'
+                          }`}>
+                        <TableCell className="font-medium">
+                          {`${item.patient_first_name} ${item.patient_last_name}`}
+                        </TableCell>
+                        <TableCell>
+                          <a
+                            href={`mailto:${item.email}`}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            {item.email}
+                          </a>
+                        </TableCell>
+                        <TableCell>{item.phone_number}</TableCell>
+                        {/* <TableCell>
+                          <AddressDisplay row={item} />
+                        </TableCell> */}
+                        <TableCell>
+                          {item.date_of_birth ? format(new Date(item.date_of_birth), 'MMM dd, yyyy') : 'N/A'}
+                        </TableCell>
+                        <TableCell>{item.age}</TableCell>
+                        <TableCell>{item.gender}</TableCell>
+                        <TableCell>{item.medical_history || 'None'}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewTreatment(item)}
+                              className="bg-green-50 hover:bg-green-100 border-green-200"
+                            >
+                              <Eye className="h-4 w-4 text-green-600" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(item)}
+                              className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                            >
+                              <Edit2 className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-red-50 hover:bg-red-100 border-red-200"
+                              onClick={() => handleDelete(item.patient_id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-700">
+                Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+                {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} patients
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}>
+                  Previous
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    const diff = Math.abs(page - currentPage);
+                    return diff <= 2 || page === 1 || page === totalPages;
+                  })
+                  .map((page, i, arr) => (
+                    <React.Fragment key={page}>
+                      {i > 0 && arr[i - 1] !== page - 1 && (
+                        <span className="px-2">...</span>
+                      )}
+                      <Button
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        className="w-8 bg-gray-600 hover:bg-gray-600 text-white"
+                        onClick={() => setCurrentPage(page)}>
+                        {page}
+                      </Button>
+                    </React.Fragment>
+                  ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}>
+                  Next
+                </Button>
               </div>
             </div>
-          </dialog>
-        </form>
-        <ToastContainer />
+          </div>
+        </CardContent>
+      </Card>
 
-        <dialog id="deleteModal" className="modal">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Archive Confirmation</h3>
-            <p className="py-4">Do you want to archive this record? </p>
-            <hr />
-            <div className="modal-action mt-12">
-              <button
-                className="btn btn-outline   "
-                type="button"
-                onClick={() => {
+      <ToastContainer />
+
+      <dialog id="deleteModal" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Archive Confirmation</h3>
+          <p className="py-4">Do you want to archive this record? </p>
+          <hr />
+          <div className="modal-action mt-12">
+            <button
+              className="btn btn-outline   "
+              type="button"
+              onClick={() => {
+                document.getElementById('deleteModal').close();
+              }}>
+              Cancel
+            </button>
+
+            <button
+              className="btn bg-buttonPrimary text-white"
+              onClick={async () => {
+                try {
+                  let res = await axios({
+                    method: 'put',
+                    url: `/archive/customer_record/${activeChildID}/CustomerID`,
+                    data: {
+                      activeChildID: activeChildID
+                    }
+                  });
+                  fetchPatients()
                   document.getElementById('deleteModal').close();
-                }}>
-                Cancel
-              </button>
-
-              <button
-                className="btn bg-buttonPrimary text-white"
-                onClick={async () => {
-                  try {
-                    let res = await axios({
-                      method: 'put',
-                      url: `/archive/customer_record/${activeChildID}/CustomerID`,
-                      data: {
-                        activeChildID: activeChildID
-                      }
-                    });
-                    fetchUsers()
-                    document.getElementById('deleteModal').close();
-                    toast.success(`Archived Successfully`, {
-                      onClose: () => {
-                        // window.location.reload();
-                      },
-                      position: 'top-right',
-                      autoClose: 1000,
-                      hideProgressBar: false,
-                      closeOnClick: true,
-                      pauseOnHover: true,
-                      draggable: true,
-                      progress: undefined,
-                      theme: 'light'
-                    });
-                  } catch (error) { }
-                }}>
-                Yes
-              </button>
-            </div>
+                  toast.success(`Archived Successfully`, {
+                    onClose: () => {
+                    },
+                    position: 'top-right',
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light'
+                  });
+                } catch (error) { }
+              }}>
+              Yes
+            </button>
           </div>
-        </dialog>
+        </div>
+      </dialog>
 
-        <dialog id="addCustomer" className="modal">
-          <div className="modal-box">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h1 className="font-bold text-lg">Fill Out Form</h1>
-            <p className="text-sm text-gray-500 mt-1">Customer Details</p>
-            <div className="p-2 space-y-4 md:space-y-6 sm:p-4">
-              <Formik {...formikConfig()}>
-                {({
-                  handleSubmit,
-                  handleChange,
-                  handleBlur, // handler for onBlur event of form elements
-                  values,
-                  touched,
-                  errors,
-                  submitForm,
-                  setFieldTouched,
-                  setFieldValue,
-                  setFieldError,
-                  setErrors,
-                  isSubmitting
-                }) => {
-                  const checkValidateTab = () => {
-                    // submitForm();
-                  };
-                  const errorMessages = () => {
-                    // you can add alert or console.log or any thing you want
-                    alert('Please fill in the required fields');
-                  };
+      <dialog id="addCustomer" className="modal">
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
+          <h1 className="font-bold text-lg">Fill Out Form</h1>
+          <p className="text-sm text-gray-500 mt-1">Customer Details</p>
+          <div className="p-2 space-y-4 md:space-y-6 sm:p-4">
+            <Formik {...formikConfig()}>
+              {({
+                handleSubmit,
+                handleChange,
+                handleBlur,
+                values,
+                touched,
+                errors,
+                submitForm,
+                setFieldTouched,
+                setFieldValue,
+                setFieldError,
+                setErrors,
+                isSubmitting
+              }) => {
+                const checkValidateTab = () => {
+                };
+                const errorMessages = () => {
+                  alert('Please fill in the required fields');
+                };
 
-                  return (
-                    <Form className="">
-                      {/* <label
-                        className={`block mb-2 text-green-400 text-left font-bold`}>
-                        Child
-                      </label> */}
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
+                return (
+                  <Form className="">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
+                      <InputText
+                        isRequired
+                        label="Full Name"
+                        name="CustomerName"
+                        type="text"
+                        placeholder=""
+                        value={values.CustomerName}
+                        onBlur={handleBlur}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 ">
+                      <InputText
+                        isRequired
+                        className="border-2 border-none focus:border-purple-500 rounded-lg p-2 w-full"
+                        label="Facebook Link"
+                        name="Facebook"
+                        type="text"
+                        placeholder=""
+                        value={values.Facebook}
+                        onBlur={handleBlur}
+                      />
+                      <InputText
+                        isRequired
+                        label="Contact Number"
+                        name="Contact"
+                        type="text"
+                        placeholder=""
+                        value={values.Contact}
+                        onBlur={handleBlur}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
+                      <InputText
+                        isRequired
+                        label="Complete Address"
+                        name="Address"
+                        type="text"
+                        placeholder=""
+                        value={values.Address}
+                        onBlur={handleBlur}
+                      />
+                    </div>
+                    * All fields are required.
+                    <button
+                      type="submit"
+                      className={
+                        'btn mt-4 shadow-lg w-full bg-buttonPrimary font-bold text-white'
 
+                      }>
+                      Submit
+                    </button>
+                  </Form>
+                );
+              }}
+            </Formik> </div>
+        </div>
+      </dialog>
 
-                        <InputText
-                          isRequired
-                          label="Full Name"
-                          name="CustomerName"
-                          type="text"
-                          placeholder=""
-                          value={values.CustomerName}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 ">
+      <dialog id="updateCustomer" className="modal">
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
+          <h1 className="font-bold text-lg">Update</h1>
+          <div className="p-2 space-y-4 md:space-y-6 sm:p-4">
+            {viewedUser && <Formik {...formikConfigUpdate(viewedUser)}>
+              {({
+                handleSubmit,
+                handleChange,
+                handleBlur,
+                values,
+                touched,
+                errors,
+                submitForm,
+                setFieldTouched,
+                setFieldValue,
+                setFieldError,
+                setErrors,
+                isSubmitting
+              }) => {
+                const checkValidateTab = () => {
+                };
+                const errorMessages = () => {
+                  alert('Please fill in the required fields');
+                };
 
-                        <InputText
-                          isRequired
-                          className="border-2 border-none focus:border-purple-500 rounded-lg p-2 w-full"
-                          label="Facebook Link"
-                          name="Facebook"
-                          type="text"
-                          placeholder=""
-                          value={values.Facebook}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                        <InputText
-                          isRequired
-                          label="Contact Number"
-                          name="Contact"
-                          type="text"
-                          placeholder=""
-                          value={values.Contact}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                      </div>
+                return (
+                  <Form className="">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
+                      <InputText
+                        isRequired
+                        label="Full Name"
+                        name="CustomerName"
+                        type="text"
+                        placeholder=""
+                        value={values.CustomerName}
+                        onBlur={handleBlur}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 ">
+                      <InputText
+                        isRequired
+                        className="border-2 border-none focus:border-purple-500 rounded-lg p-2 w-full"
+                        label="Facebook Link"
+                        name="Facebook"
+                        type="text"
+                        placeholder=""
+                        value={values.Facebook}
+                        onBlur={handleBlur}
+                      />
+                      <InputText
+                        isRequired
+                        label="Contact Number"
+                        name="Contact"
+                        type="text"
+                        placeholder=""
+                        value={values.Contact}
+                        onBlur={handleBlur}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
+                      <InputText
+                        isRequired
+                        label="Complete Address"
+                        name="Address"
+                        type="text"
+                        placeholder=""
+                        value={values.Address}
+                        onBlur={handleBlur}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className={
+                        'btn mt-4 shadow-lg w-full bg-buttonPrimary font-bold text-white'
 
+                      }>
+                      Update
+                    </button>
+                  </Form>
+                );
+              }}
+            </Formik>} </div>
+        </div>
+      </dialog>
 
-
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
-
-
-                        <InputText
-                          isRequired
-                          label="Complete Address"
-                          name="Address"
-                          type="text"
-                          placeholder=""
-                          value={values.Address}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                      </div>
-                      * All fields are required.
-                      <button
-                        type="submit"
-                        className={
-                          'btn mt-4 shadow-lg w-full bg-buttonPrimary font-bold text-white' +
-                          (loading ? ' loading' : '')
-                        }>
-                        Submit
-                      </button>
-                    </Form>
-                  );
-                }}
-              </Formik> </div>
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] p-6 bg-white rounded-lg shadow-lg overflow-y-auto">
+          <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10 pb-4 border-b">
+            <h2 className="text-lg font-semibold">Edit Patient</h2>
           </div>
-        </dialog>
 
+          {viewedUser && (
+            <RegisterPage
+              setIsDialogOpen={setIsEditDialogOpen}
+              initialData={viewedUser}
+              isEdit={true}
+              onSubmit={handleUpdate}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
-        <dialog id="updateCustomer" className="modal">
-          <div className="modal-box">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h1 className="font-bold text-lg">Update</h1>
-            {/* <p className="text-sm text-gray-500 mt-1">Customer Details</p> */}
-            <div className="p-2 space-y-4 md:space-y-6 sm:p-4">
-              {viewedUser.CustomerName && <Formik {...formikConfigUpdate(viewedUser)}>
-                {({
-                  handleSubmit,
-                  handleChange,
-                  handleBlur, // handler for onBlur event of form elements
-                  values,
-                  touched,
-                  errors,
-                  submitForm,
-                  setFieldTouched,
-                  setFieldValue,
-                  setFieldError,
-                  setErrors,
-                  isSubmitting
-                }) => {
-                  const checkValidateTab = () => {
-                    // submitForm();
-                  };
-                  const errorMessages = () => {
-                    // you can add alert or console.log or any thing you want
-                    alert('Please fill in the required fields');
-                  };
-
-                  return (
-                    <Form className="">
-                      {/* <label
-                        className={`block mb-2 text-green-400 text-left font-bold`}>
-                        Child
-                      </label> */}
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
-
-
-                        <InputText
-                          isRequired
-                          label="Full Name"
-                          name="CustomerName"
-                          type="text"
-                          placeholder=""
-                          value={values.CustomerName}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 ">
-
-                        <InputText
-                          isRequired
-                          className="border-2 border-none focus:border-purple-500 rounded-lg p-2 w-full"
-                          label="Facebook Link"
-                          name="Facebook"
-                          type="text"
-                          placeholder=""
-                          value={values.Facebook}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                        <InputText
-                          isRequired
-                          label="Contact Number"
-                          name="Contact"
-                          type="text"
-                          placeholder=""
-                          value={values.Contact}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                      </div>
-
-
-
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-1 ">
-
-
-                        <InputText
-                          isRequired
-                          label="Complete Address"
-                          name="Address"
-                          type="text"
-                          placeholder=""
-                          value={values.Address}
-                          onBlur={handleBlur} // This apparently updates `touched`?
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className={
-                          'btn mt-4 shadow-lg w-full bg-buttonPrimary font-bold text-white' +
-                          (loading ? ' loading' : '')
-                        }>
-                        Update
-                      </button>
-                    </Form>
-                  );
-                }}
-              </Formik>} </div>
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogTrigger asChild>
+          {/* <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="ml-auto bg-blue-600 hover:bg-blue-700 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Patient
+          </Button> */}
+        </DialogTrigger>
+        <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] p-6 bg-white rounded-lg shadow-lg overflow-y-auto">
+          <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10 pb-4 border-b">
+            <h2 className="text-lg font-semibold">Add New Patient</h2>
           </div>
-        </dialog>
-
-      </TitleCard>
-    )
+          <RegisterPage
+            setIsDialogOpen={setIsAddDialogOpen}
+            isEdit={false}
+            onSubmit={handleAdd}
+            onSuccess={() => {
+              setIsAddDialogOpen(false);
+              fetchPatients();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 

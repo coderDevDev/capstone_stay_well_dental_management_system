@@ -9,6 +9,7 @@ import { mdiAccount, mdiLockOutline, mdiEye, mdiEyeOff } from '@mdi/js';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import { Loader2 } from 'lucide-react';
 
 function TriangleGridBackground() {
   return (
@@ -49,7 +50,7 @@ function Login() {
     setShowPassword(!showPassword);
   };
 
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const formikConfig = {
     initialValues: {
@@ -62,10 +63,8 @@ function Login() {
         .min(8, 'Minimun of 8 character(s)')
         .required('Required field')
     }),
-    onSubmit: async (
-      values,
-      { setSubmitting, setFieldValue, setErrorMessage, setErrors }
-    ) => {
+    onSubmit: async (values, { setSubmitting }) => {
+      setIsLoading(true);
       try {
         let res = await axios({
           method: 'POST',
@@ -73,34 +72,48 @@ function Login() {
           data: values
         });
 
+        if (!res.data.success) {
+          toast.error(res.data.message);
+          return;
+        }
+
+        if (res.data.needsVerification) {
+          toast.error('Please verify your email before logging in', {
+            action: {
+              label: 'Resend',
+              onClick: () => handleResendVerification(values.email)
+            }
+          });
+          return;
+        }
+
         let { token } = res.data;
         let user = res.data.data;
 
         localStorage.setItem('token', token);
-
-
         localStorage.setItem('loggedInUser', JSON.stringify(user));
 
+        toast.success('Login successful!');
         window.location.href = '/app/dashboard';
       } catch (error) {
-
-        // //console.log(error.response.data.message)
-        toast.error(`Login Failed. Unknown User.`, {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: 'light'
-        });
+        toast.error(error.response?.data?.message || 'Login failed');
+      } finally {
+        setIsLoading(false);
+        setSubmitting(false);
       }
+    }
+  };
 
-      // setErrorMessage('');
-      // localStorage.setItem('token', 'DumyTokenHere');
-      // setLoading(false);
-      // window.location.href = '/app/dashboard';
+  const handleResendVerification = async (email) => {
+    try {
+      const response = await axios.post('auth/resend-verification', { email });
+      if (response.data.success) {
+        toast.success('Verification email sent successfully');
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error('Failed to resend verification email');
     }
   };
 
@@ -113,8 +126,8 @@ function Login() {
       {/* Login Form - Full Width on Small Screens */}
       <div className="w-full  flex items-center justify-center bg-gray-100 px-6 md:px-0">
         <div className="w-full max-w-lg">
-          <div className="flex justify-center -mt-12 mb-6">
-            <img src="/logo.jpg" alt="Logo" className="w-50 h-20 border-4 border-blue-950 shadow-lg p-1" />
+          <div className="flex justify-center mb-4">
+            <img src="/logo.jpg" alt="Logo" className="w-50 h-20 border-4 border-blue-950 shadow-lg p-0 rounded-lg" />
           </div>
           <div className="p-6 shadow-lg bg-white rounded-lg">
             <h1 className="text-xl font-bold text-center text-blue-950">Login</h1>
@@ -156,8 +169,19 @@ function Login() {
                       )}
                     </button>
                   </div>
-                  <button type="submit" className="w-full bg-blue-700 text-white font-bold py-2 rounded">
-                    Sign in
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-blue-700 text-white font-bold py-2 rounded flex items-center justify-center"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Please wait...
+                      </>
+                    ) : (
+                      'Sign in'
+                    )}
                   </button>
                   <div className="text-right text-blue-950 text-sm">
                     <a href="/forgot-password" className="hover:underline">Forgot Password?</a>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { addDays, format } from 'date-fns';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -7,7 +7,7 @@ import { getAvailableTimeSlots, TimeSlot as TimeSlotType } from './utils_api';
 
 import axios from 'axios';
 
-const formatDateForDB = date => {
+const formatDateForDB = (date: string | number | Date) => {
   return format(new Date(date), 'yyyy-MM-dd HH:mm:ss');
 };
 
@@ -23,7 +23,7 @@ const validationSchema = Yup.object().shape({
   phone: Yup.string().required('Phone is required')
 });
 
-export const AppointmentForm: React.FC = ({ getAppointmentList }) => {
+export const AppointmentForm = ({ getAppointmentList }) => {
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   const [selectedUser, setSelectedUser] = useState({});

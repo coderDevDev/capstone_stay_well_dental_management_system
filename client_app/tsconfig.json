@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "strict": true,
+
     // ...
     "baseUrl": ".",
     "paths": {
