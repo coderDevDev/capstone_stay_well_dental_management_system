@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Input } from '@/components/ui/input';
@@ -40,27 +40,16 @@ export default function UpdateAttendanceForm({
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   console.log({ attendance });
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    trigger,
-    formState: { errors },
-    reset
-  } = useForm({
+  const { control, handleSubmit, setValue, watch } = useForm({
     resolver: zodResolver(attendanceSchema),
-    defaultValues: attendance
-      ? {
-          employee_id: attendance.employee_id,
-          date: attendance.date,
-          status: attendance.status
-        }
-      : {
-          employee_id: '',
-          date: '',
-          status: ''
-        }
+    defaultValues: {
+      employee_id: attendance?.employee_id || '',
+      date: attendance?.date || '',
+      status: attendance?.status || 'Present'
+    }
   });
+
+  const employeeId = watch('employee_id');
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -80,10 +69,10 @@ export default function UpdateAttendanceForm({
   useEffect(() => {
     if (attendance) {
       setValue('employee_id', attendance.employee_id.toString());
+      setValue('date', attendance.date);
       setValue('status', attendance.status);
-      trigger(['employee_id', 'status']);
     }
-  }, [attendance, setValue, trigger]);
+  }, [attendance, setValue]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -99,7 +88,6 @@ export default function UpdateAttendanceForm({
           employee_id: data.employee_id
         });
       }
-      reset();
       onClose?.();
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -119,71 +107,70 @@ export default function UpdateAttendanceForm({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="employee_id">Employee</Label>
-              <Select
-                onValueChange={value => setValue('employee_id', value)}
-                value={attendance?.employee_id}
-                defaultValue={attendance?.employee_id}>
-                <SelectTrigger
-                  className={errors.employee_id ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select employee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map(employee => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.employee_id && (
-                <p className="text-xs font-medium text-red-500">
-                  {errors.employee_id.message}
-                </p>
-              )}
+              <Controller
+                name="employee_id"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className="w-full">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employees.map(employee => (
+                        <SelectItem
+                          key={employee.id}
+                          value={employee.id.toString()}>
+                          {employee.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                {...register('date')}
-                max={new Date().toISOString().split('T')[0]}
-                className={errors.date ? 'border-red-500' : ''}
+              <Controller
+                name="date"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="date"
+                    type="date"
+                    {...field}
+                    max={new Date().toISOString().split('T')[0]}
+                    className={field.value ? '' : 'border-red-500'}
+                  />
+                )}
               />
-              {errors.date && (
-                <p className="text-xs font-medium text-red-500">
-                  {errors.date.message}
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Select
-                onValueChange={value => {
-                  setValue('status', value);
-                  if (errors.status) {
-                    setValue('status', value, { shouldValidate: true });
-                  }
-                }}
-                defaultValue={attendance?.status || 'Present'}>
-                <SelectTrigger
-                  className={errors.status ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Present">Present</SelectItem>
-                  <SelectItem value="Absent">Absent</SelectItem>
-                  <SelectItem value="Late">Late</SelectItem>
-                  <SelectItem value="Half Day">Half Day</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.status && (
-                <p className="text-xs font-medium text-red-500">
-                  {errors.status.message}
-                </p>
-              )}
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className="w-full">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Present">Present</SelectItem>
+                      <SelectItem value="Absent">Absent</SelectItem>
+                      <SelectItem value="Late">Late</SelectItem>
+                      <SelectItem value="Half Day">Half Day</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </div>
 

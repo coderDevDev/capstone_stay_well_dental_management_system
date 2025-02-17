@@ -456,7 +456,7 @@ export function AppointmentForm({
         ) : (
           // Create Mode - Payment
           <PayPalComponent
-            amount={serviceFee}
+            amount={totalFee}
             appointmentId={createdAppointmentId}
             onSuccess={() => {
               toast.success('Appointment booked successfully!');
@@ -467,7 +467,7 @@ export function AppointmentForm({
                 start: startTime,
                 end: endTime,
                 status: 'confirmed',
-                serviceFee
+                serviceFee: totalFee
               });
             }}
           />
