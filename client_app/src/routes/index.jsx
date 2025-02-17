@@ -21,6 +21,8 @@ const Layaway = lazy(() => import('../pages/protected/Layaway'));
 const Settings = lazy(() => import('../pages/protected/Settings'));
 const Reports = lazy(() => import('../pages/protected/Reports'));
 
+const DentalServices = lazy(() => import('../app/dental-services/page'));
+const Payments = lazy(() => import('../app/payments/page'));
 const Statistics = lazy(() => import('../pages/protected/Statistics'));
 
 const ProfileSettings = lazy(() =>
@@ -177,8 +179,19 @@ routes = [
 
   {
     path: '/payments',
+    component: Payments
+  },
+
+  {
+    path: '/patients/:patient_id/treatments',
     component: DentalTreatment
   },
+
+  {
+    path: '/dental-services',
+    component: DentalServices
+  },
+
 ];
 
 

@@ -65,13 +65,11 @@ export const inventoryService = {
     return response.json();
   },
 
-  updateInventoryQuantities: async medications => {
+  updateInventoryQuantities: async (medications: InventoryUpdate[]) => {
     try {
       const response = await axios.put(
         '/inventory/update-quantities/updateEachItem',
-        {
-          medications
-        }
+        { medications }
       );
       return response.data;
     } catch (error) {
@@ -615,15 +613,15 @@ export interface Treatment {
   dentist_name: string;
   notes?: string;
   type: 'medical' | 'cosmetic';
-  // For new format
   toothTreatments?: Array<{
     toothNumber: string;
     treatment: string;
     status: 'Pending' | 'Ongoing' | 'Done';
   }>;
-  // For backward compatibility
-  tooth_numbers?: string;
-  tooth_treatments?: string;
+  medications?: Array<{
+    id: string;
+    quantity: number;
+  }>;
 }
 
 export interface TreatmentFormValues {
@@ -637,8 +635,10 @@ export interface TreatmentFormValues {
   type: 'medical' | 'cosmetic';
   patientId?: string;
   appointmentId?: string;
-  toothNumbers?: string[];
-  toothStatuses?: Record<string, string>;
+  medications?: Array<{
+    id: string;
+    quantity: number;
+  }>;
 }
 
 export const treatmentService = {
@@ -662,9 +662,8 @@ export const treatmentService = {
         dentist: data.dentist,
         notes: data.notes,
         type: data.type,
-        toothNumbers: data.toothNumbers,
         toothTreatments: data.toothTreatments,
-        toothStatuses: data.toothStatuses
+        medications: data.medications
       });
       return response.data.data;
     } catch (error: any) {
@@ -828,13 +827,170 @@ export const appointmentService = {
     data: Partial<Appointment>
   ): Promise<ApiResponse<Appointment>> {
     try {
-      const response = await axios.put(`${API_URL}/appointments/${id}`, data);
+      const response = await axios.put(`${API_URL}/appointment/${id}`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error updating appointment:', error);
       throw new Error(
         error.response?.data?.message || 'Failed to update appointment'
       );
+    }
+  },
+
+  async create(data: {
+    patientId: string;
+    serviceId: string;
+    start: string;
+    end: string;
+    status: string;
+    serviceFee: number;
+    date: Date;
+    numberOfTeeth: number;
+  }): Promise<ApiResponse<{ appointment_id: string }>> {
+    try {
+      const response = await axios.post(`${API_URL}/appointment/create`, data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error creating appointment:', error);
+      throw new Error(
+        error.response?.data?.message || 'Failed to create appointment'
+      );
+    }
+  },
+  async delete(id: string) {
+    try {
+      const response = await axios.delete(`${API_URL}/appointment/${id}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error deleting appointment:', error);
+      throw new Error(
+        error.response?.data?.message || 'Failed to delete appointment'
+      );
+    }
+  }
+};
+
+// Add these interfaces
+export interface InventoryUpdate {
+  id: string;
+  quantity: number;
+}
+
+export interface Appointment {
+  id: string;
+  start: string;
+  end: string;
+  service_name: string;
+  status: string;
+  service_fee: number;
+  treatments?: Treatment[];
+}
+
+// Add these interfaces
+export interface Payment {
+  id: number;
+  appointmentId: number;
+  payment_method: 'paypal' | 'gcash' | 'cash';
+  transaction_id?: string;
+  amount: number;
+  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  receipt_url?: string;
+  approved_by?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export const paymentService = {
+  create: async (data: Omit<Payment, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const response = await axios.post('/payments', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      throw error;
+    }
+  },
+
+  getByAppointmentId: async (appointmentId: number) => {
+    try {
+      const response = await axios.get(
+        `/payments/appointment/${appointmentId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching payment:', error);
+      throw error;
+    }
+  },
+
+  update: async (id: number, data: Partial<Payment>) => {
+    try {
+      const response = await axios.put(`/payments/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating payment:', error);
+      throw error;
+    }
+  },
+
+  getList: async () => {
+    try {
+      const response = await axios.get('/payments/list');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    }
+  }
+};
+
+// Add these interfaces and service
+export interface DentalService {
+  id: string;
+  name: string;
+  price: string;
+  unit: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const dentalServiceService = {
+  getAll: async () => {
+    try {
+      const response = await axios.get('/services/list');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching dental services:', error);
+      throw error;
+    }
+  },
+
+  create: async (data: Omit<DentalService, 'id'>) => {
+    try {
+      const response = await axios.post('/services/create', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating dental service:', error);
+      throw error;
+    }
+  },
+
+  update: async (id: string, data: Partial<DentalService>) => {
+    try {
+      const response = await axios.put(`/services/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating dental service:', error);
+      throw error;
+    }
+  },
+
+  delete: async (id: string) => {
+    try {
+      const response = await axios.delete(`/services/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting dental service:', error);
+      throw error;
     }
   }
 };

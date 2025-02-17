@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar, dateFnsLocalizer, type SlotInfo } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
@@ -19,13 +19,13 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-
+import { appointmentService } from '@/services/api';
 import { AppointmentForm } from '@/components/appointment-form';
 import { AppointmentList } from '@/components/appointment-list';
 import { TableView } from '@/components/table-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarDays, List } from 'lucide-react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'sonner';
 const locales = {
   'en-US': enUS
 };
@@ -39,6 +39,7 @@ const localizer = dateFnsLocalizer({
 });
 import axios from 'axios';
 export function FullCalendar({ isAdmin = false }) {
+  console.log({ isAdmin });
   const [selectedSlot, setSelectedSlot] = useState<SlotInfo | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [appointments, setAppointments] = useState([]);
@@ -97,11 +98,22 @@ export function FullCalendar({ isAdmin = false }) {
     setServices(services);
   };
 
-  useEffect(() => {
-    fetchAppointments();
-    fetchPatients();
-    fetchServices();
+  const fetchData = useCallback(async () => {
+    try {
+      await Promise.all([
+        fetchAppointments(),
+        fetchPatients(),
+        fetchServices()
+      ]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Failed to fetch data');
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const [isNewAppointment, setIsNewAppointment] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
@@ -140,92 +152,29 @@ export function FullCalendar({ isAdmin = false }) {
   };
 
   const handleSaveAppointment = async (appointmentData: any) => {
-    if (isNewAppointment) {
-      // console.log({
-      //   id: Date.now(),
-      //   ...appointmentData
-      // });
-      // setAppointments([
-      //   ...appointments,
-      //   { id: Date.now(), ...appointmentData }
-      // ]);
-
-      console.log({ appointmentData });
-
-      let res = await axios.post('appointment/create', {
-        patientId: Number.parseInt(appointmentData.patientId),
-        serviceId: Number.parseInt(appointmentData.serviceId),
-        start: appointmentData.start,
-        end: appointmentData.end,
-        status: appointmentData.status,
-        serviceFee: appointmentData.serviceFee
-      });
-
-      await fetchAppointments();
-      await fetchPatients();
-      await fetchServices();
-
-      toast.success('Your appointment has been saved successfully!', {
-        position: 'top-right',
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light'
-      });
-    } else {
-      // update
-      let res = await axios.put(`appointment/${appointmentData.id}`, {
-        status: appointmentData.status,
-        ...appointmentData
-        // appointmentId: id
-      });
-
-      await fetchAppointments();
-      await fetchPatients();
-      await fetchServices();
-
-      toast.success('Appointment has been updated successfully!', {
-        position: 'top-right',
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light'
-      });
+    try {
+      // The save is already handled in the form
+      // Just refresh the data
+      await fetchData();
+      setSelectedSlot(null);
+      setSelectedAppointment(null);
+    } catch (error) {
+      console.error('Error saving appointment:', error);
+      toast.error('Failed to save appointment');
     }
-
-    setSelectedSlot(null);
-    setSelectedAppointment(null);
   };
 
   const handleDeleteAppointment = async (id: number) => {
-    setAppointments(appointments.filter(apt => apt.id !== id));
-
-    let res = await axios.delete(`appointment/${id}`, {
-      // appointmentId: id
-    });
-
-    await fetchAppointments();
-    await fetchPatients();
-    await fetchServices();
-
-    toast.success('Appointment has been deleted successfully!', {
-      position: 'top-right',
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light'
-    });
-
-    setSelectedAppointment(null);
+    try {
+      await appointmentService.delete(id);
+      toast.success('Appointment deleted successfully');
+      await fetchData();
+      setSelectedSlot(null);
+      setSelectedAppointment(null);
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      toast.error('Failed to delete appointment');
+    }
   };
 
   console.log({ appointments });
@@ -326,12 +275,14 @@ export function FullCalendar({ isAdmin = false }) {
       <Dialog
         modal
         open={!!selectedSlot || !!selectedAppointment}
-        onOpenChange={() => {
-          setSelectedSlot(null);
-          setSelectedAppointment(null);
+        onOpenChange={open => {
+          if (!open) {
+            setSelectedSlot(null);
+            setSelectedAppointment(null);
+          }
         }}>
         <DialogContent
-          onOpenAutoFocus={event => event.preventDefault()} // Prevents auto-focusing hidden elements
+          onPointerDownOutside={e => e.preventDefault()}
           className="sm:max-w-[525px]">
           <DialogHeader>
             <DialogTitle>
@@ -342,7 +293,11 @@ export function FullCalendar({ isAdmin = false }) {
             appointments={appointments}
             initialDate={selectedSlot?.start || selectedAppointment?.start}
             initialAppointment={selectedAppointment}
-            onSave={handleSaveAppointment}
+            onSave={appointmentData => {
+              handleSaveAppointment(appointmentData);
+              setSelectedSlot(null);
+              setSelectedAppointment(null);
+            }}
             onDelete={handleDeleteAppointment}
             isAdmin={isAdmin}
             patients={patients}

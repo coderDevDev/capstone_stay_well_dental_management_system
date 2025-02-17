@@ -447,14 +447,18 @@ router.get('/patients/:id', async (req, res) => {
       });
     }
 
-    // Parse medical history if it exists
-    const medicalHistory = result[0].medical_history
-      ? JSON.parse(result[0].medical_history)
-      : {
-          allergies: [],
-          conditions: [],
-          medications: []
-        };
+    // Parse medical history safely
+    let medicalHistory;
+
+    try {
+      medicalHistory =
+        result[0].medical_history && result[0].medical_history !== 'none'
+          ? JSON.parse(result[0].medical_history)
+          : { allergies: [], conditions: [], medications: [] };
+    } catch (error) {
+      console.error('Error parsing medical history:', error.message);
+      medicalHistory = { allergies: [], conditions: [], medications: [] }; // Default fallback
+    }
 
     const patientData = {
       id: result[0].patient_id,

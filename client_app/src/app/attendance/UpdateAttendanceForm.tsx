@@ -66,6 +66,7 @@ export default function UpdateAttendanceForm({
     const fetchEmployees = async () => {
       try {
         const data = await employeeService.getAll();
+        console.log({ data });
         setEmployees(data);
       } catch (error) {
         console.error('Error fetching employees:', error);
@@ -78,7 +79,7 @@ export default function UpdateAttendanceForm({
 
   useEffect(() => {
     if (attendance) {
-      setValue('employee_id', attendance.employee_id);
+      setValue('employee_id', attendance.employee_id.toString());
       setValue('status', attendance.status);
       trigger(['employee_id', 'status']);
     }

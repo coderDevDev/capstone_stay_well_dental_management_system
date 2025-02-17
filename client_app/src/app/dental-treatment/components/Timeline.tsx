@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { AddTreatmentForm } from './AddTreatmentForm';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface TimelineProps {
   treatments: Treatment[];
@@ -47,13 +48,23 @@ export function Timeline({
 
   const handleEditSubmit = async (data: TreatmentFormValues) => {
     if (editingTreatment && onEdit) {
-      await onEdit({
-        ...editingTreatment,
-        ...data,
-        dentist_id: data.dentist,
-        toothTreatments: data.toothTreatments
-      });
-      setEditingTreatment(null);
+      try {
+        await onEdit({
+          ...editingTreatment,
+          ...data,
+          id: editingTreatment.id,
+          dentist_id: data.dentist,
+          toothTreatments: data.toothTreatments,
+          medications: data.medications,
+          patientId: editingTreatment.patientId,
+          appointmentId: editingTreatment.appointmentId,
+          date: editingTreatment.date
+        });
+        setEditingTreatment(null);
+      } catch (error) {
+        console.error('Error updating treatment:', error);
+        toast.error('Failed to update treatment');
+      }
     }
   };
 
@@ -201,7 +212,12 @@ export function Timeline({
               onSubmit={handleEditSubmit}
               onCancel={() => setEditingTreatment(null)}
               activeTab={editingTreatment.type}
-              selectedTeeth={new Set()}
+              selectedTeeth={
+                new Set(
+                  editingTreatment.toothTreatments?.map(t => t.toothNumber) ||
+                    []
+                )
+              }
               patientId={editingTreatment.patientId}
               appointments={appointments}
               isOpen={!!editingTreatment}

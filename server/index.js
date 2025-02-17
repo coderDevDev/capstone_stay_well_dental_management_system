@@ -17,12 +17,16 @@ import supplierRoutes from './routes/suppliers.js';
 import employeeRoutes from './routes/employee.js';
 import attendanceRoutes from './routes/attendance.js';
 import roleRoutes from './routes/roles.js';
+
+import dentalServiceRoutes from './routes/dental-services.js';
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import cron from 'node-cron';
 import payrollRoutes from './routes/payroll.js';
 import treatmentRoutes from './routes/treatments.js';
+import paymentRoutes from './routes/payments.js';
 
 // const { cypherQuerySession } = config;
 // import { mergeUserQuery } from './cypher/child.js';
@@ -91,7 +95,7 @@ app.use(
 app.use(express.json());
 
 app.use('/api/appointment', appointmentRoute);
-app.use('/api/services', servicesRoute);
+// app.use('/api/services', servicesRoute);
 app.use('/api/admin/loan', loanAdminRoute);
 app.use('/api/users', userRoute);
 app.use('/api/user', userRoute);
@@ -106,6 +110,8 @@ app.use('/api', attendanceRoutes);
 app.use('/api', roleRoutes);
 app.use('/api/payroll', payrollRoutes);
 app.use('/api/treatments', treatmentRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/services', dentalServiceRoutes);
 app.use(express.static('public'));
 app.use(express.static('files'));
 

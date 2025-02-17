@@ -539,7 +539,12 @@ function Transactions() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const handleViewTreatment = (patient) => {
-    navigate(`/patients/${patient.patient_id}/treatments`);
+
+    console.log("Dex")
+    navigate(`/app/patients/${patient.patient_id}/treatments`);
+
+
+
   };
 
   const handleAdd = async (formData) => {

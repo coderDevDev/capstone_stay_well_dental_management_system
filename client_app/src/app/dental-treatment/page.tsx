@@ -24,13 +24,14 @@ import {
   Treatment,
   TreatmentFormValues
 } from '@/services/api';
-import { useParams } from 'next/navigation';
+import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { AppointmentHistory } from './components/AppointmentHistory';
 import { Timeline } from './components/Timeline';
 import { AppointmentHistoryView } from './components/AppointmentHistoryView';
 import { PatientInformation } from '@/services/api';
 import { AddTreatmentForm } from './components/AddTreatmentForm';
+import { S } from 'dist/assets/TitleCard-tkHnMDXZ';
 
 interface Appointment {
   id: string;
@@ -50,7 +51,11 @@ interface ApiResponse<T> {
 
 export default function DentalTreatmentPage() {
   const params = useParams();
-  const patientId = params?.id?.toString() || '4';
+
+  const patientId = params?.patient_id?.toString();
+
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedTeeth, setSelectedTeeth] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<'medical' | 'cosmetic'>('medical');
@@ -89,6 +94,8 @@ export default function DentalTreatmentPage() {
   const fetchData = useCallback(async () => {
     try {
       const response = await treatmentService.getAll(patientId);
+
+      console.log({ response });
       setTreatments(response);
     } catch (error: any) {
       console.error('Error fetching treatments:', error);
@@ -130,6 +137,8 @@ export default function DentalTreatmentPage() {
           });
           return acc;
         }, {} as Record<string, string>);
+
+        console.log({ jhams: treatments.data });
         setTreatmentMap(treatments.data);
       } catch (error: any) {
         console.error('Error loading treatment map:', error);
@@ -139,7 +148,7 @@ export default function DentalTreatmentPage() {
       }
     };
     loadTreatmentMap();
-  }, [patientId]);
+  }, [patientId, treatments]);
 
   useEffect(() => {
     const loadLatestAppointment = async () => {
@@ -206,11 +215,32 @@ export default function DentalTreatmentPage() {
 
   const loadTreatments = async () => {
     try {
+      setIsLoaded(false);
       const data = await treatmentService.getAll(patientId);
+      console.log({ data });
+
       setTreatments(data);
+
+      // Update treatment map
+
+      const treatmentsArray = Array.isArray(data) ? data : [];
+
+      const map = treatmentsArray.reduce(
+        (acc: Record<string, string>, treatment: Treatment) => {
+          if (treatment.toothTreatments) {
+            treatment.toothTreatments.forEach(tt => {
+              acc[tt.toothNumber] = tt.treatment;
+            });
+          }
+          return acc;
+        },
+        {}
+      );
+      setTreatmentMap(map);
+      setIsLoaded(true);
     } catch (error) {
       console.error('Error loading treatments:', error);
-      // Handle error (show toast, etc.)
+      toast.error('Failed to load treatments');
     }
   };
 
@@ -241,34 +271,37 @@ export default function DentalTreatmentPage() {
     }
   };
 
+  // Create a function to refresh all data
+  const refreshAllData = async () => {
+    try {
+      console.log('refreshAllData');
+      await Promise.all([
+        fetchData(), // Refresh treatments
+        loadTreatments(), // Refresh treatment map
+        fetchAppointments() // Refresh appointments
+      ]);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      toast.error('Failed to refresh data');
+    }
+  };
+
   const handleAddTreatment = async (data: TreatmentFormValues) => {
     if (!selectedAppointmentId) {
       toast.error('Please select an appointment first');
       return;
     }
 
-    // Check if the current appointment already has a treatment
-    const existingTreatment = treatments.find(
-      treatment => treatment.appointmentId === selectedAppointmentId
-    );
-
-    if (existingTreatment) {
-      toast.error('This appointment already has a treatment.');
-      return;
-    }
-
     try {
-      const newTreatment = await treatmentService.create({
+      await treatmentService.create({
         ...data,
         patientId,
         appointmentId: selectedAppointmentId
       });
 
-      // Refresh treatments
-      await loadTreatments();
-
-      // Clear selection
+      await refreshAllData(); // Refresh all data after create
       setSelectedTeeth(new Set());
+      setIsAddModalOpen(false);
       toast.success('Treatment added successfully');
     } catch (error) {
       if (error instanceof Error) {
@@ -284,16 +317,11 @@ export default function DentalTreatmentPage() {
         dentist: treatment.dentist_id,
         notes: treatment.notes,
         type: treatment.type,
-        toothTreatments: treatment.toothTreatments
+        toothTreatments: treatment.toothTreatments,
+        medications: treatment.medications
       });
 
-      // Refresh all necessary data
-      await Promise.all([
-        fetchData(), // Refresh treatments
-        loadTreatments(), // Refresh treatment map
-        fetchAppointments() // Refresh appointments
-      ]);
-
+      await refreshAllData(); // Refresh all data after update
       toast.success('Treatment updated successfully');
     } catch (error: any) {
       console.error('Error updating treatment:', error);
@@ -306,8 +334,7 @@ export default function DentalTreatmentPage() {
   const handleDeleteTreatment = async (treatmentId: string) => {
     try {
       await treatmentService.delete(treatmentId);
-      // Refresh data after delete
-      await fetchData();
+      await refreshAllData(); // Refresh all data after delete
       toast.success('Treatment deleted successfully');
     } catch (error) {
       if (error instanceof Error) {
@@ -467,6 +494,7 @@ export default function DentalTreatmentPage() {
         appointments={appointments}
         isOpen={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+        treatmentsHistory={treatments.data}
       />
     </div>
   );

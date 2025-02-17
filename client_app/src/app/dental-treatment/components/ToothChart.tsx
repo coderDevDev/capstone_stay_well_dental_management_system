@@ -216,6 +216,7 @@ export function ToothChart({
     });
   };
 
+  console.log({ treatments });
   return (
     <div className="relative">
       {/* Show buttons only when teeth are selected */}

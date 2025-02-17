@@ -29,7 +29,8 @@ import {
   ToothTreatment,
   TreatmentFormValues,
   treatmentService,
-  Appointment
+  Appointment,
+  InventoryUpdate
 } from '@/services/api';
 import { useEffect, useState } from 'react';
 import { inventoryService } from '@/services/api';
@@ -41,6 +42,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { error } from 'console';
+import { cn } from '@/lib/utils';
 
 // Define treatment options based on type
 const medicalTreatments = [
@@ -89,6 +92,7 @@ interface AddTreatmentFormProps {
   appointments: Appointment[];
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  treatmentsHistory: Appointment[];
 }
 
 const treatmentFormSchema = z.object({
@@ -96,13 +100,13 @@ const treatmentFormSchema = z.object({
     z.object({
       toothNumber: z.string(),
       treatment: z.string(),
-      status: z.enum(['Ongoing', 'Done'])
+      status: z.enum(['Pending', 'Ongoing', 'Done'])
     })
   ),
   dentist: z.string().min(1, 'Dentist is required'),
   notes: z.string().optional(),
   type: z.enum(['medical', 'cosmetic']),
-  appointmentId: z.string().min(1, 'Appointment is required'),
+  appointmentId: z.string().min(1, 'Appointment is required').optional(),
   medications: z
     .array(
       z.object({
@@ -112,6 +116,8 @@ const treatmentFormSchema = z.object({
     )
     .optional()
 });
+
+type FormValues = z.infer<typeof treatmentFormSchema>;
 
 // Updated tooth mapping with common names
 const toothMap: Record<string, { label: string; commonName: string }> = {
@@ -130,7 +136,8 @@ export function AddTreatmentForm({
   patientId,
   appointments,
   isOpen,
-  onOpenChange
+  onOpenChange,
+  treatmentsHistory
 }: AddTreatmentFormProps) {
   const [dentists, setDentists] = useState<Array<{ id: string; name: string }>>(
     []
@@ -140,7 +147,7 @@ export function AddTreatmentForm({
   >([]);
   const [showMedication, setShowMedication] = useState(false);
 
-  const form = useForm({
+  const form = useForm<FormValues>({
     resolver: zodResolver(treatmentFormSchema),
     defaultValues: {
       toothTreatments:
@@ -153,7 +160,7 @@ export function AddTreatmentForm({
       dentist: editData?.dentist_id || '',
       notes: editData?.notes || '',
       type: editData?.type || activeTab,
-      appointmentId: editData?.appointmentId?.toString() || '',
+      appointmentId: editData?.appointmentId || '',
       medications: editData?.medications || []
     }
   });
@@ -162,6 +169,8 @@ export function AddTreatmentForm({
     control: form.control,
     name: 'medications'
   });
+
+  const { errors } = form.formState;
 
   const toothTreatments = form.watch('toothTreatments');
 
@@ -226,7 +235,56 @@ export function AddTreatmentForm({
     loadMedications();
   }, []);
 
-  // Check if all teeth are marked as "Done"
+  const handleSubmit = async (data: FormValues) => {
+    // Only check for existing treatments in create mode
+    if (!editData) {
+      const selectedAppointment = appointments.find(
+        app => app.id === data.appointmentId
+      );
+
+      if (selectedAppointment?.treatments?.length) {
+        toast.error('This appointment already has a treatment.');
+        return;
+      }
+    }
+
+    try {
+      // Check if all treatments are done and we have medications in edit mode
+      if (editData && data.toothTreatments.every(t => t.status === 'Done')) {
+        const medications = data.medications;
+        if (medications?.length > 0) {
+          try {
+            await inventoryService.updateInventoryQuantities(
+              medications.map(med => ({
+                id: med.id,
+                quantity: med.quantity
+              }))
+            );
+            toast.success('Inventory updated successfully');
+          } catch (error) {
+            console.error('Error updating inventory:', error);
+            toast.error('Failed to update inventory');
+            return;
+          }
+        }
+      }
+
+      // Submit the treatment update
+      await onSubmit({
+        ...data,
+        patientId,
+        appointmentId: editData ? editData.appointmentId : data.appointmentId
+      });
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Error submitting treatment:', error);
+      toast.error(
+        error.response?.data?.message || 'Failed to submit treatment'
+      );
+    }
+  };
+
+  // Simplified checkAllDone - only handles showing medication fields
   const checkAllDone = () => {
     if (Array.isArray(toothTreatments)) {
       const allDone = toothTreatments.every(tt => tt.status === 'Done');
@@ -243,33 +301,24 @@ export function AddTreatmentForm({
     checkAllDone();
   }, [toothTreatments]);
 
-  const handleSubmit = async (data: TreatmentFormValues) => {
-    const selectedAppointment = appointments.find(
-      app => app.id === data.appointmentId
-    );
-
-    if (selectedAppointment?.treatments?.length) {
-      toast.error('This appointment already has a treatment.');
-      return;
-    }
-
-    try {
-      await onSubmit({
-        ...data,
-        patientId
-      });
-      onOpenChange(false);
-    } catch (error: any) {
-      console.error('Error submitting treatment:', error);
-      toast.error(
-        error.response?.data?.message || 'Failed to submit treatment'
-      );
-    }
-  };
-
   const treatments =
     activeTab === 'medical' ? medicalTreatments : cosmeticTreatments;
 
+  // Reset form when selectedTeeth changes
+  useEffect(() => {
+    if (!editData) {
+      form.setValue(
+        'toothTreatments',
+        Array.from(selectedTeeth).map(tooth => ({
+          toothNumber: tooth,
+          treatment: '',
+          status: 'Ongoing'
+        }))
+      );
+    }
+  }, [selectedTeeth, editData, form]);
+
+  console.log({ appointments });
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -286,98 +335,120 @@ export function AddTreatmentForm({
               <FormField
                 control={form.control}
                 name="appointmentId"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Appointment</FormLabel>
+                    <FormLabel>Appointments</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={value => {
+                        const selectedAppointment = treatmentsHistory.find(
+                          app => app.appointmentId === value
+                        );
+
+                        if (selectedAppointment?.appointmentId) {
+                          toast.error(
+                            'This appointment already has treatments. Please select another appointment.'
+                          );
+                          field.onChange(''); // Reset the selection
+                        } else {
+                          field.onChange(value.toString());
+                        }
+                      }}
                       defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger
+                          className={cn(fieldState.error && 'border-red-500')}>
                           <SelectValue placeholder="Select appointment" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {appointments
-                          .filter(app => !app.treatments?.length)
-                          .map(appointment => (
-                            <SelectItem
-                              key={appointment.id}
-                              value={appointment.id}>
-                              {format(
-                                new Date(appointment.start),
-                                'MMM d, yyyy h:mm a'
-                              )}
-                            </SelectItem>
-                          ))}
+                        {appointments.map(appointment => (
+                          <SelectItem
+                            key={appointment.id}
+                            value={appointment.id.toString()}>
+                            {format(
+                              new Date(appointment.start),
+                              'MMM d, yyyy h:mm a'
+                            )}{' '}
+                            ( {appointment.service_name} -{' '}
+                            {appointment.number_of_teeth} teeth )
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    {fieldState.error && (
+                      <FormMessage className="text-red-500 text-sm">
+                        {fieldState.error.message}
+                      </FormMessage>
+                    )}
                   </FormItem>
                 )}
               />
             )}
 
-            <div className="border rounded-lg p-4">
-              <h3 className="text-sm font-medium mb-4">Treatment Details</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="font-medium text-sm text-gray-500">
-                  Tooth Number
-                </div>
-                <div className="font-medium text-sm text-gray-500">
-                  Treatment
-                </div>
-                <div className="font-medium text-sm text-gray-500">Status</div>
+            {toothTreatments && toothTreatments.length > 0 && (
+              <div className="border rounded-lg p-4">
+                <h3 className="text-sm font-medium mb-4">Treatment Details</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="font-medium text-sm text-gray-500">
+                    Tooth Number
+                  </div>
+                  <div className="font-medium text-sm text-gray-500">
+                    Treatment
+                  </div>
+                  <div className="font-medium text-sm text-gray-500">
+                    Status
+                  </div>
 
-                {form.watch('toothTreatments').map((treatment, index) => (
-                  <React.Fragment key={treatment.toothNumber}>
-                    <div className="text-sm">#{treatment.toothNumber}</div>
-                    <FormField
-                      control={form.control}
-                      name={`toothTreatments.${index}.treatment`}
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select treatment" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {treatments.map(t => (
-                              <SelectItem key={t} value={t}>
-                                {t}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`toothTreatments.${index}.status`}
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={value => {
-                            field.onChange(value);
-                            if (editData) {
-                              checkAllDone(); // Only check for medication in update mode
-                            }
-                          }}
-                          defaultValue={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Ongoing">Ongoing</SelectItem>
-                            <SelectItem value="Done">Done</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                  </React.Fragment>
-                ))}
+                  {toothTreatments.map((treatment, index) => (
+                    <React.Fragment key={treatment.toothNumber}>
+                      <div className="text-sm">#{treatment.toothNumber}</div>
+                      <FormField
+                        control={form.control}
+                        name={`toothTreatments.${index}.treatment`}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select treatment" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {treatments.map(t => (
+                                <SelectItem key={t} value={t}>
+                                  {t}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`toothTreatments.${index}.status`}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={async value => {
+                              field.onChange(value);
+                              if (editData) {
+                                await checkAllDone();
+                              }
+                            }}
+                            defaultValue={field.value}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Ongoing">Ongoing</SelectItem>
+                              <SelectItem value="Done">Done</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <FormField
               control={form.control}
@@ -534,7 +605,8 @@ export function AddTreatmentForm({
               </Button>
               <Button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white">
+                className="w-full bg-blue-600 text-white"
+                disabled={Object.keys(errors).length > 0}>
                 {editData ? 'Update Treatment' : 'Add Treatment'}
               </Button>
             </div>

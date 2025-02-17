@@ -3,6 +3,7 @@ import express from 'express';
 import config from '../config.js';
 import { format, isSunday, setHours, setMinutes } from 'date-fns';
 import { formatInTimeZone, format as dateFNSFormat } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
 
 import {
   authenticateUserMiddleware,
@@ -19,34 +20,54 @@ let firebaseStorage = config.firebaseStorage;
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // CREATE
-router.post('/create', authenticateUserMiddleware, async (req, res) => {
-  const { user_id } = req.user; // Assuming authenticated user info
-  const { status, patientId, serviceId, start, end, serviceFee } = req.body;
-
-  // Define the Philippine Timezone
-  const timeZone = 'Asia/Manila';
-
-  // Convert and format UTC to Philippine Time (PHT)
-  const startPHT = formatInTimeZone(start, timeZone, 'yyyy-MM-dd HH:mm:ss');
-  const endPHT = formatInTimeZone(end, timeZone, 'yyyy-MM-dd HH:mm:ss');
-
-  const [result] = await db.query(
-    `
-   SELECT * from appointment_statuses
-   where status_name = ?
-    `,
-    [status]
-  );
-
-  let status_id = result[0].id;
+router.post('/create', async (req, res) => {
+  const {
+    status,
+    patientId,
+    serviceId,
+    start,
+    end,
+    serviceFee,
+    date,
+    numberOfTeeth
+  } = req.body;
 
   try {
+    // Format the date from frontend
+    const dateStr = format(new Date(date), 'yyyy-MM-dd');
+
+    // Combine date with time strings
+    const startDateTime = `${dateStr} ${start}`;
+    const endDateTime = `${dateStr} ${end}`;
+
+    // Get status ID
+    const [statusResult] = await db.query(
+      `SELECT id from appointment_statuses WHERE status_name = ?`,
+      [status]
+    );
+    const status_id = statusResult[0].id;
+
     const [result] = await db.query(
       `
-      INSERT INTO appointments (patient_id, service_id, start, end, status_id, service_fee)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO appointments (
+        patient_id, 
+        service_id, 
+        start, 
+        end, 
+        status_id, 
+        service_fee,
+        number_of_teeth
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `,
-      [patientId, serviceId, startPHT, endPHT, status_id, serviceFee]
+      [
+        patientId,
+        serviceId,
+        startDateTime,
+        endDateTime,
+        status_id,
+        serviceFee,
+        numberOfTeeth
+      ]
     );
 
     res.status(201).json({
@@ -55,10 +76,15 @@ router.post('/create', authenticateUserMiddleware, async (req, res) => {
       data: { appointment_id: result.insertId }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error creating appointment' });
+    console.error('Error creating appointment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating appointment',
+      error: error.message
+    });
   }
 });
+
 // READ
 
 router.get('/', authenticateUserMiddleware, async (req, res) => {
@@ -106,40 +132,60 @@ router.get('/', authenticateUserMiddleware, async (req, res) => {
 router.put('/:appointment_id', authenticateUserMiddleware, async (req, res) => {
   const { user_id, role } = req.user;
   const { appointment_id } = req.params;
-  const { status, start, end, patientId, serviceId } = req.body;
+  const { status, start, end, patientId, serviceId, date, numberOfTeeth } =
+    req.body;
 
+  console.log('Dex');
   // Define the Philippine Timezone
   const timeZone = 'Asia/Manila';
 
-  // Convert and format UTC to Philippine Time (PHT)
-  const startPHT = formatInTimeZone(start, timeZone, 'yyyy-MM-dd HH:mm:ss');
-  const endPHT = formatInTimeZone(end, timeZone, 'yyyy-MM-dd HH:mm:ss');
+  // Format the date from frontend
+  const dateStr = format(new Date(date), 'yyyy-MM-dd');
 
-  const [result] = await db.query(
-    `
-   SELECT * from appointment_statuses
-   where status_name = ?
-    `,
-    [status]
-  );
-
-  let status_id = result[0].id;
+  // Combine date with time strings
+  const startPHT = `${dateStr} ${start}`;
+  const endPHT = `${dateStr} ${end}`;
 
   try {
-    // Fetch the existing appointment
-    const [appointment] = await db.query(
-      `SELECT * FROM appointments WHERE id = ?`,
-      [appointment_id]
+    // Check for conflicting appointments
+    const [conflicts] = await db.query(
+      `SELECT * FROM appointments 
+       WHERE id != ? AND patient_id = ? AND (
+         (start < ? AND end > ?) OR
+         (start < ? AND end > ?) OR
+         (start >= ? AND end <= ?)
+       )`,
+      [
+        appointment_id,
+        patientId,
+        endPHT,
+        startPHT,
+        startPHT,
+        endPHT,
+        startPHT,
+        endPHT
+      ]
     );
 
-    if (appointment.length === 0) {
-      return res.status(404).json({ error: 'Appointment not found' });
+    if (conflicts.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message:
+          'The updated appointment time conflicts with an existing appointment.'
+      });
     }
+
+    // Get status ID
+    const [statusResult] = await db.query(
+      `SELECT id from appointment_statuses WHERE status_name = ?`,
+      [status]
+    );
+    const status_id = statusResult[0].id;
 
     // Update the appointment
     const [result] = await db.query(
-      `UPDATE appointments SET status_id = ?, start = ?, end = ?, service_id = ? WHERE id = ?`,
-      [status_id, startPHT, endPHT, serviceId, appointment_id]
+      `UPDATE appointments SET status_id = ?, start = ?, end = ?, service_id = ?, number_of_teeth = ? WHERE id = ?`,
+      [status_id, startPHT, endPHT, serviceId, numberOfTeeth, appointment_id]
     );
 
     res.status(200).json({
@@ -147,7 +193,7 @@ router.put('/:appointment_id', authenticateUserMiddleware, async (req, res) => {
       message: 'Appointment updated successfully'
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error updating appointment:', error);
     res.status(500).json({ error: 'Error updating appointment' });
   }
 });

@@ -372,7 +372,9 @@ export default function AttendancePage() {
                       <TableCell className="font-medium">
                         {record.employeeName}
                       </TableCell>
-                      <TableCell>{record.date}</TableCell>
+                      <TableCell>
+                        {format(new Date(record.date), 'PPP')}
+                      </TableCell>
                       <TableCell>{record.status}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">

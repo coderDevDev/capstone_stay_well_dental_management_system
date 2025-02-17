@@ -138,6 +138,12 @@ const AppRoutes = () => {
           name: 'Payments',
         });
 
+        newRoutes.push({
+          path: '/app/dental-services',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Dental Services',
+        });
+
       }
 
 

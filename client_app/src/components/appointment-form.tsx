@@ -16,7 +16,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'sonner';
 import {
   servicesDental,
   mockAppointments,
@@ -46,6 +46,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import PayPalComponent from '@/components/paypal-button';
+import { appointmentService, paymentService } from '@/services/api';
+import { toast as sonnerToast } from 'sonner';
 
 interface AppointmentFormProps {
   initialDate: Date;
@@ -54,6 +56,8 @@ interface AppointmentFormProps {
   onDelete: (id: number) => void;
   isAdmin?: boolean;
   appointments: any[];
+  patients: Array<{ id: string; name: string }>;
+  servicesDental: Array<{ id: number; name: string; duration: number }>;
 }
 
 export function AppointmentForm({
@@ -63,8 +67,8 @@ export function AppointmentForm({
   onDelete,
   isAdmin = false,
   appointments,
-  patients = [],
-  servicesDental = []
+  patients,
+  servicesDental
 }: AppointmentFormProps) {
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
@@ -92,6 +96,13 @@ export function AppointmentForm({
       ''
   );
 
+  console.log([initialAppointment]);
+
+  const [numberOfTeeth, setNumberOfTeeth] = useState<number>(
+    initialAppointment?.number_of_teeth || 1
+  );
+  const [totalFee, setTotalFee] = useState<number>(0);
+
   console.log({ patients });
   useEffect(() => {
     if (service && startTime) {
@@ -106,73 +117,99 @@ export function AppointmentForm({
     }
   }, [service, startTime, date]);
 
-  const handleSubmit = e => {
+  useEffect(() => {
+    const selectedService = servicesDental.find(
+      s => s.id.toString() === service
+    );
+    if (selectedService) {
+      setTotalFee(selectedService.price * numberOfTeeth);
+    }
+  }, [service, numberOfTeeth, servicesDental]);
+
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [createdAppointmentId, setCreatedAppointmentId] = useState<
+    string | null
+  >(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!service || !startTime || !endTime || !patientId) {
-      // toast({
-      //   title: 'Error',
-      //   description: 'Please fill in all fields',
-      //   variant: 'destructive'
-      // });
-
-      toast.error('Please fill in all field', {
-        position: 'top-right',
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light'
-      });
-
+      toast.error('Please fill in all required fields');
       return;
     }
 
-    const start = parse(startTime, 'HH:mm', date);
-    const end = parse(endTime, 'HH:mm', date);
+    try {
+      setIsSubmitting(true);
 
-    console.log({ dex: isConflicting(start, end), start, end });
+      if (initialAppointment) {
+        // Handle Update
+        const response = await appointmentService.update(
+          initialAppointment.id,
+          {
+            patientId,
+            serviceId: service,
+            start: startTime,
+            end: endTime,
+            status,
+            serviceFee: totalFee,
+            numberOfTeeth: numberOfTeeth,
+            date: date
+          }
+        );
 
-    if (isConflicting(start, end)) {
-      // toast({
-      //   title: 'Error',
-      //   description:
-      //     'This time slot conflicts with an existing appointment. Please choose another time.',
-      //   variant: 'destructive'
-      // });
-
-      toast.warning(
-        'This time slot conflicts with an existing appointment. Please choose another time.',
-        {
-          position: 'top-right',
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: 'light'
+        if (response.success) {
+          toast.success('Appointment updated successfully');
+          onSave(response.data);
         }
-      );
+      } else {
+        // Handle Create
+        const response = await appointmentService.create({
+          patientId,
+          serviceId: service,
+          start: startTime,
+          end: endTime,
+          status: 'pending',
+          serviceFee: totalFee,
+          numberOfTeeth: numberOfTeeth,
+          date: date
+        });
 
-      return;
+        if (response.success) {
+          setCreatedAppointmentId(response.data.appointment_id);
+          toast.success('Appointment created. Please complete the payment.');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving appointment:', error);
+      toast.error('Failed to save appointment');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    onSave({
-      id: initialAppointment?.id || Date.now(),
-      patientId: Number.parseInt(patientId),
-      serviceId: Number.parseInt(service),
-      start,
-      end,
-      status,
-      serviceFee
-    });
-
-    // toast({
-    //   title: 'Success',
-    //   description: 'Your appointment has been saved successfully!'
-    // });
+  const handlePaymentSuccess = async () => {
+    try {
+      // Update appointment status after successful payment
+      if (createdAppointmentId) {
+        // await appointmentService.update(createdAppointmentId, {
+        //   status: 'confirmed'
+        // });
+        // onSave({
+        //   id: createdAppointmentId,
+        //   patientId,
+        //   serviceId: service,
+        //   start: startTime,
+        //   end: endTime,
+        //   status: 'confirmed',
+        //   serviceFee
+        // });
+        toast.success('Appointment booked successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      toast.error('Error updating appointment status');
+    }
   };
 
   const isConflicting = (start: Date, end: Date) => {
@@ -241,8 +278,72 @@ export function AppointmentForm({
 
   const availableTimeSlots = generateTimeSlots();
 
+  const isConfirmed = initialAppointment?.appointment_status === 'Confirmed';
+
+  const handleNumberOfTeethChange = (value: number) => {
+    if (value >= 1 && value <= 5) {
+      setNumberOfTeeth(value);
+    } else {
+      toast.error('Number of teeth must be between 1 and 5');
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex space-x-4">
+        <div className="flex-1 space-y-2">
+          <label
+            htmlFor="service"
+            className="text-sm font-medium text-gray-700">
+            Select a service:
+          </label>
+          <Select
+            value={service}
+            onValueChange={value => {
+              let findAmount = servicesDental.find(d => {
+                return d.id === parseInt(value);
+              });
+
+              setService(value);
+              // setServiceFee(findAmount.price);
+            }}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a service" />
+            </SelectTrigger>
+            <SelectContent>
+              {servicesDental.map(service => (
+                <SelectItem key={service.id} value={service.id.toString()}>
+                  {service.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex-1 space-y-2">
+          <label
+            htmlFor="numberOfTeeth"
+            className="text-sm font-medium text-gray-700">
+            Number of teeth:
+          </label>
+          <Input
+            type="number"
+            id="numberOfTeeth"
+            value={numberOfTeeth}
+            onChange={e => handleNumberOfTeethChange(Number(e.target.value))}
+            className="w-full"
+            min={1}
+            max={5}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="totalFee" className="text-sm font-medium text-gray-700">
+          Total Fee/Price
+        </label>
+        <Input type="number" value={totalFee} className="w-full" readOnly />
+      </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-700">Date:</label>
         <Popover>
@@ -282,34 +383,6 @@ export function AppointmentForm({
             {patients.map(patient => (
               <SelectItem key={patient.id} value={patient.id.toString()}>
                 {patient.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="service" className="text-sm font-medium text-gray-700">
-          Select a service:
-        </label>
-        <Select
-          value={service}
-          onValueChange={value => {
-            // console.log({ initialAppointment, e });
-
-            let findAmount = servicesDental.find(d => {
-              return d.id === parseInt(value);
-            });
-
-            setService(value);
-            setServiceFee(findAmount.amount);
-          }}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a service" />
-          </SelectTrigger>
-          <SelectContent>
-            {servicesDental.map(service => (
-              <SelectItem key={service.id} value={service.id.toString()}>
-                {service.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -363,36 +436,55 @@ export function AppointmentForm({
         </div>
       )}
 
-      <div className="space-y-2">
-        <label htmlFor="endTime" className="text-sm font-medium text-gray-700">
-          Service Fee
-        </label>
-        <Input type="number" value={serviceFee} className="w-full" readOnly />
-      </div>
-      <div className="flex justify-between">
-        <Button type="submit" className="w-full mr-2 bg-blue-700 text-white">
-          <SaveAll className="h-4 w-4 mr-1" />
-          {initialAppointment ? 'Update' : 'Book'} Appointment
-        </Button>
+      <div className="space-y-4">
+        {initialAppointment ? (
+          // Edit Mode
+          <Button
+            type="submit"
+            className="w-full bg-blue-600 text-white"
+            disabled={isSubmitting || isConfirmed}>
+            {isSubmitting ? 'Updating...' : 'Update Appointment'}
+          </Button>
+        ) : !createdAppointmentId ? (
+          // Create Mode - Initial
+          <Button
+            type="submit"
+            className="w-full bg-blue-600 text-white"
+            disabled={isSubmitting}>
+            {isSubmitting ? 'Creating...' : 'Create Appointment'}
+          </Button>
+        ) : (
+          // Create Mode - Payment
+          <PayPalComponent
+            amount={serviceFee}
+            appointmentId={createdAppointmentId}
+            onSuccess={() => {
+              toast.success('Appointment booked successfully!');
+              onSave?.({
+                id: createdAppointmentId,
+                patientId,
+                serviceId: service,
+                start: startTime,
+                end: endTime,
+                status: 'confirmed',
+                serviceFee
+              });
+            }}
+          />
+        )}
 
-        <PayPalComponent amount={500} />
         {initialAppointment && (
           <Button
-            className="bg-red-600 text-white"
+            className="w-full bg-red-600 text-white"
             type="button"
             variant="destructive"
-            onClick={() => onDelete(initialAppointment.id)}>
+            onClick={() => onDelete(initialAppointment.id)}
+            disabled={isConfirmed}>
             <Trash2 className="h-4 w-4 mr-1" />
             Delete
           </Button>
         )}
       </div>
-      {initialAppointment &&
-        (status === 'In Progress' || status === 'Completed') && (
-          <Link to={`/treatment/${initialAppointment.id}`}>
-            <Button className="w-full mt-2">Treatment</Button>
-          </Link>
-        )}
     </form>
   );
 }

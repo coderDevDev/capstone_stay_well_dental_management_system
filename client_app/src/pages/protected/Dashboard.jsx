@@ -182,10 +182,10 @@ function InternalPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
           <AppointmentOverview />
           <TreatmentStats />
-
+          {/* 
           {
             role !== 'patient' && <RecentActivities />
-          }
+          } */}
 
 
         </div>
