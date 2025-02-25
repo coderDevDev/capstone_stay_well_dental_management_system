@@ -18,9 +18,9 @@ import {
   Home, Package, Truck, ShoppingCart, UserCheck,
   PhilippinePeso,
   Banknote,
-  Calendar
+  Calendar,
 
-
+  Building2
 } from "lucide-react"
 
 const iconClasses = 'h-6 w-6';
@@ -68,6 +68,33 @@ const AppRoutes = () => {
 
 
 
+      if (role === 'admin') {
+        newRoutes.push({
+          path: '/app/dashboard',
+          icon: <Home className={iconClasses} />,
+          name: 'Dashboard',
+        });
+
+        newRoutes.push({
+          path: '/app/dental-branches',
+          icon: <Building2 className={iconClasses} />,
+          name: 'Dental Branches',
+        });
+
+
+        newRoutes.push({
+          path: '/app/users',
+          icon: <UserCheck className={iconClasses} />,
+          name: 'Patients',
+        });
+
+        newRoutes.push({
+          path: '/app/appointments',
+          icon: <Squares2X2Icon className={iconClasses} />,
+          name: 'Appointments',
+        });
+
+      }
 
       if (role === 'dentist') {
         newRoutes.push({
@@ -75,6 +102,10 @@ const AppRoutes = () => {
           icon: <Home className={iconClasses} />,
           name: 'Dashboard',
         });
+
+
+
+
         // newRoutes.push({
         //   path: '/app/profile',
         //   icon: <Squares2X2Icon className={iconClasses} />,
@@ -173,6 +204,10 @@ const AppRoutes = () => {
         });
 
       }
+
+
+
+
 
 
 

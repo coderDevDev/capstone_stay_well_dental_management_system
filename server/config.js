@@ -47,17 +47,40 @@ try {
     //   // queueLimit: 0 // No limit on queue
     // });
 
+    // const pool = await mysql.createPool({
+    //   host: '127.0.0.1',
+    //   user: 'root',
+    //   password: 'password',
+    //   database: 'dental_clinic',
+    //   port: 3306,
+    //   waitForConnections: true,
+    //   connectionLimit: 0, // Max number of connections in the pool
+    //   queueLimit: 0,
+    //   ssl: false,
+    //   timezone: '+08:00' // Use Manila time (UTC+8)
+    // });
+
+    // const pool = await mysql.createPool({
+    //   host: 'db.btmcdhltlvydssuebwir.supabase.co',
+    //   user: 'bc30f9dc38379a',
+    //   password: 'Vn8bma2WgWmWLhcE',
+    //   database: 'postgres',
+    //   port: 5432,
+    //   waitForConnections: true,
+    //   connectionLimit: 0, // Max number of connections in the pool
+    //   queueLimit: 0 // No limit on queue
+    // });
+
     const pool = await mysql.createPool({
-      host: '127.0.0.1',
+      host: 'jcqlf1.stackhero-network.com',
       user: 'root',
-      password: 'password',
+      password: 'OwhHbxDtBwsDB9VlClLwfkzw9MTBr70m',
       database: 'dental_clinic',
-      port: 3306,
+      port: 4300,
       waitForConnections: true,
       connectionLimit: 0, // Max number of connections in the pool
       queueLimit: 0,
-      ssl: false,
-      timezone: '+08:00' // Use Manila time (UTC+8)
+      ssl: false // Disable SSL connection
     });
 
     return pool;

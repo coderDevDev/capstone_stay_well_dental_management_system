@@ -994,3 +994,58 @@ export const dentalServiceService = {
     }
   }
 };
+
+export interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  contactNumber: string;
+  manager: string;
+  operatingHours: string;
+  status: 'Active' | 'Inactive';
+}
+
+export const branchService = {
+  async getAll(): Promise<Branch[]> {
+    try {
+      const response = await axios.get(`${API_URL}/branches`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to fetch branches'
+      );
+    }
+  },
+
+  async create(data: Omit<Branch, 'id'>): Promise<Branch> {
+    try {
+      const response = await axios.post(`${API_URL}/branches`, data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to create branch'
+      );
+    }
+  },
+
+  async update(id: string, data: Partial<Branch>): Promise<Branch> {
+    try {
+      const response = await axios.put(`${API_URL}/branches/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to update branch'
+      );
+    }
+  },
+
+  async delete(id: string): Promise<void> {
+    try {
+      await axios.delete(`${API_URL}/branches/${id}`);
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to delete branch'
+      );
+    }
+  }
+};

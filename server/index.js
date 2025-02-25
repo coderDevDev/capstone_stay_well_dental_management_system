@@ -19,6 +19,7 @@ import attendanceRoutes from './routes/attendance.js';
 import roleRoutes from './routes/roles.js';
 
 import dentalServiceRoutes from './routes/dental-services.js';
+import dentalBranchesRoutes from './routes/dental-branches.js';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -112,6 +113,7 @@ app.use('/api/payroll', payrollRoutes);
 app.use('/api/treatments', treatmentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/services', dentalServiceRoutes);
+app.use('/api', dentalBranchesRoutes);
 app.use(express.static('public'));
 app.use(express.static('files'));
 

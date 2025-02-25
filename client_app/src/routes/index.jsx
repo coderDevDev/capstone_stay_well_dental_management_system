@@ -24,6 +24,7 @@ const Reports = lazy(() => import('../pages/protected/Reports'));
 const DentalServices = lazy(() => import('../app/dental-services/page'));
 const Payments = lazy(() => import('../app/payments/page'));
 const Statistics = lazy(() => import('../pages/protected/Statistics'));
+const DentalBranches = lazy(() => import('../app/dental-branches/page'));
 
 const ProfileSettings = lazy(() =>
   import('../pages/protected/ProfileSettings')
@@ -190,6 +191,10 @@ routes = [
   {
     path: '/dental-services',
     component: DentalServices
+  },
+  {
+    path: '/dental-branches',
+    component: DentalBranches
   },
 
 ];
