@@ -40,7 +40,7 @@ const httpServer = createServer(app);
 
 // Configure CORS for both Express and Socket.IO
 const corsOptions = {
-  origin: 'http://localhost:5173', // Your frontend URL
+  origin: 'https://staywelldental.onrender.com', // Your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -50,7 +50,7 @@ app.use(cors(corsOptions));
 
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: 'https://staywelldental.onrender.com',
     methods: ['GET', 'POST', 'PUT', 'DELETE']
   }
 });
