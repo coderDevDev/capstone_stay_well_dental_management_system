@@ -25,6 +25,7 @@ router.post('/create', async (req, res) => {
     status,
     patientId,
     serviceId,
+    branch_id,
     start,
     end,
     serviceFee,
@@ -40,6 +41,21 @@ router.post('/create', async (req, res) => {
     const startDateTime = `${dateStr} ${start}`;
     const endDateTime = `${dateStr} ${end}`;
 
+    // Validate branch if provided
+    if (branch_id) {
+      const [branch] = await db.query(
+        'SELECT * FROM dental_branches WHERE id = ? AND status = "Active"',
+        [branch_id]
+      );
+
+      if (!branch[0]) {
+        return res.status(400).json({
+          success: false,
+          message: 'Selected branch is not available'
+        });
+      }
+    }
+
     // Get status ID
     const [statusResult] = await db.query(
       `SELECT id from appointment_statuses WHERE status_name = ?`,
@@ -51,17 +67,19 @@ router.post('/create', async (req, res) => {
       `
       INSERT INTO appointments (
         patient_id, 
-        service_id, 
+        service_id,
+        branch_id, 
         start, 
         end, 
         status_id, 
         service_fee,
         number_of_teeth
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         patientId,
         serviceId,
+        branch_id,
         startDateTime,
         endDateTime,
         status_id,
@@ -70,10 +88,31 @@ router.post('/create', async (req, res) => {
       ]
     );
 
+    // Get the created appointment with branch info
+    const [newAppointment] = await db.query(
+      `SELECT 
+        a.*,
+        s.name as service_name,
+        p.first_name,
+        p.last_name,
+        aps.status_name as status,
+        db.name as branch_name
+      FROM appointments a
+      INNER JOIN services s ON a.service_id = s.id
+      INNER JOIN patients p ON a.patient_id = p.patient_id
+      INNER JOIN appointment_statuses aps ON a.status_id = aps.id
+      LEFT JOIN dental_branches db ON a.branch_id = db.id
+      WHERE a.id = ?`,
+      [result.insertId]
+    );
+
     res.status(201).json({
       success: true,
       message: 'Appointment created successfully',
-      data: { appointment_id: result.insertId }
+      data: {
+        appointment_id: result.insertId,
+        ...newAppointment[0]
+      }
     });
   } catch (error) {
     console.error('Error creating appointment:', error);
@@ -132,10 +171,17 @@ router.get('/', authenticateUserMiddleware, async (req, res) => {
 router.put('/:appointment_id', authenticateUserMiddleware, async (req, res) => {
   const { user_id, role } = req.user;
   const { appointment_id } = req.params;
-  const { status, start, end, patientId, serviceId, date, numberOfTeeth } =
-    req.body;
+  const {
+    status,
+    start,
+    end,
+    patientId,
+    serviceId,
+    date,
+    numberOfTeeth,
+    branch_id // Added branch_id
+  } = req.body;
 
-  console.log('Dex');
   // Define the Philippine Timezone
   const timeZone = 'Asia/Manila';
 
@@ -147,6 +193,21 @@ router.put('/:appointment_id', authenticateUserMiddleware, async (req, res) => {
   const endPHT = `${dateStr} ${end}`;
 
   try {
+    // Validate branch if provided
+    if (branch_id) {
+      const [branch] = await db.query(
+        'SELECT * FROM dental_branches WHERE id = ? AND status = "Active"',
+        [branch_id]
+      );
+
+      if (!branch[0]) {
+        return res.status(400).json({
+          success: false,
+          message: 'Selected branch is not available'
+        });
+      }
+    }
+
     // Check for conflicting appointments
     const [conflicts] = await db.query(
       `SELECT * FROM appointments 
@@ -182,19 +243,57 @@ router.put('/:appointment_id', authenticateUserMiddleware, async (req, res) => {
     );
     const status_id = statusResult[0].id;
 
-    // Update the appointment
+    // Update the appointment with branch_id
     const [result] = await db.query(
-      `UPDATE appointments SET status_id = ?, start = ?, end = ?, service_id = ?, number_of_teeth = ? WHERE id = ?`,
-      [status_id, startPHT, endPHT, serviceId, numberOfTeeth, appointment_id]
+      `UPDATE appointments 
+       SET status_id = ?, 
+           start = ?, 
+           end = ?, 
+           service_id = ?, 
+           number_of_teeth = ?,
+           branch_id = ?
+       WHERE id = ?`,
+      [
+        status_id,
+        startPHT,
+        endPHT,
+        serviceId,
+        numberOfTeeth,
+        branch_id,
+        appointment_id
+      ]
+    );
+
+    // Get the updated appointment with branch info
+    const [updatedAppointment] = await db.query(
+      `SELECT 
+        a.*,
+        s.name as service_name,
+        p.first_name,
+        p.last_name,
+        aps.status_name as status,
+        db.name as branch_name
+      FROM appointments a
+      INNER JOIN services s ON a.service_id = s.id
+      INNER JOIN patients p ON a.patient_id = p.patient_id
+      INNER JOIN appointment_statuses aps ON a.status_id = aps.id
+      LEFT JOIN dental_branches db ON a.branch_id = db.id
+      WHERE a.id = ?`,
+      [appointment_id]
     );
 
     res.status(200).json({
       success: true,
-      message: 'Appointment updated successfully'
+      message: 'Appointment updated successfully',
+      data: updatedAppointment[0]
     });
   } catch (error) {
     console.error('Error updating appointment:', error);
-    res.status(500).json({ error: 'Error updating appointment' });
+    res.status(500).json({
+      success: false,
+      message: 'Error updating appointment',
+      error: error.message
+    });
   }
 });
 
@@ -239,54 +338,53 @@ router.delete(
 );
 
 router.get('/list', authenticateUserMiddleware, async (req, res) => {
-  const { user_id, role } = req.user; // Assuming authenticated user info
-
-  let patient_id = req.user.patient_id;
+  const { branchId } = req.query;
+  const { user_id, role, patient_id } = req.user; // Assuming authenticated user info
 
   try {
+    const conditions = [];
+    const params = [];
+
+    if (branchId) {
+      conditions.push('a.branch_id = ?');
+      params.push(branchId);
+    }
+
+    if (patient_id) {
+      conditions.push('a.patient_id = ?');
+      params.push(patient_id);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
     const query = `
-SELECT
-    a.*,
-    p.first_name AS patient_first_name,
-    p.last_name AS patient_last_name,
-    s.name AS service_name,
-    aps.status_name AS appointment_status
-FROM appointments a
-INNER JOIN appointment_statuses aps ON aps.id = a.status_id
-INNER JOIN patients p ON a.patient_id = p.patient_id
-INNER JOIN services s ON a.service_id = s.id
-
-
-
-    ${role === 'patient' ? `WHERE a.patient_id = ${patient_id}` : ''}
-
-    
+      SELECT a.*, s.name as service_name, p.first_name, 
+      p.last_name ,
+      aps.status_name as status,
+      b.name as branch_name
+      FROM appointments a
+      INNER JOIN services s ON a.service_id = s.id
+      INNER JOIN patients p ON a.patient_id = p.patient_id
+      INNER JOIN appointment_statuses aps ON a.status_id = aps.id
+      LEFT JOIN dental_branches b ON a.branch_id = b.id
+      ${whereClause}
+      ORDER BY a.start DESC
     `;
 
-    console.log(query);
+    const [appointments] = await db.query(query, params);
 
-    const [appointments] = await db.query(query);
-
-    const transformedAppointments = appointments.map(appointment => {
-      return {
-        id: appointment.id,
-        patientId: appointment.patient_id,
-        serviceId: appointment.service_id,
-        date: format(new Date(appointment.start), 'yyyy-MM-dd'),
-        start: new Date(appointment.start),
-        end: new Date(appointment.end),
-        status: appointment.appointment_status,
-        ...appointment
-      };
-    });
-
-    res.status(200).json({
+    res.json({
       success: true,
-      data: transformedAppointments
+      data: appointments
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error fetching all appointments' });
+    console.error('Error fetching appointments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch appointments'
+    });
   }
 });
 

@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import {
   format,
@@ -46,7 +48,13 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import PayPalComponent from '@/components/paypal-button';
-import { appointmentService, paymentService } from '@/services/api';
+import {
+  appointmentService,
+  paymentService,
+  branchService,
+  type Branch
+} from '@/services/api';
+import { Card } from '@/components/ui/card';
 import { toast as sonnerToast } from 'sonner';
 
 interface AppointmentFormProps {
@@ -104,6 +112,13 @@ export function AppointmentForm({
   const [totalFee, setTotalFee] = useState<number>(0);
 
   console.log({ patients });
+
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(
+    initialAppointment?.branch_id || null
+  );
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     if (service && startTime) {
       const selectedService = servicesDental.find(
@@ -126,6 +141,27 @@ export function AppointmentForm({
     }
   }, [service, numberOfTeeth, servicesDental]);
 
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await branchService.getAll();
+        if (response.success) {
+          setBranches(response.data);
+          if (!selectedBranchId && response.data.length > 0) {
+            setSelectedBranchId(response.data[0].id);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+        toast.error('Failed to fetch branches');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBranches();
+  }, []);
+
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [createdAppointmentId, setCreatedAppointmentId] = useState<
     string | null
@@ -134,7 +170,7 @@ export function AppointmentForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!service || !startTime || !endTime || !patientId) {
+    if (!service || !startTime || !endTime || !patientId || !selectedBranchId) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -154,7 +190,8 @@ export function AppointmentForm({
             status,
             serviceFee: totalFee,
             numberOfTeeth: numberOfTeeth,
-            date: date
+            date: date,
+            branch_id: selectedBranchId
           }
         );
 
@@ -172,7 +209,8 @@ export function AppointmentForm({
           status: 'pending',
           serviceFee: totalFee,
           numberOfTeeth: numberOfTeeth,
-          date: date
+          date: date,
+          branch_id: selectedBranchId
         });
 
         if (response.success) {
@@ -289,202 +327,263 @@ export function AppointmentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex space-x-4">
-        <div className="flex-1 space-y-2">
+    <div className="max-h-[80vh] overflow-y-auto px-1">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium">Select Branch</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {branches.map(branch => (
+              <Card
+                key={branch.id}
+                className={`p-2 cursor-pointer transition-all hover:shadow-md ${
+                  parseInt(selectedBranchId) === parseInt(branch.id)
+                    ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
+                    : 'hover:bg-gray-50'
+                }`}
+                onClick={() => setSelectedBranchId(branch.id)}>
+                <div className="flex flex-col space-y-1">
+                  <h4 className="font-medium text-sm truncate">
+                    {branch.name}
+                  </h4>
+                  <p className="text-xs text-gray-600 truncate">
+                    {branch.address}
+                  </p>
+                  <span
+                    className={`mt-1 text-[10px] px-1.5 py-0.5 rounded-full w-fit ${
+                      branch.status === 'Active'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                    {branch.status}
+                  </span>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div className="sm:hidden mt-2">
+            <Select
+              value={selectedBranchId || undefined}
+              onValueChange={setSelectedBranchId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a branch" />
+              </SelectTrigger>
+              <SelectContent>
+                {branches.map(branch => (
+                  <SelectItem key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex space-x-4">
+          <div className="flex-1 space-y-2">
+            <label
+              htmlFor="service"
+              className="text-sm font-medium text-gray-700">
+              Select a service:
+            </label>
+            <Select
+              value={service}
+              onValueChange={value => {
+                let findAmount = servicesDental.find(d => {
+                  return d.id === parseInt(value);
+                });
+
+                setService(value);
+                // setServiceFee(findAmount.price);
+              }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a service" />
+              </SelectTrigger>
+              <SelectContent>
+                {servicesDental.map(service => (
+                  <SelectItem key={service.id} value={service.id.toString()}>
+                    {service.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1 space-y-2">
+            <label
+              htmlFor="numberOfTeeth"
+              className="text-sm font-medium text-gray-700">
+              Number of teeth:
+            </label>
+            <Input
+              type="number"
+              id="numberOfTeeth"
+              value={numberOfTeeth}
+              onChange={e => handleNumberOfTeethChange(Number(e.target.value))}
+              className="w-full"
+              min={1}
+              max={5}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <label
-            htmlFor="service"
+            htmlFor="totalFee"
             className="text-sm font-medium text-gray-700">
-            Select a service:
+            Total Fee/Price
+          </label>
+          <Input type="number" value={totalFee} className="w-full" readOnly />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Date:</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'w-full justify-start text-left font-normal',
+                  !date && 'text-muted-foreground'
+                )}>
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, 'PPP') : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={newDate => newDate && setDate(newDate)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="space-y-2">
+          <label
+            htmlFor="patient"
+            className="text-sm font-medium text-gray-700">
+            Select a patient:
           </label>
           <Select
-            value={service}
-            onValueChange={value => {
-              let findAmount = servicesDental.find(d => {
-                return d.id === parseInt(value);
-              });
-
-              setService(value);
-              // setServiceFee(findAmount.price);
-            }}>
+            disabled={!isAdmin && loggedInUser.patient_id}
+            value={patientId}
+            onValueChange={setPatientId}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a service" />
+              <SelectValue placeholder="Select a patient" />
             </SelectTrigger>
             <SelectContent>
-              {servicesDental.map(service => (
-                <SelectItem key={service.id} value={service.id.toString()}>
-                  {service.name}
+              {patients.map(patient => (
+                <SelectItem key={patient.id} value={patient.id.toString()}>
+                  {patient.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="flex-1 space-y-2">
-          <label
-            htmlFor="numberOfTeeth"
-            className="text-sm font-medium text-gray-700">
-            Number of teeth:
-          </label>
-          <Input
-            type="number"
-            id="numberOfTeeth"
-            value={numberOfTeeth}
-            onChange={e => handleNumberOfTeethChange(Number(e.target.value))}
-            className="w-full"
-            min={1}
-            max={5}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="totalFee" className="text-sm font-medium text-gray-700">
-          Total Fee/Price
-        </label>
-        <Input type="number" value={totalFee} className="w-full" readOnly />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Date:</label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={'outline'}
-              className={cn(
-                'w-full justify-start text-left font-normal',
-                !date && 'text-muted-foreground'
-              )}>
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, 'PPP') : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={newDate => newDate && setDate(newDate)}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="patient" className="text-sm font-medium text-gray-700">
-          Select a patient:
-        </label>
-        <Select
-          disabled={!isAdmin && loggedInUser.patient_id}
-          value={patientId}
-          onValueChange={setPatientId}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a patient" />
-          </SelectTrigger>
-          <SelectContent>
-            {patients.map(patient => (
-              <SelectItem key={patient.id} value={patient.id.toString()}>
-                {patient.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <label
-          htmlFor="startTime"
-          className="text-sm font-medium text-gray-700">
-          Start time:
-        </label>
-        <Select value={startTime} onValueChange={setStartTime}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a start time" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {availableTimeSlots.map(t => (
-              <SelectItem
-                key={t}
-                value={t}
-                disabled={isTimeSlotConflicting(date, t)}>
-                {t}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="endTime" className="text-sm font-medium text-gray-700">
-          End time:
-        </label>
-        <Input type="time" value={endTime} className="w-full" readOnly />
-      </div>
-      {isAdmin && (
         <div className="space-y-2">
-          <label htmlFor="status" className="text-sm font-medium text-gray-700">
-            Status:
+          <label
+            htmlFor="startTime"
+            className="text-sm font-medium text-gray-700">
+            Start time:
           </label>
-          <Select value={status} onValueChange={setStatus}>
+          <Select value={startTime} onValueChange={setStartTime}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a status" />
+              <SelectValue placeholder="Select a start time" />
             </SelectTrigger>
-            <SelectContent>
-              {appointmentStatuses.map(status => (
-                <SelectItem key={status} value={status}>
-                  {status}
+            <SelectContent position="popper">
+              {availableTimeSlots.map(t => (
+                <SelectItem
+                  key={t}
+                  value={t}
+                  disabled={isTimeSlotConflicting(date, t)}>
+                  {t}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-      )}
-
-      <div className="space-y-4">
-        {initialAppointment ? (
-          // Edit Mode
-          <Button
-            type="submit"
-            className="w-full bg-blue-600 text-white"
-            disabled={isSubmitting || isConfirmed}>
-            {isSubmitting ? 'Updating...' : 'Update Appointment'}
-          </Button>
-        ) : !createdAppointmentId ? (
-          // Create Mode - Initial
-          <Button
-            type="submit"
-            className="w-full bg-blue-600 text-white"
-            disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create Appointment'}
-          </Button>
-        ) : (
-          // Create Mode - Payment
-          <PayPalComponent
-            amount={totalFee}
-            appointmentId={createdAppointmentId}
-            onSuccess={() => {
-              toast.success('Appointment booked successfully!');
-              onSave?.({
-                id: createdAppointmentId,
-                patientId,
-                serviceId: service,
-                start: startTime,
-                end: endTime,
-                status: 'confirmed',
-                serviceFee: totalFee
-              });
-            }}
-          />
+        <div className="space-y-2">
+          <label
+            htmlFor="endTime"
+            className="text-sm font-medium text-gray-700">
+            End time:
+          </label>
+          <Input type="time" value={endTime} className="w-full" readOnly />
+        </div>
+        {isAdmin && (
+          <div className="space-y-2">
+            <label
+              htmlFor="status"
+              className="text-sm font-medium text-gray-700">
+              Status:
+            </label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a status" />
+              </SelectTrigger>
+              <SelectContent>
+                {appointmentStatuses.map(status => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
 
-        {initialAppointment && (
-          <Button
-            className="w-full bg-red-600 text-white"
-            type="button"
-            variant="destructive"
-            onClick={() => onDelete(initialAppointment.id)}
-            disabled={isConfirmed}>
-            <Trash2 className="h-4 w-4 mr-1" />
-            Delete
-          </Button>
-        )}
-      </div>
-    </form>
+        <div className="space-y-4">
+          {initialAppointment ? (
+            // Edit Mode
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 text-white"
+              disabled={isSubmitting || isConfirmed}>
+              {isSubmitting ? 'Updating...' : 'Update Appointment'}
+            </Button>
+          ) : !createdAppointmentId ? (
+            // Create Mode - Initial
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 text-white"
+              disabled={isSubmitting || !selectedBranchId}>
+              {isSubmitting ? 'Creating...' : 'Create Appointment'}
+            </Button>
+          ) : (
+            // Create Mode - Payment
+            <PayPalComponent
+              amount={totalFee}
+              appointmentId={createdAppointmentId}
+              onSuccess={() => {
+                toast.success('Appointment booked successfully!');
+                onSave?.({
+                  id: createdAppointmentId,
+                  patientId,
+                  serviceId: service,
+                  start: startTime,
+                  end: endTime,
+                  status: 'confirmed',
+                  serviceFee: totalFee,
+                  branch_id: selectedBranchId
+                });
+              }}
+            />
+          )}
+
+          {initialAppointment && (
+            <Button
+              className="w-full bg-red-600 text-white"
+              type="button"
+              variant="destructive"
+              onClick={() => onDelete(initialAppointment.id)}
+              disabled={isConfirmed}>
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete
+            </Button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }

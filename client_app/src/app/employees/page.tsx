@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Search, PlusCircle, Edit2, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
   Card,
   CardContent,
@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/pagination';
 import { toast } from 'sonner';
 import { io } from 'socket.io-client';
+import { branchService, type Branch } from '@/services/api';
 
 export default function EmployeesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,6 +43,9 @@ export default function EmployeesPage() {
   );
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(true);
 
   // Fetch initial data
   useEffect(() => {
@@ -68,6 +72,25 @@ export default function EmployeesPage() {
     };
   }, []);
 
+  // Add branch fetching
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await branchService.getAll();
+        if (response.success) {
+          setBranches(response.data);
+          setSelectedBranchId(response.data[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+        toast.error('Failed to fetch branches');
+      } finally {
+        setIsLoadingBranches(false);
+      }
+    };
+    fetchBranches();
+  }, []);
+
   const fetchEmployees = async () => {
     try {
       const data = await employeeService.getAll();
@@ -78,9 +101,16 @@ export default function EmployeesPage() {
     }
   };
 
-  const filteredEmployees = employeeList.filter(employee =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter employees by branch
+  const filteredEmployees = employeeList.filter(employee => {
+    const matchesSearch = employee.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesBranch = selectedBranchId
+      ? employee.branch_id === selectedBranchId
+      : true;
+    return matchesSearch && matchesBranch;
+  });
 
   const paginatedEmployees = filteredEmployees.slice(
     (page - 1) * itemsPerPage,
@@ -144,6 +174,52 @@ export default function EmployeesPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Branch Selection */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium mb-3">Filter by Branch</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {console.log({ branches: branches.length })}
+              {branches.length > 1 && (
+                <Card
+                  className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                    !selectedBranchId
+                      ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedBranchId(null)}>
+                  <div className="flex flex-col space-y-1">
+                    <h4 className="font-medium text-sm">All Branches</h4>
+                  </div>
+                </Card>
+              )}
+
+              {branches.map(branch => (
+                <Card
+                  key={branch.id}
+                  className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                    selectedBranchId === branch.id
+                      ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedBranchId(branch.id)}>
+                  <div className="flex flex-col space-y-1">
+                    <h4 className="font-medium text-sm truncate">
+                      {branch.name}
+                    </h4>
+                    <span
+                      className={`mt-1 text-[10px] px-1.5 py-0.5 rounded-full w-fit ${
+                        branch.status === 'Active'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                      {branch.status}
+                    </span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <Search className="h-5 w-5 text-gray-500" />
@@ -171,7 +247,7 @@ export default function EmployeesPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Position</TableHead>
+
                   <TableHead>Salary</TableHead>
                   <TableHead>Salary Basis</TableHead>
                   <TableHead>Working Hours</TableHead>
@@ -187,9 +263,9 @@ export default function EmployeesPage() {
                     </TableCell>
                     <TableCell>{employee.email}</TableCell>
                     <TableCell>{employee.role_name}</TableCell>
-                    <TableCell>{employee.position}</TableCell>
+
                     <TableCell>₱{employee.salary.toLocaleString()}</TableCell>
-                    <TableCell>{employee.salaryBasis}</TableCell>
+                    <TableCell>{employee.salary_basis}</TableCell>
                     <TableCell>{employee.workingHours} hours/week</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
@@ -258,16 +334,27 @@ export default function EmployeesPage() {
             setSelectedEmployee(null);
           }
         }}>
-        <DialogContent className="max-w-4xl">
-          <UpdateEmployeeForm
-            onUpdate={updateEmployee}
-            onAdd={addEmployee}
-            employee={selectedEmployee}
-            onClose={() => {
-              setIsAddModalOpen(false);
-              setSelectedEmployee(null);
-            }}
-          />
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 gap-0">
+          <div className="max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b">
+              <DialogTitle className="text-xl font-semibold">
+                {selectedEmployee ? 'Edit Employee' : 'Add New Employee'}
+              </DialogTitle>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <UpdateEmployeeForm
+                onUpdate={updateEmployee}
+                onAdd={addEmployee}
+                employee={selectedEmployee}
+                branches={branches}
+                selectedBranchId={selectedBranchId}
+                onClose={() => {
+                  setIsAddModalOpen(false);
+                  setSelectedEmployee(null);
+                }}
+              />
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

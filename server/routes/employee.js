@@ -37,27 +37,25 @@ const queries = {
   deleteEmployee: `DELETE FROM employees WHERE id = ?`
 };
 
-// Get all employees
+// Get all employees with branch info
 router.get('/', async (req, res) => {
   try {
-    const [employees] = await db.query(queries.getAllEmployees);
-    const formattedEmployees = employees.map(emp => ({
-      id: emp.id,
-      name: emp.name,
-      email: emp.email,
-      role_id: emp.role_id,
-      role_name: emp.role_name,
-      position: emp.position,
-      salary: emp.salary,
-      salaryBasis: emp.salary_basis,
-      workingHours: emp.working_hours,
-      category: emp.category,
-      sssContribution: emp.sss_contribution,
-      pagibigContribution: emp.pagibig_contribution,
-      philhealthContribution: emp.philhealth_contribution,
-      withholdingTax: emp.withholding_tax
-    }));
-    res.json(formattedEmployees);
+    const [employees] = await db.query(`
+      SELECT 
+        e.*,
+        u.email,
+        u.role_id,
+        r.role_name,
+        b.name as branch_name,
+        b.id as branch_id
+      FROM employees e
+      INNER JOIN users u ON e.user_id = u.user_id
+      INNER JOIN roles r ON u.role_id = r.role_id
+      LEFT JOIN dental_branches b ON e.branch_id = b.id
+      ORDER BY e.created_at DESC
+    `);
+
+    res.status(200).json(employees);
   } catch (error) {
     console.error('Error fetching employees:', error);
     res.status(500).json({ error: 'Failed to fetch employees' });
@@ -99,11 +97,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create a new employee
+// Create employee
 router.post('/create', async (req, res) => {
   const {
     name,
-    position,
+    email,
+    roleId,
     salary,
     salaryBasis,
     workingHours,
@@ -112,37 +111,56 @@ router.post('/create', async (req, res) => {
     pagibigContribution,
     philhealthContribution,
     withholdingTax,
-    email,
-    roleId
+    branch_id // Added branch_id
   } = req.body;
 
   try {
+    // Start transaction
+    await db.query('START TRANSACTION');
+
+    // Validate if branch exists and is active
+    if (branch_id) {
+      const [branch] = await db.query(
+        'SELECT * FROM dental_branches WHERE id = ? AND status = "Active"',
+        [branch_id]
+      );
+
+      if (!branch[0]) {
+        await db.query('ROLLBACK');
+        return res.status(400).json({
+          success: false,
+          message: 'Selected branch is not available'
+        });
+      }
+    }
+
     // Check if email already exists
-    const emailCheck = await db.query('SELECT * FROM users WHERE email = ?', [
-      email
-    ]);
-    if (emailCheck[0].length > 0) {
+    const [existingUser] = await db.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+
+    if (existingUser.length > 0) {
+      await db.query('ROLLBACK');
       return res.status(400).json({ error: 'Email already exists' });
     }
 
-    // First create the user
+    // Create user account
     const [userResult] = await db.query(
       'INSERT INTO users (email, password, role_id) VALUES (?, ?, ?)',
       [email, 'defaultpassword', roleId]
     );
 
-    // Then create the employee with the user_id
+    // Create employee record with branch_id
     const [employeeResult] = await db.query(
       `INSERT INTO employees (
-        user_id, name, position, salary, salary_basis, 
-        working_hours, category, sss_contribution,
-        pagibig_contribution, philhealth_contribution,
-        withholding_tax
+        user_id, name, salary, salary_basis, working_hours,
+        category, sss_contribution, pagibig_contribution,
+        philhealth_contribution, withholding_tax, branch_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         userResult.insertId,
         name,
-        position, // This will be the role_name
         salary,
         salaryBasis,
         workingHours,
@@ -150,15 +168,35 @@ router.post('/create', async (req, res) => {
         sssContribution,
         pagibigContribution,
         philhealthContribution,
-        withholdingTax
+        withholdingTax,
+        branch_id
       ]
     );
 
+    await db.query('COMMIT');
+
+    // Get the created employee with all related info
+    const [newEmployee] = await db.query(
+      `SELECT 
+        e.*,
+        u.email,
+        u.role_id,
+        r.role_name,
+        b.name as branch_name
+      FROM employees e
+      INNER JOIN users u ON e.user_id = u.user_id
+      INNER JOIN roles r ON u.role_id = r.role_id
+      LEFT JOIN dental_branches b ON e.branch_id = b.id
+      WHERE e.id = ?`,
+      [employeeResult.insertId]
+    );
+
     res.status(201).json({
-      message: 'Employee created successfully',
-      employeeId: employeeResult.insertId
+      success: true,
+      data: newEmployee[0]
     });
   } catch (error) {
+    await db.query('ROLLBACK');
     console.error('Error creating employee:', error);
     res.status(500).json({ error: 'Failed to create employee' });
   }
@@ -166,89 +204,102 @@ router.post('/create', async (req, res) => {
 
 // Update employee
 router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    email,
+    roleId,
+    salary,
+    salaryBasis,
+    workingHours,
+    category,
+    sssContribution,
+    pagibigContribution,
+    philhealthContribution,
+    withholdingTax,
+    branch_id // Added branch_id
+  } = req.body;
+
   try {
-    const {
-      name,
-      position,
-      salary,
-      salaryBasis,
-      workingHours,
-      category,
-      sssContribution,
-      pagibigContribution,
-      philhealthContribution,
-      withholdingTax,
-      email,
-      roleId
-    } = req.body;
-
-    // First check if the email exists for any other user
-    const [emailCheck] = await db.query(
-      'SELECT u.user_id FROM users u INNER JOIN employees e ON u.user_id = e.user_id WHERE u.email = ? AND e.id != ?',
-      [email, parseInt(req.params.id)]
-    );
-
-    if (emailCheck.length > 0) {
-      return res.status(400).json({ error: 'Email already exists' });
-    }
-
-    // Get the user_id for this employee
-    const [employeeData] = await db.query(
-      'SELECT user_id FROM employees WHERE id = ?',
-      [parseInt(req.params.id)]
-    );
-
-    if (!employeeData[0]) {
-      return res.status(404).json({ error: 'Employee not found' });
-    }
-
-    // Start a transaction
     await db.query('START TRANSACTION');
 
-    try {
-      // Update user email and role
-      await db.query(
-        'UPDATE users SET email = ?, role_id = ? WHERE user_id = ?',
-        [email, roleId, employeeData[0].user_id]
+    // Validate branch if provided
+    if (branch_id) {
+      const [branch] = await db.query(
+        'SELECT * FROM dental_branches WHERE id = ? AND status = "Active"',
+        [branch_id]
       );
 
-      // Update employee details
-      await db.query(
-        `UPDATE employees 
-         SET name = ?, position = ?, salary = ?, 
-             salary_basis = ?, working_hours = ?, category = ?,
-             sss_contribution = ?, pagibig_contribution = ?,
-             philhealth_contribution = ?, withholding_tax = ?
-         WHERE id = ?`,
-        [
-          name,
-          position,
-          salary,
-          salaryBasis,
-          workingHours,
-          category,
-          sssContribution,
-          pagibigContribution,
-          philhealthContribution,
-          withholdingTax,
-          parseInt(req.params.id)
-        ]
-      );
-
-      await db.query('COMMIT');
-
-      const updatedEmployee = {
-        id: parseInt(req.params.id),
-        ...req.body
-      };
-
-      global.io.emit('employeeUpdated', updatedEmployee);
-      res.json(updatedEmployee);
-    } catch (error) {
-      await db.query('ROLLBACK');
-      throw error;
+      if (!branch[0]) {
+        await db.query('ROLLBACK');
+        return res.status(400).json({
+          success: false,
+          message: 'Selected branch is not available'
+        });
+      }
     }
+
+    // Update employee record with branch_id
+    await db.query(
+      `UPDATE employees 
+       SET name = ?, salary = ?, salary_basis = ?, 
+           working_hours = ?, category = ?, 
+           sss_contribution = ?, pagibig_contribution = ?,
+           philhealth_contribution = ?, withholding_tax = ?,
+           branch_id = ?
+       WHERE id = ?`,
+      [
+        name,
+        salary,
+        salaryBasis,
+        workingHours,
+        category,
+        sssContribution,
+        pagibigContribution,
+        philhealthContribution,
+        withholdingTax,
+        branch_id,
+        id
+      ]
+    );
+
+    // Update user email and role if provided
+    const [employee] = await db.query(
+      'SELECT user_id FROM employees WHERE id = ?',
+      [id]
+    );
+
+    if (email || roleId) {
+      await db.query(
+        'UPDATE users SET email = COALESCE(?, email), role_id = COALESCE(?, role_id) WHERE user_id = ?',
+        [email, roleId, employee[0].user_id]
+      );
+    }
+
+    await db.query('COMMIT');
+
+    // Get updated employee with all related info
+    const [updatedEmployee] = await db.query(
+      `SELECT 
+        e.*,
+        u.email,
+        u.role_id,
+        r.role_name,
+        b.name as branch_name
+      FROM employees e
+      INNER JOIN users u ON e.user_id = u.user_id
+      INNER JOIN roles r ON u.role_id = r.role_id
+      LEFT JOIN dental_branches b ON e.branch_id = b.id
+      WHERE e.id = ?`,
+      [id]
+    );
+
+    res.json({
+      success: true,
+      data: updatedEmployee[0]
+    });
   } catch (error) {
+    await db.query('ROLLBACK');
     console.error('Error updating employee:', error);
     res.status(500).json({ error: 'Failed to update employee' });
   }

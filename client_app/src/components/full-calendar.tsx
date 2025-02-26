@@ -19,13 +19,20 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { appointmentService } from '@/services/api';
+import { appointmentService, branchService } from '@/services/api';
 import { AppointmentForm } from '@/components/appointment-form';
 import { AppointmentList } from '@/components/appointment-list';
 import { TableView } from '@/components/table-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarDays, List } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
+
+interface FullCalendarProps {
+  isAdmin?: boolean;
+  selectedBranchId?: string | null;
+}
+
 const locales = {
   'en-US': enUS
 };
@@ -37,8 +44,11 @@ const localizer = dateFnsLocalizer({
   getDay,
   locales
 });
-import axios from 'axios';
-export function FullCalendar({ isAdmin = false }) {
+
+export function FullCalendar({
+  isAdmin = false,
+  selectedBranchId
+}: FullCalendarProps) {
   console.log({ isAdmin });
   const [selectedSlot, setSelectedSlot] = useState<SlotInfo | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -47,26 +57,32 @@ export function FullCalendar({ isAdmin = false }) {
   const [servicesDental, setServices] = useState([]);
 
   const fetchAppointments = async () => {
-    let res = await axios.get('appointment/list', {
-      // customerId: userId,
-      // type: orderType
-    });
-    let list = res.data.data.map(other => {
-      // const phDateStart = addHours(parseISO(other.start), 8);
-      // const phDateEnd = addHours(parseISO(other.end), 8);
+    try {
+      let res = await axios.get('appointment/list', {
+        params: {
+          branchId: selectedBranchId
+        }
+      });
+      let list = res.data.data.map(other => {
+        // const phDateStart = addHours(parseISO(other.start), 8);
+        // const phDateEnd = addHours(parseISO(other.end), 8);
 
-      // let options = { timeZone: 'Asia/Manila', timeZoneName: 'long' };
+        // let options = { timeZone: 'Asia/Manila', timeZoneName: 'long' };
 
-      return {
-        ...other,
-        serviceId: other.service_id,
-        patientId: other.patient_id,
-        start: new Date(other.start),
-        end: new Date(other.end)
-      };
-    });
-    console.log({ list });
-    setAppointments(list);
+        return {
+          ...other,
+          serviceId: other.service_id,
+          patientId: other.patient_id,
+          start: new Date(other.start),
+          end: new Date(other.end)
+        };
+      });
+      console.log({ list });
+      setAppointments(list);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      toast.error('Failed to fetch appointments');
+    }
   };
 
   const fetchPatients = async () => {
@@ -114,6 +130,10 @@ export function FullCalendar({ isAdmin = false }) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [selectedBranchId]);
 
   const [isNewAppointment, setIsNewAppointment] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
@@ -273,7 +293,6 @@ export function FullCalendar({ isAdmin = false }) {
         </TabsContent>
       </Tabs>
       <Dialog
-        modal
         open={!!selectedSlot || !!selectedAppointment}
         onOpenChange={open => {
           if (!open) {
@@ -282,8 +301,8 @@ export function FullCalendar({ isAdmin = false }) {
           }
         }}>
         <DialogContent
-          onPointerDownOutside={e => e.preventDefault()}
-          className="sm:max-w-[525px]">
+          className="max-w-3xl w-[95vw] max-h-[90vh] p-6"
+          onPointerDownOutside={e => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               {isNewAppointment ? 'Book an Appointment' : 'Edit Appointment'}

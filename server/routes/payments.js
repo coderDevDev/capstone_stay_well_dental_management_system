@@ -1,6 +1,6 @@
 import express from 'express';
 import config from '../config.js';
-
+import { authenticateUserMiddleware } from './../middleware/authMiddleware.js';
 const router = express.Router();
 const db = config.mySqlDriver;
 
@@ -92,35 +92,62 @@ router.get('/payments', async (req, res) => {
 });
 
 // Create payment
-router.post('/', async (req, res) => {
+router.post('/create', async (req, res) => {
   const {
     appointmentId,
     payment_method,
     transaction_id,
     amount,
     status,
+    branch_id,
     receipt_url,
     approved_by
   } = req.body;
 
   try {
+    // Validate if appointment exists and get branch info
+    const [appointment] = await db.query(
+      `SELECT a.*, b.id as branch_id, b.name as branch_name 
+       FROM appointments a 
+       LEFT JOIN dental_branches b ON a.branch_id = b.id 
+       WHERE a.id = ?`,
+      [appointmentId]
+    );
+
+    if (!appointment[0]) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found'
+      });
+    }
+
+    // Use branch_id from request or from appointment
+    const finalBranchId = branch_id || appointment[0].branch_id;
+
+    // Create payment record
     const [result] = await db.query(
       `INSERT INTO payments (
-        appointmentId, payment_method, transaction_id, 
-        amount, status, receipt_url, approved_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        appointmentId, 
+        payment_method, 
+        transaction_id, 
+        amount, 
+        status,
+        branch_id,
+        receipt_url,
+        approved_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         appointmentId,
         payment_method,
         transaction_id,
         amount,
         status,
+        finalBranchId,
         receipt_url,
         approved_by
       ]
     );
 
-    // Update appointment status
     await db.query('UPDATE appointments SET status_id = ? WHERE id = ?', [
       2,
       appointmentId
@@ -132,12 +159,29 @@ router.post('/', async (req, res) => {
       status: 'completed'
     });
 
+    // Get the created payment with related data
+    const [newPayment] = await db.query(
+      `SELECT 
+        p.*,
+        a.start as appointment_date,
+        pat.first_name as patient_first_name,
+        pat.last_name as patient_last_name,
+        s.name as service_name,
+        aps.status_name as appointment_status,
+        b.name as branch_name
+      FROM payments p
+      INNER JOIN appointments a ON p.appointmentId  = a.id
+      INNER JOIN patients pat ON a.patient_id = pat.patient_id
+      INNER JOIN services s ON a.service_id = s.id
+      INNER JOIN appointment_statuses aps ON a.status_id = aps.id
+      LEFT JOIN dental_branches b ON p.branch_id = b.id
+      WHERE p.id = ?`,
+      [result.insertId]
+    );
+
     res.status(201).json({
       success: true,
-      data: {
-        id: result.insertId,
-        ...req.body
-      }
+      data: newPayment[0]
     });
   } catch (error) {
     console.error('Error creating payment:', error);
@@ -169,27 +213,57 @@ router.get('/appointment/:id', async (req, res) => {
   }
 });
 
-// GET all payments with related data
-router.get('/list', async (req, res) => {
+router.get('/list', authenticateUserMiddleware, async (req, res) => {
   try {
-    const [payments] = await db.query(`
+    const { branch_id } = req.query;
+    const { patient_id, role } = req.user;
+
+    let query = `
       SELECT 
         p.*,
         a.start as appointment_date,
-        a.service_fee,
         pat.first_name as patient_first_name,
         pat.last_name as patient_last_name,
         s.name as service_name,
-        aps.status_name as appointment_status
+        aps.status_name as appointment_status,
+        b.name as branch_name
       FROM payments p
-      INNER JOIN appointments a ON p.appointmentId = a.id
+      INNER JOIN appointments a ON p.appointmentId   = a.id
       INNER JOIN patients pat ON a.patient_id = pat.patient_id
       INNER JOIN services s ON a.service_id = s.id
       INNER JOIN appointment_statuses aps ON a.status_id = aps.id
-      ORDER BY p.created_at DESC
-    `);
+      LEFT JOIN dental_branches b ON p.branch_id = b.id
+    `;
 
-    console.log({ payments });
+    let params = [];
+    let conditions = [];
+
+    // Apply branch filter
+    if (branch_id) {
+      conditions.push(`p.branch_id = ?`);
+      params.push(branch_id);
+    }
+
+    // Apply role-based filtering
+    if (role === 'patient') {
+      conditions.push(`a.patient_id = ?`); // Filtering by patient_id in the appointments table
+      params.push(patient_id);
+    }
+    //  else if (role === 'dentist') {
+    //   conditions.push(`s.dentist_id = ?`); // Assuming services table has a dentist_id column
+    //   params.push(user_id);
+    // }
+
+    // Append conditions to query
+
+    if (conditions.length > 0) {
+      query += ` WHERE ` + conditions.join(' AND ');
+    }
+
+    query += ` ORDER BY p.created_at DESC`;
+    console.log({ query, params });
+
+    const [payments] = await db.query(query, params);
 
     res.json({
       success: true,
@@ -200,6 +274,65 @@ router.get('/list', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch payments'
+    });
+  }
+});
+
+// Update payment
+router.put('/:id', async (req, res) => {
+  const { payment_method, transaction_id, amount, status, branch_id } =
+    req.body;
+
+  try {
+    // Update payment record
+    const [result] = await db.query(
+      `UPDATE payments 
+       SET payment_method = ?,
+           transaction_id = ?,
+           amount = ?,
+           status = ?,
+           branch_id = ?,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [payment_method, transaction_id, amount, status, branch_id, req.params.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Payment not found'
+      });
+    }
+
+    // Get updated payment with related data
+    const [updatedPayment] = await db.query(
+      `SELECT 
+        p.*,
+        a.start as appointment_date,
+        pat.first_name as patient_first_name,
+        pat.last_name as patient_last_name,
+        s.name as service_name,
+        aps.status_name as appointment_status,
+        b.name as branch_name
+      FROM payments p
+      INNER JOIN appointments a ON p.appointment_id = a.id
+      INNER JOIN patients pat ON a.patient_id = pat.patient_id
+      INNER JOIN services s ON a.service_id = s.id
+      INNER JOIN appointment_statuses aps ON a.status_id = aps.id
+      LEFT JOIN dental_branches b ON p.branch_id = b.id
+      WHERE p.id = ?`,
+      [req.params.id]
+    );
+
+    res.json({
+      success: true,
+      data: updatedPayment[0]
+    });
+  } catch (error) {
+    console.error('Error updating payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update payment'
     });
   }
 });

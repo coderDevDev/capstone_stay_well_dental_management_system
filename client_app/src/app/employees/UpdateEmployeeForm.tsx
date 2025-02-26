@@ -32,7 +32,34 @@ import {
 import { cn } from '@/lib/utils';
 import { type Employee as ApiEmployee } from '@/services/api';
 import { toast } from 'sonner';
-import { roleService, type Role } from '@/services/api';
+import {
+  roleService,
+  type Role,
+  branchService,
+  type Branch
+} from '@/services/api';
+
+interface ApiEmployee {
+  id: number;
+  user_id: number;
+  name: string;
+  position: string | null;
+  salary: string;
+  salary_basis: string;
+  working_hours: number;
+  category: string;
+  sss_contribution: string;
+  pagibig_contribution: string;
+  philhealth_contribution: string;
+  withholding_tax: string;
+  created_at: string;
+  updated_at: string;
+  branch_id: number;
+  email: string;
+  role_id: number;
+  role_name: string;
+  branch_name: string;
+}
 
 const employeeSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -63,7 +90,8 @@ const employeeSchema = z.object({
     val => Number(val),
     z.number().min(0, 'Withholding tax must be valid')
   ),
-  email: z.string().email('Invalid email address')
+  email: z.string().email('Invalid email address'),
+  branch_id: z.number().min(1, 'Branch is required')
 });
 
 interface UpdateEmployeeFormProps {
@@ -71,6 +99,8 @@ interface UpdateEmployeeFormProps {
   onAdd: (data: Omit<ApiEmployee, 'id'>) => Promise<void>;
   employee: ApiEmployee | null;
   onClose?: () => void;
+  branches: Branch[];
+  selectedBranchId?: string | null;
 }
 
 const categories = [
@@ -89,8 +119,11 @@ export default function UpdateEmployeeForm({
   onUpdate,
   onAdd,
   employee,
-  onClose
+  onClose,
+  branches,
+  selectedBranchId
 }: UpdateEmployeeFormProps) {
+  console.log({ employee });
   const [roles, setRoles] = useState<Role[]>([]);
   const {
     register,
@@ -104,16 +137,17 @@ export default function UpdateEmployeeForm({
     defaultValues: employee
       ? {
           name: employee.name,
-          roleId: employee.role_id,
-          salary: employee.salary,
-          salaryBasis: employee.salaryBasis,
-          workingHours: employee.workingHours,
+          roleId: employee.role_id.toString(),
+          salary: parseFloat(employee.salary),
+          salaryBasis: employee.salary_basis,
+          workingHours: employee.working_hours,
           category: employee.category,
-          sssContribution: employee.sssContribution,
-          pagibigContribution: employee.pagibigContribution,
-          philhealthContribution: employee.philhealthContribution,
-          withholdingTax: employee.withholdingTax,
-          email: employee.email
+          sssContribution: parseFloat(employee.sss_contribution),
+          pagibigContribution: parseFloat(employee.pagibig_contribution),
+          philhealthContribution: parseFloat(employee.philhealth_contribution),
+          withholdingTax: parseFloat(employee.withholding_tax),
+          email: employee.email,
+          branch_id: employee.branch_id
         }
       : {
           name: '',
@@ -126,7 +160,8 @@ export default function UpdateEmployeeForm({
           pagibigContribution: '',
           philhealthContribution: '',
           withholdingTax: '',
-          email: ''
+          email: '',
+          branch_id: selectedBranchId || ''
         }
   });
 
@@ -147,16 +182,23 @@ export default function UpdateEmployeeForm({
   useEffect(() => {
     if (employee) {
       setValue('name', employee.name);
-      setValue('roleId', employee.role_id);
-      setValue('salary', employee.salary);
-      setValue('salaryBasis', employee.salaryBasis);
-      setValue('workingHours', employee.workingHours);
+      setValue('roleId', employee.role_id.toString());
+      setValue('salary', parseFloat(employee.salary));
+      setValue('salaryBasis', employee.salary_basis);
+      setValue('workingHours', employee.working_hours);
       setValue('category', employee.category);
-      setValue('sssContribution', employee.sssContribution);
-      setValue('pagibigContribution', employee.pagibigContribution);
-      setValue('philhealthContribution', employee.philhealthContribution);
-      setValue('withholdingTax', employee.withholdingTax);
+      setValue('sssContribution', parseFloat(employee.sss_contribution));
+      setValue(
+        'pagibigContribution',
+        parseFloat(employee.pagibig_contribution)
+      );
+      setValue(
+        'philhealthContribution',
+        parseFloat(employee.philhealth_contribution)
+      );
+      setValue('withholdingTax', parseFloat(employee.withholding_tax));
       setValue('email', employee.email);
+      setValue('branch_id', employee.branch_id);
     }
   }, [employee, setValue]);
 
@@ -188,14 +230,54 @@ export default function UpdateEmployeeForm({
   };
 
   return (
-    <Card className="max-h-[85vh] overflow-hidden w-full">
-      <CardHeader className="pb-4">
+    <Card className="w-full">
+      {/* <CardHeader className="">
         <CardTitle>
           {employee ? 'Update Employee' : 'Add New Employee'}
         </CardTitle>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent className="overflow-y-auto pb-6 px-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Branch Selection Cards */}
+          <div className="space-y-3">
+            <Label>Select Branch</Label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {branches.map(branch => (
+                <Card
+                  key={branch.id}
+                  className={`p-2 cursor-pointer transition-all hover:shadow-md ${
+                    watch('branch_id') === branch.id
+                      ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => setValue('branch_id', branch.id)}>
+                  <div className="flex flex-col space-y-1">
+                    <h4 className="font-medium text-sm truncate">
+                      {branch.name}
+                    </h4>
+                    <p className="text-xs text-gray-600 truncate">
+                      {branch.address}
+                    </p>
+                    <span
+                      className={`mt-1 text-[10px] px-1.5 py-0.5 rounded-full w-fit ${
+                        branch.status === 'Active'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                      {branch.status}
+                    </span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+            {errors.branch_id && (
+              <p className="text-xs font-medium text-red-500">
+                {errors.branch_id.message}
+              </p>
+            )}
+          </div>
+
+          {/* Rest of the form fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-4">
@@ -301,7 +383,7 @@ export default function UpdateEmployeeForm({
                     <Calculator className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 z-10" />
                     <Select
                       onValueChange={value => setValue('salaryBasis', value)}
-                      defaultValue={employee?.salaryBasis}>
+                      defaultValue={employee?.salary_basis}>
                       <SelectTrigger
                         className={cn(
                           'pl-9',
@@ -487,6 +569,7 @@ export default function UpdateEmployeeForm({
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               className="font-bold shadow-2xl"

@@ -1,6 +1,10 @@
 import express from 'express';
 import config from '../config.js';
 
+import {
+  authenticateUserMiddleware,
+  auditTrailMiddleware
+} from '../middleware/authMiddleware.js';
 const router = express.Router();
 const db = config.mySqlDriver;
 
@@ -29,13 +33,42 @@ const queries = {
 };
 
 // Get all branches
-router.get('/branches', async (req, res) => {
+router.get('/branches', authenticateUserMiddleware, async (req, res) => {
+  const { user_id, role } = req.user; // Extract user ID and role from authenticated user
+
+  console.log({ dex: req.user });
+
   try {
     const [branches] = await db.query(queries.getAllBranches);
-    res.json({
-      success: true,
-      data: branches
-    });
+
+    if (role === 'admin') {
+      res.json({
+        success: true,
+        data: branches
+      });
+    } else {
+      const [employee] = await db.query(
+        `
+        
+         SELECT e.*, u.email, u.role_id, r.role_name
+          FROM employees e
+          INNER JOIN users u ON e.user_id = u.user_id
+          INNER JOIN roles r ON u.role_id = r.role_id
+          WHERE e.user_id = ?
+        `,
+
+        [parseInt(user_id)]
+      );
+
+      const filteredBranches = branches.filter(
+        branch => branch.id === parseInt(employee[0].branch_id)
+      );
+
+      res.json({
+        success: true,
+        data: filteredBranches
+      });
+    }
   } catch (error) {
     console.error('Error fetching branches:', error);
     res.status(500).json({

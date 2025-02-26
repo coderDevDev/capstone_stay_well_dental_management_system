@@ -903,7 +903,7 @@ export interface Payment {
 export const paymentService = {
   create: async (data: Omit<Payment, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      const response = await axios.post('/payments', data);
+      const response = await axios.post('/payments/create', data);
       return response.data;
     } catch (error) {
       console.error('Error creating payment:', error);

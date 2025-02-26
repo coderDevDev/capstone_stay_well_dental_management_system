@@ -94,6 +94,19 @@ const AppRoutes = () => {
           name: 'Appointments',
         });
 
+
+        newRoutes.push({
+          path: '/app/employees',
+          icon: <UserGroupIcon className={iconClasses} />,
+          name: 'Employees',
+        });
+
+        newRoutes.push({
+          path: '/app/suppliers-orders',
+          icon: <Truck className={iconClasses} />,
+          name: 'Inventory & Suppliers',
+        });
+
       }
 
       if (role === 'dentist') {
@@ -147,21 +160,17 @@ const AppRoutes = () => {
         });
 
 
-        newRoutes.push({
-          path: '/app/payroll',
-          icon: <PhilippinePeso className={iconClasses} />,
-          name: 'Payroll',
-        });
+        // newRoutes.push({
+        //   path: '/app/payroll',
+        //   icon: <PhilippinePeso className={iconClasses} />,
+        //   name: 'Payroll',
+        // });
 
 
 
 
 
-        newRoutes.push({
-          path: '/app/suppliers-orders',
-          icon: <Truck className={iconClasses} />,
-          name: 'Inventory & Suppliers',
-        });
+
 
         newRoutes.push({
           path: '/app/payments',
