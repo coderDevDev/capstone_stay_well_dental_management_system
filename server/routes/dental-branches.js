@@ -60,9 +60,15 @@ router.get('/branches', authenticateUserMiddleware, async (req, res) => {
         [parseInt(user_id)]
       );
 
-      const filteredBranches = branches.filter(
-        branch => branch.id === parseInt(employee[0].branch_id)
-      );
+      let filteredBranches = [];
+
+      if (role === 'patient') {
+        filteredBranches = branches;
+      } else {
+        filteredBranches = branches.filter(
+          branch => branch.id === parseInt(employee[0].branch_id)
+        );
+      }
 
       res.json({
         success: true,
