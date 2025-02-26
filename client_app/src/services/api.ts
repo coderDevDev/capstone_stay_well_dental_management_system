@@ -5,7 +5,7 @@ import type {
 } from '../app/inventory-supplier/InventoryManagement';
 import axios from 'axios';
 
-export const API_URL = 'http://localhost:5000/api';
+export const API_URL = 'https://staywelldentalbackend.onrender.com/api';
 
 // Inventory Services
 export const inventoryService = {
