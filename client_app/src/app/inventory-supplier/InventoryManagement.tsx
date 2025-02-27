@@ -115,7 +115,7 @@ export default function InventoryManagement() {
   }, []);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000', {
+    const socket = io('https://staywelldentalbackend.onrender.com', {
       withCredentials: true,
       transports: ['websocket', 'polling'],
       reconnection: true,
