@@ -207,7 +207,7 @@ export default function AttendancePage() {
   };
 
   const filteredAttendance = attendanceList.filter(record => {
-    const matchesSearch = record.employee_name
+    const matchesSearch = (record?.employee_name || '')
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesEmployee =
@@ -221,6 +221,9 @@ export default function AttendancePage() {
 
     return matchesSearch && matchesEmployee && matchesStatus;
   });
+
+  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  console.log({ loggedInUser, filteredAttendance });
 
   const pageCount = Math.ceil(filteredAttendance.length / itemsPerPage);
   const paginationRange = Array.from({ length: pageCount }, (_, i) => i + 1);

@@ -1,6 +1,6 @@
 import express from 'express';
 import config from '../config.js';
-
+import { authenticateUserMiddleware } from '../middleware/authMiddleware.js';
 const router = express.Router();
 const db = config.mySqlDriver;
 
@@ -24,19 +24,28 @@ const queries = {
 };
 
 // Get all attendance records with employee names
-router.get('/attendance', async (req, res) => {
-  try {
-    const [records] = await db.query(
-      `SELECT a.*, e.name as employeeName 
+router.get(
+  '/attendance',
+
+  authenticateUserMiddleware,
+
+  async (req, res) => {
+    try {
+      const authuser = req.user; // Extract user ID and role from authenticated user
+
+      console.log({ authuser });
+      const [records] = await db.query(
+        `SELECT a.*, e.name as employeeName 
        FROM attendance a
        INNER JOIN employees e ON a.employee_id = e.id`
-    );
-    res.json(records);
-  } catch (error) {
-    console.error('Error fetching attendance:', error);
-    res.status(500).json({ error: 'Failed to fetch attendance records' });
+      );
+      res.json(records);
+    } catch (error) {
+      console.error('Error fetching attendance:', error);
+      res.status(500).json({ error: 'Failed to fetch attendance records' });
+    }
   }
-});
+);
 
 // Get attendance by ID
 router.get('/attendance/:id', async (req, res) => {
