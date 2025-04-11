@@ -33,6 +33,10 @@ import {
 import { toast } from 'sonner';
 import { io } from 'socket.io-client';
 import { branchService, type Branch } from '@/services/api';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AttendanceManagement from './AttendanceManagement';
+import PayrollManagement from './PayrollManagement';
+import { cn } from '@/lib/utils';
 
 export default function EmployeesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,6 +50,8 @@ export default function EmployeesPage() {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [isLoadingBranches, setIsLoadingBranches] = useState(true);
+  const [activeTab, setActiveTab] = useState('employees');
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   // Fetch initial data
   useEffect(() => {
@@ -89,6 +95,12 @@ export default function EmployeesPage() {
       }
     };
     fetchBranches();
+  }, []);
+
+  useEffect(() => {
+    // Get user role from localStorage or context
+    const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+    setUserRole(user.role_name || null);
   }, []);
 
   const fetchEmployees = async () => {
@@ -157,173 +169,234 @@ export default function EmployeesPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <Card className="bg-white">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Employees</CardTitle>
-              <CardDescription>
-                Manage your employee information
-              </CardDescription>
-            </div>
-            {/* <Button onClick={() => setIsAddModalOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Employee
-            </Button> */}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Branch Selection */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium mb-3">Filter by Branch</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {console.log({ branches: branches.length })}
-              {branches.length > 1 && (
-                <Card
-                  className={`p-3 cursor-pointer transition-all hover:shadow-md ${
-                    !selectedBranchId
-                      ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedBranchId(null)}>
-                  <div className="flex flex-col space-y-1">
-                    <h4 className="font-medium text-sm">All Branches</h4>
-                  </div>
-                </Card>
-              )}
+    <div className="container mx-auto py-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-3 bg-gray-100 p-1 rounded-lg mb-6">
+          <TabsTrigger
+            value="employees"
+            className={cn(
+              'px-4 py-2 rounded-md transition-all',
+              activeTab === 'employees'
+                ? 'bg-white shadow-sm font-medium text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            )}>
+            Employees
+          </TabsTrigger>
+          <TabsTrigger
+            value="attendance"
+            className={cn(
+              'px-4 py-2 rounded-md transition-all',
+              activeTab === 'attendance'
+                ? 'bg-white shadow-sm font-medium text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            )}>
+            Attendance (DTR)
+          </TabsTrigger>
+          <TabsTrigger
+            value="payroll"
+            className={cn(
+              'px-4 py-2 rounded-md transition-all',
+              activeTab === 'payroll'
+                ? 'bg-white shadow-sm font-medium text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            )}>
+            Payroll & Salary
+          </TabsTrigger>
+        </TabsList>
 
-              {branches.map(branch => (
-                <Card
-                  key={branch.id}
-                  className={`p-3 cursor-pointer transition-all hover:shadow-md ${
-                    selectedBranchId === branch.id
-                      ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedBranchId(branch.id)}>
-                  <div className="flex flex-col space-y-1">
-                    <h4 className="font-medium text-sm truncate">
-                      {branch.name}
-                    </h4>
-                    <span
-                      className={`mt-1 text-[10px] px-1.5 py-0.5 rounded-full w-fit ${
-                        branch.status === 'Active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}>
-                      {branch.status}
-                    </span>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <Search className="h-5 w-5 text-gray-500" />
-              <Input
-                placeholder="Search employees..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="max-w-sm"
-              />
-            </div>
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="hover:bg-blue-700
-              
-              font-bold text-white bg-blue-700 shadow-2xl
-              ">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Employee
-            </Button>
-          </div>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-
-                  <TableHead>Salary</TableHead>
-                  <TableHead>Salary Basis</TableHead>
-                  <TableHead>Working Hours</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedEmployees.map(employee => (
-                  <TableRow key={employee.id}>
-                    <TableCell className="font-medium">
-                      {employee.name}
-                    </TableCell>
-                    <TableCell>{employee.email}</TableCell>
-                    <TableCell>{employee.role_name}</TableCell>
-
-                    <TableCell>₱{employee.salary.toLocaleString()}</TableCell>
-                    <TableCell>{employee.salary_basis}</TableCell>
-                    <TableCell>{employee.workingHours} hours/week</TableCell>
-                    <TableCell>{employee.category}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-blue-50 hover:bg-blue-100 border-blue-200"
-                          onClick={() => setSelectedEmployee(employee)}>
-                          <Edit2 className="h-4 w-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-red-50 hover:bg-red-100 border-red-200"
-                          onClick={() => handleDelete(employee.id)}>
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
+        <TabsContent value="employees">
+          <Card className="bg-white">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Employees</CardTitle>
+                  <CardDescription>
+                    Manage your employee information
+                  </CardDescription>
+                </div>
+                {/* <Button onClick={() => setIsAddModalOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Employee
+                </Button> */}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Branch Selection */}
+              <div className="mb-6">
+                <h3 className="text-sm font-medium mb-3">Filter by Branch</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {console.log({ branches: branches.length })}
+                  {branches.length > 1 && (
+                    <Card
+                      className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                        !selectedBranchId
+                          ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => setSelectedBranchId(null)}>
+                      <div className="flex flex-col space-y-1">
+                        <h4 className="font-medium text-sm">All Branches</h4>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          {totalPages > 1 && (
-            <div className="mt-4 flex justify-center">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    p => (
-                      <PaginationItem key={p}>
-                        <PaginationLink
-                          onClick={() => setPage(p)}
-                          isActive={page === p}>
-                          {p}
-                        </PaginationLink>
-                      </PaginationItem>
-                    )
+                    </Card>
                   )}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+                  {branches.map(branch => (
+                    <Card
+                      key={branch.id}
+                      className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                        selectedBranchId === branch.id
+                          ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => setSelectedBranchId(branch.id)}>
+                      <div className="flex flex-col space-y-1">
+                        <h4 className="font-medium text-sm truncate">
+                          {branch.name}
+                        </h4>
+                        <span
+                          className={`mt-1 text-[10px] px-1.5 py-0.5 rounded-full w-fit ${
+                            branch.status === 'Active'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                          {branch.status}
+                        </span>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Search className="h-5 w-5 text-gray-500" />
+                  <Input
+                    placeholder="Search employees..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="max-w-sm"
+                  />
+                </div>
+                <Button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="hover:bg-blue-700
+                  
+                  font-bold text-white bg-blue-700 shadow-2xl
+                  ">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Employee
+                </Button>
+              </div>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+
+                      <TableHead>Salary</TableHead>
+                      <TableHead>Salary Basis</TableHead>
+                      <TableHead>Working Hours</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedEmployees.map(employee => (
+                      <TableRow key={employee.id}>
+                        <TableCell className="font-medium">
+                          {employee.name}
+                        </TableCell>
+                        <TableCell>{employee.email}</TableCell>
+                        <TableCell>{employee.role_name}</TableCell>
+
+                        <TableCell>
+                          ₱{employee.salary.toLocaleString()}
+                        </TableCell>
+                        <TableCell>{employee.salary_basis}</TableCell>
+                        <TableCell>
+                          {employee.workingHours} hours/week
+                        </TableCell>
+                        <TableCell>{employee.category}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                              onClick={() => setSelectedEmployee(employee)}>
+                              <Edit2 className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-red-50 hover:bg-red-100 border-red-200"
+                              onClick={() => handleDelete(employee.id)}>
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {totalPages > 1 && (
+                <div className="mt-4 flex justify-center">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setPage(p => Math.max(1, p - 1))}
+                          disabled={page === 1}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        p => (
+                          <PaginationItem key={p}>
+                            <PaginationLink
+                              onClick={() => setPage(p)}
+                              isActive={page === p}>
+                              {p}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      )}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            setPage(p => Math.min(totalPages, p + 1))
+                          }
+                          disabled={page === totalPages}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="attendance">
+          <AttendanceManagement
+            employees={employeeList}
+            branches={branches}
+            selectedBranchId={selectedBranchId}
+            setSelectedBranchId={setSelectedBranchId}
+          />
+        </TabsContent>
+
+        <TabsContent value="payroll">
+          <PayrollManagement
+            employees={employeeList}
+            branches={branches}
+            selectedBranchId={selectedBranchId}
+            setSelectedBranchId={setSelectedBranchId}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Add/Edit Employee Modal */}
       <Dialog

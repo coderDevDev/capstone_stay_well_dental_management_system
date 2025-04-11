@@ -348,4 +348,63 @@ router.get('/dentists/all', async (req, res) => {
   }
 });
 
+// Update employee salary rate
+router.put('/:id/rate', async (req, res) => {
+  const { id } = req.params;
+  const { rate_per_hour, working_hours } = req.body;
+
+  try {
+    // Get the employee
+    const [employee] = await db.query(`SELECT * FROM employees WHERE id = ?`, [
+      id
+    ]);
+
+    if (!employee[0]) {
+      return res.status(404).json({
+        success: false,
+        message: 'Employee not found'
+      });
+    }
+
+    // Calculate new salary based on rate and hours
+    let newSalary;
+    if (employee[0].salary_basis === 'Hourly') {
+      newSalary = rate_per_hour;
+    } else {
+      // For monthly salary, calculate based on 4 weeks
+      newSalary = rate_per_hour * working_hours * 4;
+    }
+
+    // Update employee rate
+    await db.query(
+      `UPDATE employees 
+       SET salary = ?,
+           working_hours = ?,
+           rate_per_hour = ?
+       WHERE id = ?`,
+      [newSalary, working_hours, rate_per_hour, id]
+    );
+
+    // Emit socket event for real-time updates
+    global.io.emit('employeeUpdated');
+
+    res.json({
+      success: true,
+      message: 'Salary rate updated successfully',
+      data: {
+        id,
+        salary: newSalary,
+        rate_per_hour,
+        working_hours
+      }
+    });
+  } catch (error) {
+    console.error('Error updating salary rate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update salary rate'
+    });
+  }
+});
+
 export default router;
