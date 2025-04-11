@@ -464,4 +464,34 @@ router.get('/:id/payslip', authenticateUserMiddleware, async (req, res) => {
   }
 });
 
+// Add this DELETE endpoint to handle payroll record deletion
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete the payroll record
+    const result = await db.query('DELETE FROM payroll WHERE id = ? ', [id]);
+
+    // Check if a record was actually deleted
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Payroll record not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Payroll record deleted successfully',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error deleting payroll record:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while deleting payroll record'
+    });
+  }
+});
+
 export default router;

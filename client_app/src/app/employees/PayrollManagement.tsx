@@ -37,7 +37,8 @@ import {
   Calculator,
   Calendar,
   DollarSign,
-  Printer
+  Printer,
+  Trash2
 } from 'lucide-react';
 import {
   format,
@@ -644,6 +645,33 @@ export default function PayrollManagement({
     return employeeName.includes(searchTerm.toLowerCase());
   });
 
+  const handleDeletePayroll = async (id: string) => {
+    if (
+      !confirm(
+        'Are you sure you want to delete this payroll record? This action cannot be undone.'
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await axios.delete(`/payroll/${id}`);
+
+      // Update the state to remove the deleted record
+      setPayrollRecords(prevRecords =>
+        prevRecords.filter(record => record.id !== id)
+      );
+
+      toast.success('Payroll record deleted successfully');
+    } catch (error) {
+      console.error('Error deleting payroll record:', error);
+      toast.error('Failed to delete payroll record');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -781,15 +809,23 @@ export default function PayrollManagement({
                               {record.status}
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mr-2"
-                              onClick={() => viewPayslip(record)}>
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                                onClick={() => viewPayslip(record)}>
+                                <Eye className="h-4 w-4 text-blue-600" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-red-50 hover:bg-red-100 border-red-200"
+                                onClick={() => handleDeletePayroll(record.id)}>
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -1008,7 +1044,10 @@ export default function PayrollManagement({
                 onClick={() => setIsAddModalOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={generatePayroll} disabled={isLoading}>
+              <Button
+                className="text-white"
+                onClick={generatePayroll}
+                disabled={isLoading}>
                 {isLoading ? 'Processing...' : 'Generate Payroll'}
               </Button>
             </DialogFooter>
@@ -1184,9 +1223,9 @@ export default function PayrollManagement({
                           <span>
                             ₱
                             {(
-                              payslipData.basic_salary +
-                              payslipData.overtime_pay +
-                              payslipData.allowances
+                              parseFloat(payslipData.basic_salary) +
+                              parseFloat(payslipData.overtime_pay) +
+                              parseFloat(payslipData.allowances)
                             ).toLocaleString(undefined, {
                               minimumFractionDigits: 2
                             })}

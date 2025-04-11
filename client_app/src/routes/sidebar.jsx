@@ -108,6 +108,11 @@ const AppRoutes = () => {
           icon: <Truck className={iconClasses} />,
           name: 'Inventory & Suppliers',
         });
+        newRoutes.push({
+          path: '/app/payments',
+          icon: <Banknote className={iconClasses} />,
+          name: 'Payments',
+        });
 
       }
 
