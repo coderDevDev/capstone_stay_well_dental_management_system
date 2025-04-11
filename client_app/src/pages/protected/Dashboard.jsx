@@ -32,6 +32,7 @@ import { dentalStats } from "./DashboardComponents/mockData"
 
 
 import PatientTreatment from "./PatientTreatment/index"
+import { ExpensesComponent } from "./DashboardComponents/ExpensesComponent"
 
 function InternalPage() {
 
@@ -179,17 +180,17 @@ function InternalPage() {
             <StatCard key={index} {...stat} />
           ))}
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6">
           <AppointmentOverview />
           {/* <TreatmentStats /> */}
-          {/* 
-          {
-            role !== 'patient' && <RecentActivities />
-          } */}
-
-
         </div>
-        {/* <PatientTreatment /> */}
+
+        {/* Only show expenses to admins and staff, not to patients */}
+        {role !== 'patient' && (
+          <div className="grid gap-6 mb-6">
+            <ExpensesComponent />
+          </div>
+        )}
       </div>
 
     </div>

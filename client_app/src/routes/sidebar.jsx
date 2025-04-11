@@ -68,6 +68,8 @@ const AppRoutes = () => {
 
 
 
+      console.log({ role })
+
       if (role === 'admin') {
         newRoutes.push({
           path: '/app/dashboard',
@@ -109,7 +111,7 @@ const AppRoutes = () => {
 
       }
 
-      if (role === 'dentist') {
+      if (role === 'dentist' || role === 'secretary') {
         newRoutes.push({
           path: '/app/dashboard',
           icon: <Home className={iconClasses} />,

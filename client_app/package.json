@@ -47,6 +47,7 @@
     "chart.js": "^4.4.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "dom-to-image": "^2.6.0",
