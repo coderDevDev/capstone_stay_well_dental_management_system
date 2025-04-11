@@ -65,14 +65,21 @@ router.get('/branches', authenticateUserMiddleware, async (req, res) => {
       if (role === 'patient') {
         filteredBranches = branches;
       } else {
-        filteredBranches = branches.filter(
-          branch => branch.id === parseInt(employee[0].branch_id)
-        );
+        console.log({ branches, employee });
+        // what if  employee: []
+
+        if (employee.length > 0) {
+          filteredBranches = branches.filter(
+            branch => branch.id === parseInt(employee[0].branch_id)
+          );
+        } else {
+          filteredBranches = [];
+        }
       }
 
       res.json({
         success: true,
-        data: filteredBranches
+        data: filteredBranches.filter(b => b.status === 'Active')
       });
     }
   } catch (error) {

@@ -142,6 +142,7 @@ function Login() {
                     type="text"
                     value={values.email}
                     onBlur={handleBlur}
+                    autoComplete="off" // 👈 Add this
                   />
                   <div className="relative">
                     <InputText
@@ -152,6 +153,7 @@ function Login() {
                       type={showPassword ? 'text' : 'password'}
                       value={values.password}
                       onBlur={handleBlur}
+                      autoComplete="new-password" // 👈 Add this
                     />
                     <button
                       type="button"

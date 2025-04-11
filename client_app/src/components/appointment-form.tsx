@@ -319,11 +319,12 @@ export function AppointmentForm({
   const isConfirmed = initialAppointment?.appointment_status === 'Confirmed';
 
   const handleNumberOfTeethChange = (value: number) => {
-    if (value >= 1 && value <= 5) {
-      setNumberOfTeeth(value);
-    } else {
-      toast.error('Number of teeth must be between 1 and 5');
-    }
+    setNumberOfTeeth(value);
+    // if (value >= 1 && value <= 5) {
+    //   setNumberOfTeeth(value);
+    // } else {
+    //   toast.error('Number of teeth must be between 1 and 5');
+    // }
   };
 
   return (
@@ -420,8 +421,8 @@ export function AppointmentForm({
               value={numberOfTeeth}
               onChange={e => handleNumberOfTeethChange(Number(e.target.value))}
               className="w-full"
-              min={1}
-              max={5}
+              // min={1}
+              // max={5}
             />
           </div>
         </div>
@@ -432,7 +433,12 @@ export function AppointmentForm({
             className="text-sm font-medium text-gray-700">
             Total Fee/Price
           </label>
-          <Input type="number" value={totalFee} className="w-full" readOnly />
+          <Input
+            type="number"
+            value={totalFee.toFixed(2)}
+            className="w-full"
+            readOnly
+          />
         </div>
 
         <div className="space-y-2">
@@ -489,7 +495,11 @@ export function AppointmentForm({
           </label>
           <Select value={startTime} onValueChange={setStartTime}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a start time" />
+              <SelectValue placeholder="Select a start time">
+                {startTime
+                  ? format(parse(startTime, 'HH:mm', new Date()), 'h:mm a')
+                  : 'Select a start time'}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent position="popper">
               {availableTimeSlots.map(t => (
@@ -497,7 +507,7 @@ export function AppointmentForm({
                   key={t}
                   value={t}
                   disabled={isTimeSlotConflicting(date, t)}>
-                  {t}
+                  {format(parse(t, 'HH:mm', new Date()), 'h:mm a')}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -509,7 +519,16 @@ export function AppointmentForm({
             className="text-sm font-medium text-gray-700">
             End time:
           </label>
-          <Input type="time" value={endTime} className="w-full" readOnly />
+          <Input
+            type="text"
+            value={
+              endTime
+                ? format(parse(endTime, 'HH:mm', new Date()), 'h:mm a')
+                : ''
+            }
+            className="w-full"
+            readOnly
+          />
         </div>
         {isAdmin && (
           <div className="space-y-2">

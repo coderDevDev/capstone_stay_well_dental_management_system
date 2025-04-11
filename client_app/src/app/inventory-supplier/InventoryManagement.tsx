@@ -286,6 +286,16 @@ export default function InventoryManagement() {
     }
   }, [inventory, checkStockLevels]);
 
+  const refreshInventory = async () => {
+    try {
+      const inventoryData = await inventoryService.getAll();
+      setInventory(inventoryData);
+      checkStockLevels(inventoryData);
+    } catch (error) {
+      console.error('Error refreshing inventory:', error);
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <Tabs defaultValue="inventory" className="w-full">
@@ -336,6 +346,7 @@ export default function InventoryManagement() {
                 suppliers={suppliers}
                 onUpdate={updateInventory}
                 onAdd={addInventory}
+                refreshInventory={refreshInventory}
               />
             </CardContent>
           </Card>

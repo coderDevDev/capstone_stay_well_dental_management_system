@@ -298,4 +298,85 @@ router.put('/inventory/update-quantities/updateEachItem', async (req, res) => {
   }
 });
 
+// Add this new endpoint for recording item usage
+router.post('/inventory/use', async (req, res) => {
+  const { itemId, quantity, notes } = req.body;
+
+  if (!itemId || !quantity || quantity <= 0) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid item ID or quantity'
+    });
+  }
+
+  try {
+    await db.query('START TRANSACTION');
+
+    // Get current quantity
+    const [currentItem] = await db.query(
+      'SELECT quantity, name FROM inventory WHERE id = ?',
+      [itemId]
+    );
+
+    if (!currentItem[0]) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({
+        success: false,
+        error: 'Item not found'
+      });
+    }
+
+    const previousQuantity = currentItem[0].quantity;
+    const newQuantity = previousQuantity - quantity;
+
+    // Check if we have enough in stock
+    if (newQuantity < 0) {
+      await db.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        error: 'Insufficient quantity in stock'
+      });
+    }
+
+    // Update the inventory
+    await db.query('UPDATE inventory SET quantity = ? WHERE id = ?', [
+      newQuantity,
+      itemId
+    ]);
+
+    // Record the inventory usage with detailed change type
+    await db.query(queries.recordInventoryHistory, [
+      itemId,
+      newQuantity,
+      previousQuantity,
+      'adjustment',
+      notes || `Used ${quantity} units`
+    ]);
+
+    await db.query('COMMIT');
+
+    // Emit event for real-time updates
+    global.io.emit('inventoryUpdated');
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully used ${quantity} units of ${currentItem[0].name}`,
+      data: {
+        id: itemId,
+        name: currentItem[0].name,
+        previousQuantity,
+        newQuantity,
+        quantityUsed: quantity
+      }
+    });
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error('Error recording inventory usage:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to record inventory usage'
+    });
+  }
+});
+
 export default router;
