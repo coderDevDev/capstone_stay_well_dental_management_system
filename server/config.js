@@ -70,17 +70,20 @@ try {
     //   connectionLimit: 0, // Max number of connections in the pool
     //   queueLimit: 0 // No limit on queue
     // });
-
     const pool = await mysql.createPool({
-      host: 'jcqlf1.stackhero-network.com',
+      port: 3934,
+      host: 'aiks1r.stackhero-network.com',
       user: 'root',
-      password: 'OwhHbxDtBwsDB9VlClLwfkzw9MTBr70m',
-      database: 'dental_clinic',
-      port: 4300,
+      password: 'de5Jtt5OaQr5QY0mS5Cfb1jRQUDddlPD',
+      database: 'sample2',
+      connectTimeout: 10000,
       waitForConnections: true,
-      connectionLimit: 0, // Max number of connections in the pool
+      connectionLimit: 100000, // Adjust this number based on your needs
       queueLimit: 0,
-      ssl: false // Disable SSL connection
+      ssl: {
+        rejectUnauthorized: true // Ensure it's a secure connection
+      },
+      timezone: 'Asia/Manila'
     });
 
     return pool;
