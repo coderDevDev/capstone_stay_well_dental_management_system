@@ -13,7 +13,15 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import {
+  DialogHeader,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogFooter,
+  DialogDescription
+} from '@/components/ui/dialog';
+
 import {
   Card,
   CardContent,
@@ -40,6 +48,8 @@ import {
   PaginationNext,
   PaginationPrevious
 } from '@/components/ui/pagination';
+import { PlusCircle } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 export default function PaymentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,6 +61,14 @@ export default function PaymentsPage() {
   const [methodFilter, setMethodFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+  const [isCashPaymentDialogOpen, setIsCashPaymentDialogOpen] = useState(false);
+  const [cashPaymentData, setCashPaymentData] = useState({
+    patient_name: '',
+    service_name: '',
+    amount: '',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    notes: ''
+  });
 
   const fetchPayments = async () => {
     try {
@@ -104,6 +122,63 @@ export default function PaymentsPage() {
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
+
+  // Calculate total cash payments
+  const totalCashPayments = payments
+    .filter(p => p.payment_method === 'cash')
+    .reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+
+  // Add this function to handle cash payment submissions
+  const handleAddCashPayment = async () => {
+    try {
+      if (!cashPaymentData.patient_name || !cashPaymentData.amount) {
+        toast.error('Patient name and amount are required');
+        return;
+      }
+
+      setIsLoading(true);
+
+      // Create a proper payment object
+      const paymentData = {
+        patient_id: 'manual', // Placeholder for manual entry
+        patient_first_name: cashPaymentData.patient_name.split(' ')[0] || '',
+        patient_last_name:
+          cashPaymentData.patient_name.split(' ').slice(1).join(' ') || '',
+        service_name: cashPaymentData.service_name || 'Cash Payment',
+        amount: parseFloat(cashPaymentData.amount),
+        payment_method: 'cash',
+        status: 'completed',
+        transaction_id: `CASH-${Date.now()}`, // Generate a unique ID
+        notes: cashPaymentData.notes,
+        payment_date: cashPaymentData.date
+      };
+
+      // Use the new manual payment endpoint
+      const response = await paymentService.createManualCashPayment(
+        paymentData
+      );
+
+      if (response.success) {
+        toast.success('Cash payment recorded successfully');
+        setIsCashPaymentDialogOpen(false);
+        setCashPaymentData({
+          patient_name: '',
+          service_name: '',
+          amount: '',
+          date: format(new Date(), 'yyyy-MM-dd'),
+          notes: ''
+        });
+        fetchPayments(); // Refresh the payments list
+      } else {
+        toast.error(response.message || 'Failed to record payment');
+      }
+    } catch (error) {
+      console.error('Error adding cash payment:', error);
+      toast.error('An error occurred while recording the payment');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     !isLoading && (
@@ -159,6 +234,25 @@ export default function PaymentsPage() {
               </p>
             </CardContent>
           </Card>
+          <Card className="bg-white">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Cash Payments
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {new Intl.NumberFormat('en-PH', {
+                  style: 'currency',
+                  currency: 'PHP'
+                }).format(totalCashPayments)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {payments.filter(p => p.payment_method === 'cash').length}{' '}
+                transactions
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Main Content */}
@@ -171,6 +265,12 @@ export default function PaymentsPage() {
                   Manage payment records and transactions
                 </CardDescription>
               </div>
+              <Button
+                onClick={() => setIsCashPaymentDialogOpen(true)}
+                className="bg-green-600 hover:bg-green-700 text-white">
+                <PlusCircle className="mr-2 h-5 w-5" />
+                Add Cash Payment
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -372,6 +472,120 @@ export default function PaymentsPage() {
                 setSelectedPayment(null);
               }}
             />
+          </DialogContent>
+        </Dialog>
+
+        {/* Cash Payment Dialog */}
+        <Dialog
+          open={isCashPaymentDialogOpen}
+          onOpenChange={setIsCashPaymentDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add Cash Payment</DialogTitle>
+              <DialogDescription>
+                Record a manual cash payment received from a patient.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="patient_name" className="text-right">
+                  Patient Name
+                </Label>
+                <Input
+                  id="patient_name"
+                  value={cashPaymentData.patient_name}
+                  onChange={e =>
+                    setCashPaymentData({
+                      ...cashPaymentData,
+                      patient_name: e.target.value
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="service_name" className="text-right">
+                  Service
+                </Label>
+                <Input
+                  id="service_name"
+                  value={cashPaymentData.service_name}
+                  onChange={e =>
+                    setCashPaymentData({
+                      ...cashPaymentData,
+                      service_name: e.target.value
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="amount" className="text-right">
+                  Amount
+                </Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={cashPaymentData.amount}
+                  onChange={e =>
+                    setCashPaymentData({
+                      ...cashPaymentData,
+                      amount: e.target.value
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date" className="text-right">
+                  Date
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={cashPaymentData.date}
+                  onChange={e =>
+                    setCashPaymentData({
+                      ...cashPaymentData,
+                      date: e.target.value
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="notes" className="text-right">
+                  Notes
+                </Label>
+                <Input
+                  id="notes"
+                  value={cashPaymentData.notes}
+                  onChange={e =>
+                    setCashPaymentData({
+                      ...cashPaymentData,
+                      notes: e.target.value
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsCashPaymentDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="text-white" onClick={handleAddCashPayment}>
+                Save Payment
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

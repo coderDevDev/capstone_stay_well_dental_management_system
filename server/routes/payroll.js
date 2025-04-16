@@ -473,7 +473,7 @@ router.delete('/:id', async (req, res) => {
     const result = await db.query('DELETE FROM payroll WHERE id = ? ', [id]);
 
     // Check if a record was actually deleted
-    if (result.rowCount === 0) {
+  if (result.rowCount === 0) {
       return res.status(404).json({
         success: false,
         error: 'Payroll record not found'

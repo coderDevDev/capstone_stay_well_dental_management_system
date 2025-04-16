@@ -213,25 +213,24 @@ router.get('/appointment/:id', async (req, res) => {
   }
 });
 
+// Update the GET /list endpoint to handle both appointment-based and manual cash payments
 router.get('/list', authenticateUserMiddleware, async (req, res) => {
   try {
-    const { branch_id } = req.query;
-    const { patient_id, role } = req.user;
+    const { role, user_id, patient_id, branch_id } = req.query;
 
     let query = `
       SELECT 
         p.*,
-        a.start as appointment_date,
-        pat.first_name as patient_first_name,
-        pat.last_name as patient_last_name,
-        s.name as service_name,
-        aps.status_name as appointment_status,
-        b.name as branch_name
+        COALESCE(pat.first_name, p.patient_first_name) as patient_first_name,
+        COALESCE(pat.last_name, p.patient_last_name) as patient_last_name,
+        COALESCE(s.name, p.service_name) as service_name,
+        COALESCE(aps.status_name, 'Completed') as appointment_status,
+        COALESCE(b.name, 'Main Branch') as branch_name
       FROM payments p
-      INNER JOIN appointments a ON p.appointmentId   = a.id
-      INNER JOIN patients pat ON a.patient_id = pat.patient_id
-      INNER JOIN services s ON a.service_id = s.id
-      INNER JOIN appointment_statuses aps ON a.status_id = aps.id
+      LEFT JOIN appointments a ON p.appointmentId = a.id
+      LEFT JOIN patients pat ON a.patient_id = pat.patient_id
+      LEFT JOIN services s ON a.service_id = s.id
+      LEFT JOIN appointment_statuses aps ON a.status_id = aps.id
       LEFT JOIN dental_branches b ON p.branch_id = b.id
     `;
 
@@ -246,16 +245,11 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
 
     // Apply role-based filtering
     if (role === 'patient') {
-      conditions.push(`a.patient_id = ?`); // Filtering by patient_id in the appointments table
-      params.push(patient_id);
+      conditions.push(`(a.patient_id = ? OR p.patient_id = ?)`);
+      params.push(patient_id, patient_id);
     }
-    //  else if (role === 'dentist') {
-    //   conditions.push(`s.dentist_id = ?`); // Assuming services table has a dentist_id column
-    //   params.push(user_id);
-    // }
 
     // Append conditions to query
-
     if (conditions.length > 0) {
       query += ` WHERE ` + conditions.join(' AND ');
     }
@@ -333,6 +327,79 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update payment'
+    });
+  }
+});
+
+// Add endpoint for manual cash payments
+router.post('/manual', authenticateUserMiddleware, async (req, res) => {
+  try {
+    const {
+      patient_id,
+      patient_first_name,
+      patient_last_name,
+      service_name,
+      amount,
+      payment_method,
+      status,
+      transaction_id,
+      notes,
+      payment_date
+    } = req.body;
+
+    // Validate required fields
+    if (!amount || !payment_method) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Insert the payment record
+    const [result] = await db.query(
+      `INSERT INTO payments (
+        patient_id, 
+        patient_first_name,
+        patient_last_name,
+        service_name,
+        amount, 
+        payment_method, 
+        status, 
+        transaction_id,
+        notes,
+        payment_date,
+        created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        patient_id || 'manual',
+        patient_first_name || '',
+        patient_last_name || '',
+        service_name || 'Cash Payment',
+        amount,
+        payment_method,
+        status || 'completed',
+        transaction_id || `CASH-${Date.now()}`,
+        notes || '',
+        payment_date || new Date().toISOString().split('T')[0],
+        req.user?.id || null
+      ]
+    );
+
+    // Get the inserted payment
+    const [payment] = await db.query('SELECT * FROM payments WHERE id = ?', [
+      result.insertId
+    ]);
+
+    res.status(201).json({
+      success: true,
+      message: 'Payment recorded successfully',
+      data: payment[0]
+    });
+  } catch (error) {
+    console.error('Error recording manual payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record payment'
     });
   }
 });

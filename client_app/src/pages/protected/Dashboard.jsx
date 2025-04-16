@@ -165,8 +165,8 @@ function InternalPage() {
     mappedStats = [
       { title: 'Total Patients', value: patients.length, icon: 'Users' },
       { title: 'Appointments Today', value: todaysAppointments.length, icon: 'Calendar' },
-      { title: 'New Patients (This Month)', value: newPatientsThisMonth.length, icon: 'UserPlus' },
-      { title: 'Revenue (This Month)', value: '₱0', icon: 'PesoSign' }
+      // { title: 'New Patients (This Month)', value: newPatientsThisMonth.length, icon: 'UserPlus' },
+      // { title: 'Revenue (This Month)', value: '₱0', icon: 'PesoSign' }
     ];
 
   }
