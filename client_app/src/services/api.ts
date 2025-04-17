@@ -5,7 +5,7 @@ import type {
 } from '../app/inventory-supplier/InventoryManagement';
 import axios from 'axios';
 
-export const API_URL = 'http://localhost:5000/api';
+export const API_URL = 'https://staywelldentalbackend.onrender.com/api';
 
 // Inventory Services
 export const inventoryService = {
@@ -856,8 +856,7 @@ export const appointmentService = {
         error.response?.data?.message || 'Failed to create appointment'
       );
     }
-  },
-  async delete(id: string) {
+
     try {
       const response = await axios.delete(`${API_URL}/appointment/${id}`);
       return response.data;
@@ -940,6 +939,16 @@ export const paymentService = {
     } catch (error) {
       console.error('Error fetching payments:', error);
     }
+  },
+
+  createManualCashPayment: async (data: any) => {
+    try {
+      const response = await axios.post(`${API_URL}/payments/manual`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating manual payment:', error);
+      throw error;
+    }
   }
 };
 
@@ -964,7 +973,7 @@ export const dentalServiceService = {
     }
   },
 
-  create: async (data: Omit<DentalService, 'id'>) => {
+  create: async (data: Omit<DentalService, 'id'>): Promise<DentalService> => {
     try {
       const response = await axios.post('/services/create', data);
       return response.data;
@@ -974,7 +983,10 @@ export const dentalServiceService = {
     }
   },
 
-  update: async (id: string, data: Partial<DentalService>) => {
+  update: async (
+    id: string,
+    data: Partial<DentalService>
+  ): Promise<DentalService> => {
     try {
       const response = await axios.put(`/services/${id}`, data);
       return response.data;
@@ -984,7 +996,7 @@ export const dentalServiceService = {
     }
   },
 
-  delete: async (id: string) => {
+  delete: async (id: string): Promise<void> => {
     try {
       const response = await axios.delete(`/services/${id}`);
       return response.data;
