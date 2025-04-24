@@ -309,6 +309,7 @@ export function FullCalendar({
             </DialogTitle>
           </DialogHeader>
           <AppointmentForm
+            selectedBranchId={selectedBranchId}
             appointments={appointments}
             initialDate={selectedSlot?.start || selectedAppointment?.start}
             initialAppointment={selectedAppointment}

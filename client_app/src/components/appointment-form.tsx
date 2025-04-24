@@ -76,8 +76,10 @@ export function AppointmentForm({
   isAdmin = false,
   appointments,
   patients,
-  servicesDental
+  servicesDental,
+  selectedBranchId
 }: AppointmentFormProps) {
+  console.log({ servicesDental });
   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   console.log({ initialAppointment });
@@ -113,8 +115,8 @@ export function AppointmentForm({
 
   console.log({ patients });
 
-  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(
-    initialAppointment?.branch_id || null
+  const [selectedBranchIdFinal, setSelectedBranchId] = useState<string | null>(
+    selectedBranchId
   );
   const [branches, setBranches] = useState<Branch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -331,35 +333,37 @@ export function AppointmentForm({
     <div className="max-h-[80vh] overflow-y-auto px-1">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">Select Branch</h3>
+          <h3 className="text-sm font-medium">Current Selected Branch</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {branches.map(branch => (
-              <Card
-                key={branch.id}
-                className={`p-2 cursor-pointer transition-all hover:shadow-md ${
-                  parseInt(selectedBranchId) === parseInt(branch.id)
-                    ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
-                    : 'hover:bg-gray-50'
-                }`}
-                onClick={() => setSelectedBranchId(branch.id)}>
-                <div className="flex flex-col space-y-1">
-                  <h4 className="font-medium text-sm truncate">
-                    {branch.name}
-                  </h4>
-                  <p className="text-xs text-gray-600 truncate">
-                    {branch.address}
-                  </p>
-                  <span
-                    className={`mt-1 text-[10px] px-1.5 py-0.5 rounded-full w-fit ${
-                      branch.status === 'Active'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                    {branch.status}
-                  </span>
-                </div>
-              </Card>
-            ))}
+            {branches
+              .filter(branch => branch.id === selectedBranchIdFinal)
+              .map(branch => (
+                <Card
+                  key={branch.id}
+                  className={`p-2 cursor-pointer transition-all hover:shadow-md ${
+                    parseInt(selectedBranchId) === parseInt(branch.id)
+                      ? 'ring-2 ring-blue-500 shadow-md bg-blue-50'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedBranchId(branch.id)}>
+                  <div className="flex flex-col space-y-1">
+                    <h4 className="font-medium text-sm truncate">
+                      {branch.name}
+                    </h4>
+                    <p className="text-xs text-gray-600 truncate">
+                      {branch.address}
+                    </p>
+                    <span
+                      className={`mt-1 text-[10px] px-1.5 py-0.5 rounded-full w-fit ${
+                        branch.status === 'Active'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                      {branch.status}
+                    </span>
+                  </div>
+                </Card>
+              ))}
           </div>
 
           <div className="sm:hidden mt-2">
