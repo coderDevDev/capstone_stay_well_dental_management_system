@@ -169,7 +169,7 @@ export default function UpdateEmployeeForm({
     const fetchRoles = async () => {
       try {
         const data = await roleService.getAll();
-        setRoles(data);
+        setRoles(data.filter((role: Role) => role.role_name !== 'patient'));
       } catch (error) {
         console.error('Error fetching roles:', error);
         toast.error('Failed to fetch roles');

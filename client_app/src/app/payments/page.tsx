@@ -32,7 +32,7 @@ import {
 import { PaymentDialog } from './components/payment-dialog';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 import {
   Select,
   SelectContent,
@@ -48,7 +48,7 @@ import {
   PaginationNext,
   PaginationPrevious
 } from '@/components/ui/pagination';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
 export default function PaymentsPage() {
@@ -59,6 +59,11 @@ export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [methodFilter, setMethodFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
+  const [dateRange, setDateRange] = useState({
+    start: format(subMonths(new Date(), 1), 'yyyy-MM-dd'),
+    end: format(new Date(), 'yyyy-MM-dd')
+  });
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
   const [isCashPaymentDialogOpen, setIsCashPaymentDialogOpen] = useState(false);
@@ -69,13 +74,32 @@ export default function PaymentsPage() {
     date: format(new Date(), 'yyyy-MM-dd'),
     notes: ''
   });
+  const [sortField, setSortField] = useState<string>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  const [isPatient, setIsPatient] = useState(false);
   const fetchPayments = async () => {
     try {
       setIsLoading(true);
       const response = await paymentService.getList();
       if (response.success) {
-        setPayments(response.data);
+        console.log({ response });
+
+        // curre
+        let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+        const isPatient = loggedInUser.role === 'patient';
+        setIsPatient(isPatient);
+
+        let filteredPayments = isPatient
+          ? response.data.filter(
+              (payment: Payment) =>
+                payment.patient_id === loggedInUser.id &&
+                payment.patient_id !== 'manual'
+            )
+          : response.data;
+        // filter only
+        setPayments(filteredPayments);
       }
     } catch (error) {
       toast.error('Failed to fetch payments');
@@ -113,12 +137,85 @@ export default function PaymentsPage() {
       statusFilter === 'all' || payment.status === statusFilter;
     const matchesMethod =
       methodFilter === 'all' || payment.payment_method === methodFilter;
-    return matchesSearch && matchesStatus && matchesMethod;
+
+    // Add date filtering
+    let matchesDate = true;
+    if (dateFilter !== 'all') {
+      const paymentDate = new Date(payment.created_at);
+      const startDate = new Date(dateRange.start);
+      const endDate = new Date(dateRange.end);
+
+      if (dateFilter === 'custom') {
+        // Custom date range
+        matchesDate = paymentDate >= startDate && paymentDate <= endDate;
+      } else if (dateFilter === 'today') {
+        // Today only
+        const today = new Date();
+        matchesDate =
+          paymentDate.getDate() === today.getDate() &&
+          paymentDate.getMonth() === today.getMonth() &&
+          paymentDate.getFullYear() === today.getFullYear();
+      } else if (dateFilter === 'thisMonth') {
+        // This month
+        const today = new Date();
+        matchesDate =
+          paymentDate.getMonth() === today.getMonth() &&
+          paymentDate.getFullYear() === today.getFullYear();
+      } else if (dateFilter === 'thisYear') {
+        // This year
+        matchesDate = paymentDate.getFullYear() === new Date().getFullYear();
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesMethod && matchesDate;
   });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
-  const paginatedPayments = filteredPayments.slice(
+  // Replace your existing sortPaymentsByDate function with this more general sort function
+  const sortPayments = (
+    data: Payment[],
+    field: string,
+    direction: 'asc' | 'desc'
+  ) => {
+    return [...data].sort((a, b) => {
+      let valueA: any = a[field as keyof Payment];
+      let valueB: any = b[field as keyof Payment];
+
+      // Handle special cases
+      if (field === 'patient') {
+        valueA = `${a.patient_first_name} ${a.patient_last_name}`.toLowerCase();
+        valueB = `${b.patient_first_name} ${b.patient_last_name}`.toLowerCase();
+      } else if (field === 'amount') {
+        valueA = parseFloat(a.amount);
+        valueB = parseFloat(b.amount);
+      } else if (field === 'created_at') {
+        valueA = new Date(a.created_at).getTime();
+        valueB = new Date(b.created_at).getTime();
+      }
+
+      // Sort direction
+      if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+      if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  // Handle column header click
+  const handleSort = (field: string) => {
+    const isAsc = sortField === field && sortDirection === 'asc';
+    setSortDirection(isAsc ? 'desc' : 'asc');
+    setSortField(field);
+  };
+
+  // Use sorted payments for display
+  const sortedPayments = sortPayments(
+    filteredPayments,
+    sortField,
+    sortDirection
+  );
+
+  // Pagination with sorted payments
+  const totalPages = Math.ceil(sortedPayments.length / itemsPerPage);
+  const paginatedPayments = sortedPayments.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
@@ -265,18 +362,21 @@ export default function PaymentsPage() {
                   Manage payment records and transactions
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => setIsCashPaymentDialogOpen(true)}
-                className="bg-green-600 hover:bg-green-700 text-white">
-                <PlusCircle className="mr-2 h-5 w-5" />
-                Add Cash Payment
-              </Button>
+
+              {!isPatient && (
+                <Button
+                  onClick={() => setIsCashPaymentDialogOpen(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white">
+                  <PlusCircle className="mr-2 h-5 w-5" />
+                  Add Cash Payment
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
             {/* Filters */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-wrap gap-2">
                 <div className="flex items-center space-x-2">
                   <Search className="h-5 w-5 text-gray-500" />
                   <Input
@@ -286,6 +386,44 @@ export default function PaymentsPage() {
                     className="max-w-sm"
                   />
                 </div>
+                <Select
+                  value={dateFilter}
+                  onValueChange={value => {
+                    setDateFilter(value);
+                    setPage(1); // Reset to first page on filter change
+                  }}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Filter by date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Dates</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="thisMonth">This Month</SelectItem>
+                    <SelectItem value="thisYear">This Year</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+                {dateFilter === 'custom' && (
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={e =>
+                        setDateRange({ ...dateRange, start: e.target.value })
+                      }
+                      className="w-[150px]"
+                    />
+                    <span>to</span>
+                    <Input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={e =>
+                        setDateRange({ ...dateRange, end: e.target.value })
+                      }
+                      className="w-[150px]"
+                    />
+                  </div>
+                )}
                 <Select
                   value={statusFilter}
                   onValueChange={value => setStatusFilter(value)}>
@@ -320,13 +458,110 @@ export default function PaymentsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Transaction ID</TableHead>
-                    <TableHead>Patient</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort('transaction_id')}>
+                      Transaction ID
+                      {sortField === 'transaction_id' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="inline ml-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="inline ml-1 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="inline ml-1 h-4 w-4" />
+                      )}
+                    </TableHead>
+
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort('patient')}>
+                      Patient
+                      {sortField === 'patient' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="inline ml-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="inline ml-1 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="inline ml-1 h-4 w-4" />
+                      )}
+                    </TableHead>
+
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort('service_name')}>
+                      Service
+                      {sortField === 'service_name' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="inline ml-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="inline ml-1 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="inline ml-1 h-4 w-4" />
+                      )}
+                    </TableHead>
+
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort('amount')}>
+                      Amount
+                      {sortField === 'amount' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="inline ml-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="inline ml-1 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="inline ml-1 h-4 w-4" />
+                      )}
+                    </TableHead>
+
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort('payment_method')}>
+                      Method
+                      {sortField === 'payment_method' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="inline ml-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="inline ml-1 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="inline ml-1 h-4 w-4" />
+                      )}
+                    </TableHead>
+
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort('status')}>
+                      Status
+                      {sortField === 'status' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="inline ml-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="inline ml-1 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="inline ml-1 h-4 w-4" />
+                      )}
+                    </TableHead>
+
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort('created_at')}>
+                      Date
+                      {sortField === 'created_at' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="inline ml-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="inline ml-1 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="inline ml-1 h-4 w-4" />
+                      )}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -10,7 +10,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { Loader2 } from 'lucide-react';
-
+import { Eye, EyeOff } from 'lucide-react';
 function TriangleGridBackground() {
   return (
     <div className="relative w-full h-screen bg-gray-100 overflow-hidden">
@@ -153,21 +153,17 @@ function Login() {
                       type={showPassword ? 'text' : 'password'}
                       value={values.password}
                       onBlur={handleBlur}
-                      autoComplete="new-password" // 👈 Add this
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={togglePasswordVisibility}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-primary mt-5"
                     >
                       {showPassword ? (
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                          <path d={mdiEyeOff} />
-                        </svg>
+                        <EyeOff size={18} />
                       ) : (
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                          <path d={mdiEye} />
-                        </svg>
+                        <Eye size={18} />
                       )}
                     </button>
                   </div>

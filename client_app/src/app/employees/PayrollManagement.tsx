@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -58,8 +58,9 @@ import {
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
 import { toast } from 'sonner';
-import html2pdf from 'html2pdf.js';
+import { useReactToPrint } from 'react-to-print';
 import { cn } from '@/lib/utils';
+import { PayslipPrintable } from './PayslipPrintable';
 
 interface PayrollRecord {
   id: string;
@@ -87,6 +88,14 @@ interface PayrollManagementProps {
   branches: any[];
   selectedBranchId: string | null;
   setSelectedBranchId: (id: string | null) => void;
+}
+
+interface AttendanceRecord {
+  status: string;
+  date: string;
+  employee_id: string;
+  id: string;
+  [key: string]: any;
 }
 
 export default function PayrollManagement({
@@ -133,6 +142,9 @@ export default function PayrollManagement({
     allowances: 0,
     status: 'Pending'
   });
+
+  // Add a ref to the printable content
+  const payslipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchPayrollRecords();
@@ -223,13 +235,13 @@ export default function PayrollManagement({
 
       // 2. Calculate hours worked based on attendance
       const presentDays = attendanceRecords.filter(
-        r => r.status === 'Present'
+        (r: AttendanceRecord) => r.status === 'Present'
       ).length;
       const halfDays = attendanceRecords.filter(
-        r => r.status === 'Half Day'
+        (r: AttendanceRecord) => r.status === 'Half Day'
       ).length;
       const lateDays = attendanceRecords.filter(
-        r => r.status === 'Late'
+        (r: AttendanceRecord) => r.status === 'Late'
       ).length;
 
       // Calculate total hours based on present days (assume 8 hours per day)
@@ -362,250 +374,37 @@ export default function PayrollManagement({
     setIsViewModalOpen(true);
   };
 
-  const printPayslip = () => {
-    if (!payslipData) return;
+  // Replace the printPayslip function with this one
+  const printPayslip = useReactToPrint({
+    content: () => payslipRef.current,
+    documentTitle: payslipData
+      ? `Payslip_${payslipData.employeeName}_${format(
+          new Date(payslipData.pay_period_end),
+          'MMM_yyyy'
+        )}`
+      : 'Payslip',
+    onAfterPrint: () => {
+      toast.success('Payslip printed successfully');
+    },
+    onPrintError: () => {
+      toast.error('Failed to print payslip');
+    }
+  });
 
-    const employee = employees.find(
-      e => e.id.toString() === payslipData.employee_id
-    );
-    if (!employee) return;
-
-    // Convert numeric values to ensure they're processed correctly
-    const basicSalary = Number(payslipData.basic_salary);
-    const ratePerHour = Number(payslipData.rate_per_hour);
-    const hoursWorked = Number(payslipData.hours_worked);
-    const overtimeHours = Number(payslipData.overtime_hours);
-    const overtimePay = Number(payslipData.overtime_pay);
-    const allowances = Number(payslipData.allowances);
-    const sssContribution = Number(payslipData.sss_contribution);
-    const philhealthContribution = Number(payslipData.philhealth_contribution);
-    const pagibigContribution = Number(payslipData.pagibig_contribution);
-    const tax = Number(payslipData.tax);
-    const deductions = Number(payslipData.deductions);
-    const netPay = Number(payslipData.net_pay);
-
-    // Then use these converted variables in your HTML template
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="margin-bottom: 5px;">PAYSLIP</h1>
-          <h3 style="margin-top: 0; color: #666;">Stay Well Dental Management System</h3>
-        </div>
-        
-        <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px;">
-          <table style="width: 100%;">
-            <tr>
-              <td style="width: 50%;">
-                <p><strong>Employee:</strong> ${employee.name}</p>
-                <p><strong>Position:</strong> ${
-                  employee.position || employee.role_name || 'N/A'
-                }</p>
-                <p><strong>Employee ID:</strong> ${employee.id}</p>
-              </td>
-              <td style="width: 50%;">
-                <p><strong>Pay Period:</strong> ${payslipData.periodStart} to ${
-      payslipData.periodEnd
-    }</p>
-                <p><strong>Payment Date:</strong> ${format(
-                  new Date(),
-                  'MMMM dd, yyyy'
-                )}</p>
-                <p><strong>Payment Method:</strong> Direct Deposit</p>
-              </td>
-            </tr>
-          </table>
-        </div>
-        
-        <div style="display: flex; margin-bottom: 20px;">
-          <div style="flex: 1; margin-right: 10px;">
-            <h3 style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Earnings</h3>
-            <table style="width: 100%;">
-              <tr>
-                <td>Basic Salary</td>
-                <td style="text-align: right;">₱${basicSalary.toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2 }
-                )}</td>
-              </tr>
-              ${
-                overtimePay > 0
-                  ? `
-                <tr>
-                  <td>Overtime Pay</td>
-                  <td style="text-align: right;">₱${overtimePay.toLocaleString(
-                    undefined,
-                    { minimumFractionDigits: 2 }
-                  )}</td>
-                </tr>
-              `
-                  : ''
-              }
-              ${
-                allowances > 0
-                  ? `
-                <tr>
-                  <td>Allowances</td>
-                  <td style="text-align: right;">₱${allowances.toLocaleString(
-                    undefined,
-                    { minimumFractionDigits: 2 }
-                  )}</td>
-                </tr>
-              `
-                  : ''
-              }
-              <tr>
-                <td style="border-top: 1px solid #ddd; padding-top: 5px;"><strong>Gross Pay</strong></td>
-                <td style="border-top: 1px solid #ddd; padding-top: 5px; text-align: right;"><strong>₱${(
-                  basicSalary +
-                  overtimePay +
-                  allowances
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2
-                })}</strong></td>
-              </tr>
-            </table>
-          </div>
-          
-          <div style="flex: 1; margin-left: 10px;">
-            <h3 style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Deductions</h3>
-            <table style="width: 100%;">
-              <tr>
-                <td>SSS Contribution</td>
-                <td style="text-align: right;">₱${sssContribution.toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2 }
-                )}</td>
-              </tr>
-              <tr>
-                <td>PhilHealth</td>
-                <td style="text-align: right;">₱${philhealthContribution.toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2 }
-                )}</td>
-              </tr>
-              <tr>
-                <td>Pag-IBIG</td>
-                <td style="text-align: right;">₱${pagibigContribution.toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2 }
-                )}</td>
-              </tr>
-              <tr>
-                <td>Withholding Tax</td>
-                <td style="text-align: right;">₱${tax.toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2 }
-                )}</td>
-              </tr>
-              <tr>
-                <td style="border-top: 1px solid #ddd; padding-top: 5px;"><strong>Total Deductions</strong></td>
-                <td style="border-top: 1px solid #ddd; padding-top: 5px; text-align: right;"><strong>₱${deductions.toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2 }
-                )}</strong></td>
-              </tr>
-            </table>
-          </div>
-        </div>
-        
-        <div style="background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <table style="width: 100%;">
-            <tr>
-              <td style="width: 70%;"><strong>NET PAY</strong></td>
-              <td style="width: 30%; text-align: right;"><strong style="font-size: 1.2em;">₱${netPay.toLocaleString(
-                undefined,
-                { minimumFractionDigits: 2 }
-              )}</strong></td>
-            </tr>
-          </table>
-        </div>
-        
-        <div style="margin-bottom: 30px;">
-          <h3 style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Attendance Summary</h3>
-          <table style="width: 100%;">
-            <tr>
-              <td style="width: 50%;">
-                <p><strong>Hours Worked:</strong> ${hoursWorked.toFixed(
-                  1
-                )} hrs</p>
-                <p><strong>Rate per Hour:</strong> ₱${ratePerHour.toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2 }
-                )}/hr</p>
-                ${
-                  overtimeHours > 0
-                    ? `<p><strong>Overtime Hours:</strong> ${overtimeHours.toFixed(
-                        1
-                      )} hrs</p>`
-                    : ''
-                }
-              </td>
-              <td style="width: 50%;">
-                <p>Present Days: ${
-                  payslipData.attendance?.presentDays || 'N/A'
-                }</p>
-                <p>Absent Days: ${
-                  payslipData.attendance?.absentDays || 'N/A'
-                }</p>
-                <p>Late Days: ${payslipData.attendance?.lateDays || 'N/A'}</p>
-              </td>
-            </tr>
-          </table>
-        </div>
-        
-        <div style="margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; display: flex; justify-content: space-between;">
-          <div style="width: 45%;">
-            <p style="margin-bottom: 30px;">Prepared by:</p>
-            <div style="border-top: 1px solid #000; padding-top: 5px;">
-              <p style="margin: 0; text-align: center;">HR Manager</p>
-            </div>
-          </div>
-          
-          <div style="width: 45%;">
-            <p style="margin-bottom: 30px;">Received by:</p>
-            <div style="border-top: 1px solid #000; padding-top: 5px;">
-              <p style="margin: 0; text-align: center;">${employee.name}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const element = document.createElement('div');
-    element.innerHTML = html;
-    document.body.appendChild(element);
-
-    html2pdf(element, {
-      margin: 10,
-      filename: `Payslip_${employee.name}_${format(
-        new Date(payslipData.pay_period_end),
-        'MMM_yyyy'
-      )}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).then(() => {
-      document.body.removeChild(element);
-    });
-  };
-
-  const updateEmployeeRate = async (employeeId, data) => {
+  const updateEmployeeRate = async (employeeId: string, data: any) => {
     try {
       setIsLoading(true);
       const response = await axios.put(`/employees/${employeeId}/rate`, data);
 
       if (response.data.success) {
         toast.success('Salary rate updated successfully');
-        fetchEmployees(); // Refresh employee data
         setIsEditRateModalOpen(false);
       } else {
         toast.error(response.data.message || 'Failed to update salary rate');
       }
     } catch (error) {
-      console.error('Error updating salary rate:', error);
-      // toast.error(
-      //   error.response?.data?.message || 'Failed to update salary rate'
-      // );
+      console.error('Error updating employee rate:', error);
+      toast.error('Failed to update salary rate');
     } finally {
       setIsLoading(false);
     }
@@ -1156,177 +955,197 @@ export default function PayrollManagement({
             </DialogHeader>
 
             {payslipData && (
-              <div className="bg-white rounded-lg overflow-hidden">
-                <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-                  <h2 className="text-xl font-bold">PAYSLIP</h2>
-                  <p>
-                    {payslipData.periodStart} to {payslipData.periodEnd}
-                  </p>
-                </div>
-
-                <div className="p-4 border-b">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Employee Name</p>
-                      <p className="font-medium">{payslipData.employeeName}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Position</p>
-                      <p className="font-medium">{payslipData.position}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <h3 className="font-semibold border-b pb-2 mb-2">
-                        Earnings
-                      </h3>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>Basic Salary</span>
-                          <span>
-                            ₱
-                            {payslipData.basic_salary.toLocaleString(
-                              undefined,
-                              { minimumFractionDigits: 2 }
-                            )}
-                          </span>
-                        </div>
-                        {payslipData.overtime_pay > 0 && (
-                          <div className="flex justify-between">
-                            <span>Overtime</span>
-                            <span>
-                              ₱
-                              {payslipData.overtime_pay.toLocaleString(
-                                undefined,
-                                { minimumFractionDigits: 2 }
-                              )}
-                            </span>
-                          </div>
-                        )}
-                        {payslipData.allowances > 0 && (
-                          <div className="flex justify-between">
-                            <span>Allowances</span>
-                            <span>
-                              ₱
-                              {payslipData.allowances.toLocaleString(
-                                undefined,
-                                { minimumFractionDigits: 2 }
-                              )}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex justify-between border-t pt-2 font-medium">
-                          <span>Gross Pay</span>
-                          <span>
-                            ₱
-                            {(
-                              parseFloat(payslipData.basic_salary) +
-                              parseFloat(payslipData.overtime_pay) +
-                              parseFloat(payslipData.allowances)
-                            ).toLocaleString(undefined, {
-                              minimumFractionDigits: 2
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold border-b pb-2 mb-2">
-                        Deductions
-                      </h3>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>SSS</span>
-                          <span>
-                            ₱
-                            {payslipData.sss_contribution.toLocaleString(
-                              undefined,
-                              { minimumFractionDigits: 2 }
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>PhilHealth</span>
-                          <span>
-                            ₱
-                            {payslipData.philhealth_contribution.toLocaleString(
-                              undefined,
-                              { minimumFractionDigits: 2 }
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Pag-IBIG</span>
-                          <span>
-                            ₱
-                            {payslipData.pagibig_contribution.toLocaleString(
-                              undefined,
-                              { minimumFractionDigits: 2 }
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Tax</span>
-                          <span>
-                            ₱
-                            {payslipData.tax.toLocaleString(undefined, {
-                              minimumFractionDigits: 2
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex justify-between border-t pt-2 font-medium">
-                          <span>Total Deductions</span>
-                          <span>
-                            ₱
-                            {payslipData.deductions.toLocaleString(undefined, {
-                              minimumFractionDigits: 2
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-100 p-4 mt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold">NET PAY</span>
-                    <span className="text-lg font-bold">
-                      ₱
-                      {payslipData.net_pay.toLocaleString(undefined, {
-                        minimumFractionDigits: 2
-                      })}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 text-xs text-gray-500">
-                  <p>
-                    Hours Worked: {Number(payslipData.hours_worked).toFixed(1)}{' '}
-                    hrs
-                  </p>
-                  <p>
-                    Rate per Hour: ₱
-                    {Number(payslipData.rate_per_hour).toLocaleString(
-                      undefined,
-                      {
-                        minimumFractionDigits: 2
-                      }
-                    )}
-                    /hr
-                  </p>
-                  {payslipData.overtime_hours > 0 && (
+              <>
+                {/* Visible dialog content */}
+                <div className="bg-white rounded-lg overflow-hidden">
+                  <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+                    <h2 className="text-xl font-bold">PAYSLIP</h2>
                     <p>
-                      Overtime Hours:{' '}
-                      {Number(payslipData.overtime_hours).toFixed(1)} hrs
+                      {payslipData.periodStart} to {payslipData.periodEnd}
                     </p>
-                  )}
+                  </div>
+
+                  <div className="p-4 border-b">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-500">Employee Name</p>
+                        <p className="font-medium">
+                          {payslipData.employeeName}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Position</p>
+                        <p className="font-medium">{payslipData.position}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div>
+                        <h3 className="font-semibold border-b pb-2 mb-2">
+                          Earnings
+                        </h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span>Basic Salary</span>
+                            <span>
+                              ₱
+                              {payslipData.basic_salary.toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2 }
+                              )}
+                            </span>
+                          </div>
+                          {payslipData.overtime_pay > 0 && (
+                            <div className="flex justify-between">
+                              <span>Overtime</span>
+                              <span>
+                                ₱
+                                {payslipData.overtime_pay.toLocaleString(
+                                  undefined,
+                                  { minimumFractionDigits: 2 }
+                                )}
+                              </span>
+                            </div>
+                          )}
+                          {payslipData.allowances > 0 && (
+                            <div className="flex justify-between">
+                              <span>Allowances</span>
+                              <span>
+                                ₱
+                                {payslipData.allowances.toLocaleString(
+                                  undefined,
+                                  { minimumFractionDigits: 2 }
+                                )}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex justify-between border-t pt-2 font-medium">
+                            <span>Gross Pay</span>
+                            <span>
+                              ₱
+                              {(
+                                parseFloat(payslipData.basic_salary) +
+                                parseFloat(payslipData.overtime_pay) +
+                                parseFloat(payslipData.allowances)
+                              ).toLocaleString(undefined, {
+                                minimumFractionDigits: 2
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="font-semibold border-b pb-2 mb-2">
+                          Deductions
+                        </h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span>SSS</span>
+                            <span>
+                              ₱
+                              {payslipData.sss_contribution.toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2 }
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>PhilHealth</span>
+                            <span>
+                              ₱
+                              {payslipData.philhealth_contribution.toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2 }
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Pag-IBIG</span>
+                            <span>
+                              ₱
+                              {payslipData.pagibig_contribution.toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2 }
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Tax</span>
+                            <span>
+                              ₱
+                              {payslipData.tax.toLocaleString(undefined, {
+                                minimumFractionDigits: 2
+                              })}
+                            </span>
+                          </div>
+                          <div className="flex justify-between border-t pt-2 font-medium">
+                            <span>Total Deductions</span>
+                            <span>
+                              ₱
+                              {payslipData.deductions.toLocaleString(
+                                undefined,
+                                {
+                                  minimumFractionDigits: 2
+                                }
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-100 p-4 mt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-bold">NET PAY</span>
+                      <span className="text-lg font-bold">
+                        ₱
+                        {payslipData.net_pay.toLocaleString(undefined, {
+                          minimumFractionDigits: 2
+                        })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 text-xs text-gray-500">
+                    <p>
+                      Hours Worked:{' '}
+                      {Number(payslipData.hours_worked).toFixed(1)} hrs
+                    </p>
+                    <p>
+                      Rate per Hour: ₱
+                      {Number(payslipData.rate_per_hour).toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2
+                        }
+                      )}
+                      /hr
+                    </p>
+                    {payslipData.overtime_hours > 0 && (
+                      <p>
+                        Overtime Hours:{' '}
+                        {Number(payslipData.overtime_hours).toFixed(1)} hrs
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                {/* Hidden printable content - will only be visible when printing */}
+                <div className="hidden">
+                  <div ref={payslipRef}>
+                    <PayslipPrintable
+                      payslipData={payslipData}
+                      employee={employees.find(
+                        e => e.id.toString() === payslipData.employee_id
+                      )}
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <DialogFooter>
